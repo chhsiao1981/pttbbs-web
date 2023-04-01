@@ -1205,6 +1205,18 @@
     "minimatch" "^3.1.2"
     "strip-json-comments" "^3.1.1"
 
+"@floating-ui/core@^1.2.4":
+  "integrity" "sha512-qrcbyfnRVziRlB6IYwjCopYhO7Vud750JlJyuljruIXcPxr22y8zdckcJGsuOdnQ639uVD1tTXddrcH3t3QYIQ=="
+  "resolved" "https://registry.npmjs.org/@floating-ui/core/-/core-1.2.5.tgz"
+  "version" "1.2.5"
+
+"@floating-ui/dom@^1.0.0":
+  "integrity" "sha512-+sAUfpQ3Frz+VCbPCqj+cZzvEESy3fjSeT/pDWkYCWOBXYNNKZfuVsHuv8/JO2zze8+Eb/Q7a6hZVgzS81fLbQ=="
+  "resolved" "https://registry.npmjs.org/@floating-ui/dom/-/dom-1.2.5.tgz"
+  "version" "1.2.5"
+  dependencies:
+    "@floating-ui/core" "^1.2.4"
+
 "@humanwhocodes/config-array@^0.11.8":
   "integrity" "sha512-UybHIJzJnR5Qc/MsD9Kr+RpO2h+/P1GhOwdiLPXK5TWk5sgTdu88bTD9UP+CKbPPh5Rni1u0GjAdYQLemG8g+g=="
   "resolved" "https://registry.npmjs.org/@humanwhocodes/config-array/-/config-array-0.11.8.tgz"
@@ -3198,7 +3210,7 @@
   "resolved" "https://registry.npmjs.org/cjs-module-lexer/-/cjs-module-lexer-1.2.2.tgz"
   "version" "1.2.2"
 
-"classnames@*", "classnames@^2.2.3", "classnames@^2.3.1":
+"classnames@*", "classnames@^2.2.3", "classnames@^2.3.0", "classnames@^2.3.1":
   "integrity" "sha512-CSbhY4cFEJRe6/GQzIk5qXZ4Jeg5pcsP7b5peFSDpffpe1cqjASH/n9UTjBwOp6XpMSTwQ8Za2K5V02ueA7Tmw=="
   "resolved" "https://registry.npmjs.org/classnames/-/classnames-2.3.2.tgz"
   "version" "2.3.2"
@@ -8176,6 +8188,14 @@
     "workbox-webpack-plugin" "^6.4.1"
   optionalDependencies:
     "fsevents" "^2.3.2"
+
+"react-tooltip@^5.10.4":
+  "integrity" "sha512-QUBX6k3+qjOyAy64ntV/NkwzZqaghjcEpZ6Q5pqVbYUYS8kGcmIgXznRc2syQDlffCtzeWJGGMz93JYKjGo2Pw=="
+  "resolved" "https://registry.npmjs.org/react-tooltip/-/react-tooltip-5.10.4.tgz"
+  "version" "5.10.4"
+  dependencies:
+    "@floating-ui/dom" "^1.0.0"
+    "classnames" "^2.3.0"
 
 "react-transition-group@^4.4.2":
   "integrity" "sha512-pZcd1MCJoiKiBR2NRxeCRg13uCXbydPnmB4EOeRrY7480qNWO8IIgQG6zlDkm6uRMsURXPuKq0GWtiM59a5Q6g=="

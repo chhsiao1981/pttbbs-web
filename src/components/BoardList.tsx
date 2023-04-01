@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { CSSProperties, useState } from 'react'
 
 import CSS from 'csstype'
 
@@ -16,6 +16,7 @@ import Moderators from './cells/Moderators'
 
 import { CHAR_WIDTH } from './utils'
 import { BoardSummary_i, PttColumn, TableData } from '../types'
+import { Tooltip } from 'react-tooltip'
 
 const _COLUMNS: PttColumn[] = [
     { Header: '', accessor: '', width: 0, fixed: true, type: 'rest' },
@@ -27,6 +28,7 @@ const _COLUMNS: PttColumn[] = [
     { Header: '中文敘述', accessor: 'title', width: CHAR_WIDTH * 48, fixed: true },
     { Header: '人氣', accessor: 'nuser', width: CHAR_WIDTH * 5, fixed: true },
     { Header: '板主', accessor: 'moderators', width: CHAR_WIDTH * 38, fixed: true, type: 'moderator' },
+    { Header: '', accessor: '', width: CHAR_WIDTH * 20, fixed: true, type: 'menu' },
     { Header: '', accessor: '', width: 0, fixed: true, type: 'rest' },
 ]
 
@@ -63,6 +65,10 @@ export default (props: Props) => {
 
     let renderCell = (column: PttColumn, data: TableData, fontSize: number) => {
         let renderer = null
+
+        if (column.type === 'menu') {
+            return (<Cell><button className={screenStyles['submenu']}>…</button></Cell>)
+        }
 
         switch (column.accessor) {
             case 'numIdx':
@@ -111,7 +117,23 @@ export default (props: Props) => {
         return (<Cell className={screenStyles['header']} style={style}>{column.Header}</Cell>)
     }
 
+    let renderTooltip = () => {
+        return (
+            <div className={screenStyles['submenu-tooltip']}>
+                This is the tooltip
+            </div>
+        )
+    }
+
+    let tooltipStyle: CSSProperties = {
+        backgroundColor: '#0ff',
+        zIndex: 99,
+    }
+
     return (
-        <Screen width={width} height={height} columns={_COLUMNS} data={boards} renderCell={renderCell} renderHeader={renderHeader} scrollToRow={scrollToRow} onVerticalScroll={onVerticalScroll} scrollTop={scrollTop} />
+        <div>
+            <Screen width={width} height={height} columns={_COLUMNS} data={boards} renderCell={renderCell} renderHeader={renderHeader} scrollToRow={scrollToRow} onVerticalScroll={onVerticalScroll} scrollTop={scrollTop} />
+            <Tooltip anchorSelect={'.' + screenStyles['submenu']} style={tooltipStyle} render={renderTooltip} openOnClick={true} noArrow={true} positionStrategy={'fixed'} clickable={true} closeOnEsc={true} />
+        </div>
     )
 }

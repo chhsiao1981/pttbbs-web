@@ -16,6 +16,7 @@
     "react-dropdown": "^1.11.0",
     "react-reducer-utils": "^4.0.1",
     "react-router-dom": "^6.5.0",
+    "react-tooltip": "^5.10.4",
     "react-use": "^17.4.0",
     "react-widgets": "^5.8.4",
     "web-vitals": "^2.1.4"

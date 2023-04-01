@@ -13,3 +13,10 @@
     background-color: #000;
 }
 
+.submenu {
+    color: #0ff;
+}
+
+.submenu-tooltip {
+    background-color: #0ff;
+}
