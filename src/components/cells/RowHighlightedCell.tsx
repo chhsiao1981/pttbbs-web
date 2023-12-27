@@ -1,6 +1,8 @@
 import { TableData } from '../../types'
 import { Cell } from 'fixed-data-table-2'
 import Empty from '../Empty'
+import { MouseEventHandler } from 'react'
+import { cursorTo } from 'readline'
 
 type Props = {
     data: TableData<any>
@@ -19,7 +21,8 @@ export default (props: Props) => {
     let style = {
         display: 'block',
         height: '100%',
-        fontSize: fontSize + 'px'
+        fontSize: fontSize + 'px',
+        cursor: 'pointer',
     }
     if (typeof rowIndex === 'undefined') { // for ts
         return (<Empty />)
@@ -36,7 +39,7 @@ export default (props: Props) => {
             <Cell style={style}
                 onMouseEnter={() => setRowNum(rowIndex)}
                 onMouseLeave={() => setRowNum(-1)}>
-                <Content data={data} rowIndex={rowIndex} columnKey={columnKey} {...params} />
+                <Content data={data} rowIndex={rowIndex} columnKey={columnKey} highlightRow={highlightRow} {...params} />
             </Cell>
         </a>
     )

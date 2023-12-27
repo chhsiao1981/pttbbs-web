@@ -70,15 +70,18 @@ a, a:hover {
 }
 
 .public_fixedDataTableCell_cellContent {
+    height: 100%;
     padding: 0px;
 }
 
 .fixedDataTableCellLayout_wrap2 {
     display: block;
+    height: 100%;
 }
 
 .fixedDataTableCellLayout_wrap3 {
     display: block;
+    height: 100%;
 }
 
 .logo-github {

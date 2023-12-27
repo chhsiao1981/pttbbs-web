@@ -1,6 +1,6 @@
-import React, { CSSProperties, useState } from 'react'
+import React, { CSSProperties, MouseEventHandler, useState } from 'react'
 
-import { Cell } from 'fixed-data-table-2'
+import { Cell, Column } from 'fixed-data-table-2'
 
 import screenStyles from './Screen.module.css'
 
@@ -11,6 +11,9 @@ import Idx from './cells/Idx'
 import State from './cells/State'
 import CommNum from './cells/CommNum'
 import Category from './cells/Category'
+import More from './cells/More'
+
+import { TableData } from '../types'
 
 import Screen from './Screen'
 
@@ -26,6 +29,7 @@ const _COLUMNS: PttColumn[] = [
     { Header: '作者', accessor: 'owner', width: CHAR_WIDTH * 14, fixed: true },
     { Header: '類別', accessor: 'class', width: CHAR_WIDTH * 6, fixed: true },
     { Header: '標 題', accessor: 'title', width: CHAR_WIDTH * 48, fixed: true, headerTextAlign: 'left' },
+    { Header: 'More', accessor: 'more', width: CHAR_WIDTH * 4, fixed: true, type: 'more' },
     { Header: '', accessor: '', width: 0, fixed: true, type: 'rest' },
 ]
 
@@ -48,6 +52,11 @@ export default (props: Props) => {
     // assume that we will need to use different highlight for different cell
     let defaultHighlight = {
         backgroundColor: '#333',
+    }
+
+    let onClickMore = (data: TableData<any>, rowIndex: number) => {
+        let item = data[rowIndex]
+        console.log('ArticleList.onClickMore: rowIndex:', rowIndex, 'item:', item)
     }
 
     let renderCell = (column: PttColumn, data: ArticleSummary_i[], fontSize: number) => {
@@ -76,6 +85,8 @@ export default (props: Props) => {
             case 'owner':
                 renderer = PlainText
                 break
+            case 'more':
+                return <More data={data} fontSize={fontSize} highlightRow={selectedRow} setRowNum={setSeletedRow} onClick={onClickMore} />
             default:
                 return <Cell className={screenStyles['default']}></Cell>
         }

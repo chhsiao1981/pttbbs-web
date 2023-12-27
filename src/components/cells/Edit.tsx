@@ -50,10 +50,7 @@ export default (props: Props) => {
     let runes: EditRunes_t = item.runes
     let background = data[rowIndex].background || COLOR_BACKGROUND_BLACK
 
-    //console.log('Edit: rowIndex:', rowIndex, 'item:', item, 'isTail:', item.isTail)
-
     if (item.isTail) {
-        //console.log('Edit: rowIndex:', rowIndex, 'to render tail')
         return <div key={'edit-' + rowIndex} className={styles['c' + background]}>
             {runes.map((each, idx) => (<Rune key={'edit-' + idx} rune={each} idx={idx} onMouseDown={onMouseDownTail} {...props} />))}
         </div>
@@ -63,8 +60,6 @@ export default (props: Props) => {
     if (tail !== null) {
         runes = runes.concat([tail])
     }
-
-    //console.log('Edit: rowIndex:', rowIndex, 'selectedRow:', selectedRow, 'selectedColumn:', selectedColumn, 'tail:', tail, 'runes:', runes, 'isFocus:', isFocus, 'focusInputRef:', focusInputRef.current, 'activeElement:', document.activeElement, 'focusInputRef.current === activeElement', focusInputRef.current === document.activeElement)
 
     let render = (rune: EditRune_t, idx: number) => {
         let isRune = rowIndex !== selectedRow || idx !== selectedColumn
