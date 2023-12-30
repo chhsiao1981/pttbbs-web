@@ -1,6 +1,6 @@
-import React, { CSSProperties, MouseEventHandler, useState } from 'react'
+import { CSSProperties, useState } from 'react'
 
-import { Cell, Column } from 'fixed-data-table-2'
+import { Cell } from 'fixed-data-table-2'
 
 import screenStyles from './Screen.module.css'
 
@@ -12,6 +12,7 @@ import State from './cells/State'
 import CommNum from './cells/CommNum'
 import Category from './cells/Category'
 import More from './cells/More'
+import MoreModal from './cells/MoreModal'
 
 import { TableData } from '../types'
 
@@ -19,6 +20,7 @@ import Screen from './Screen'
 
 import { CHAR_WIDTH } from './utils'
 import { ArticleSummary_i, PttColumn } from '../types'
+import { MoreInfo } from './cells/MoreInfo'
 
 const _COLUMNS: PttColumn[] = [
     { Header: '', accessor: '', width: 0, fixed: true, type: 'rest' },
@@ -44,19 +46,75 @@ type Props = {
     scrollTop: number
 }
 
+type StateMore_t = {
+    x: number,
+    y: number,
+    isMore: boolean,
+    more: Array<MoreInfo>,
+    row: number,
+}
+
 export default (props: Props) => {
     const { articles, width, height, loadPre, loadNext, scrollToRow, onVerticalScroll, scrollTop } = props
 
     const [selectedRow, setSeletedRow] = useState(-1)
+
+    const [stateMore, setStateMore] = useState<StateMore_t>({ x: 0, y: 0, isMore: false, more: [], row: -1 })
 
     // assume that we will need to use different highlight for different cell
     let defaultHighlight = {
         backgroundColor: '#333',
     }
 
-    let onClickMore = (data: TableData<any>, rowIndex: number) => {
+    let onClickMore = (data: TableData<ArticleSummary_i>, rowIndex: number, divRef: HTMLDivElement | null) => {
         let item = data[rowIndex]
+
         console.log('ArticleList.onClickMore: rowIndex:', rowIndex, 'item:', item)
+        if (divRef === null) {
+            return
+        }
+
+        let more = getMoreInfo(data, rowIndex)
+
+        let rect = divRef.getBoundingClientRect()
+        setStateMore({ x: rect.x, y: rect.y, isMore: true, more, row: rowIndex })
+        setSeletedRow(rowIndex)
+    }
+
+    let getMoreInfo = (data: TableData<ArticleSummary_i>, rowIndex: number): Array<MoreInfo> => {
+        let item = data[rowIndex]
+
+        let ret: Array<MoreInfo> = [{
+            name: '回覆',
+            action: () => { onClickReply(item) }
+        }]
+
+        return ret
+    }
+
+    let onClickReply = (item: ArticleSummary_i) => {
+        console.log('onClickReply: start: item:', item)
+
+        let urlSearchParams = {
+            class: item.class,
+            title: 'Re: ' + item.title,
+        }
+
+        let queryString = new URLSearchParams(urlSearchParams).toString()
+
+        let url = '/board/' + item.bid + '/post?' + queryString
+
+        window.location.href = url
+    }
+
+    let onEnterMore = () => {
+        console.log('ArticleList.onEnterMore: start')
+        setStateMore({ x: stateMore.x, y: stateMore.y, isMore: true, more: stateMore.more, row: stateMore.row })
+        setSeletedRow(stateMore.row)
+    }
+
+    let onLeaveMore = () => {
+        setStateMore({ x: stateMore.x, y: stateMore.y, isMore: false, more: stateMore.more, row: stateMore.row })
     }
 
     let renderCell = (column: PttColumn, data: ArticleSummary_i[], fontSize: number) => {
@@ -86,7 +144,7 @@ export default (props: Props) => {
                 renderer = PlainText
                 break
             case 'more':
-                return <More data={data} fontSize={fontSize} highlightRow={selectedRow} setRowNum={setSeletedRow} onClick={onClickMore} />
+                return <More data={data} fontSize={fontSize} highlightRow={selectedRow} setRowNum={setSeletedRow} onClick={onClickMore} onLeaveMore={onLeaveMore} />
             default:
                 return <Cell className={screenStyles['default']}></Cell>
         }
@@ -113,7 +171,12 @@ export default (props: Props) => {
         )
     }
 
+    console.log('ArticleList: to return: positionMore:', stateMore, 'selectedRow:', selectedRow)
+
     return (
-        <Screen width={width} height={height} columns={_COLUMNS} data={articles} renderCell={renderCell} renderHeader={renderHeader} scrollToRow={scrollToRow} onVerticalScroll={onVerticalScroll} scrollTop={scrollTop} />
+        <>
+            <Screen width={width} height={height} columns={_COLUMNS} data={articles} renderCell={renderCell} renderHeader={renderHeader} scrollToRow={scrollToRow} onVerticalScroll={onVerticalScroll} scrollTop={scrollTop} />
+            <MoreModal isDisplay={stateMore.isMore} x={stateMore.x} y={stateMore.y} more={stateMore.more} onEnterMore={onEnterMore} onLeaveMore={onLeaveMore} />
+        </>
     )
 }

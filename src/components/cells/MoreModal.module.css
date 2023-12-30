@@ -1,0 +1,19 @@
+.moremodal {
+    border: 3px;
+    border-bottom-left-radius: 3px;
+    border-bottom-right-radius: 3px;
+    border-top-right-radius: 3px;
+    background-color: #ff00ff;
+    position: absolute;
+    padding: 5px;
+}
+
+.more {
+    border: 1ch;
+    border-radius: 1ch;
+    cursor: pointer;
+}
+
+.more:hover {
+    color: aqua;
+}

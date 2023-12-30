@@ -3,7 +3,7 @@ import pageStyles from './Page.module.css'
 
 import * as errors from './errors'
 
-import { useWindowSize, useKey, useStartTyping } from 'react-use'
+import { useWindowSize, useKey } from 'react-use'
 import { useParams } from 'react-router-dom'
 
 import { useReducer, getRoot, getRootID, genUUID } from 'react-reducer-utils'

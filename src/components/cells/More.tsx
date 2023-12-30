@@ -1,4 +1,4 @@
-import { MouseEventHandler } from 'react'
+import { Component, LegacyRef, MouseEventHandler, createRef } from 'react'
 import { TableData } from '../../types'
 
 import { Cell } from 'fixed-data-table-2'
@@ -13,36 +13,49 @@ type Props = {
     columnKey?: string
     highlightRow: number
     setRowNum: any
-    onClick: (data: TableData<any>, rowIndex: number) => void
+    onClick: (data: TableData<any>, rowIndex: number, divRef: HTMLDivElement | null) => void
+    onLeaveMore: () => void
 }
 
-export default (props: Props) => {
-    const { data, rowIndex, fontSize, columnKey, highlightRow, setRowNum, onClick } = props
+export default class More extends Component<Props> {
+    divRef = createRef<HTMLDivElement>()
 
-    let style: any = {
-        display: 'block',
-        height: '100%',
-        fontSize: fontSize + 'px',
-        cursor: 'pointer',
-    }
+    render() {
+        const { data, rowIndex, fontSize, columnKey, highlightRow, setRowNum, onClick, onLeaveMore } = this.props
 
-    if (rowIndex !== highlightRow) {
+        let style: any = {
+            display: 'block',
+            height: '100%',
+            fontSize: fontSize + 'px',
+            cursor: 'pointer',
+        }
+
+        if (rowIndex !== highlightRow) {
+            return (
+                <Cell style={style}
+                    onMouseEnter={() => setRowNum(rowIndex)}
+                    onMouseLeave={() => setRowNum(-1)}>
+                    <div className={styles['more']} style={style}></div>
+                </Cell>
+            )
+        }
+
+        style['backgroundColor'] = '#333'
+
+        let onLeave = () => {
+            console.log('More: onLeave: start')
+            setRowNum(-1)
+            if (onLeaveMore) {
+                onLeaveMore()
+            }
+        }
+
         return (
             <Cell style={style}
                 onMouseEnter={() => setRowNum(rowIndex)}
-                onMouseLeave={() => setRowNum(-1)}>
-                <div className={styles['more']} style={style}></div>
+                onMouseLeave={onLeave}>
+                <div ref={this.divRef} className={styles['more']} onClick={() => onClick(data, rowIndex, this.divRef.current)}>...</div>
             </Cell>
         )
     }
-
-    style['backgroundColor'] = '#333'
-
-    return (
-        <Cell style={style}
-            onMouseEnter={() => setRowNum(rowIndex)}
-            onMouseLeave={() => setRowNum(-1)}>
-            <div className={styles['more']} onClick={() => onClick(data, rowIndex)}>...</div>
-        </Cell>
-    )
 }
