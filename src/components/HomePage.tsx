@@ -1,57 +1,74 @@
-import React, { useEffect } from 'react'
-import pageStyles from './Page.module.css'
+import {
+  genUUID,
+  getDefaultID,
+  getState,
+  type ThunkModuleToFunc,
+  useThunk,
+} from "@chhsiao1981/use-thunk";
+import config from "config";
+import { type CSSProperties, useEffect } from "react";
+import useWindowSize from "../hooks/useWindowSize";
+import type { State as Header_s } from "../reducers/header";
+import * as DoHeader from "../reducers/header";
+import * as DoHomePage from "../reducers/homePage";
+import Empty from "./Empty";
+import Header from "./Header";
+import pageStyles from "./Page.module.css";
 
-import { useReducer, getRoot, genUUID, getRootID } from 'react-reducer-utils'
+type TDoHeader = ThunkModuleToFunc<typeof DoHeader>;
+type TDoHomePage = ThunkModuleToFunc<typeof DoHomePage>;
 
-import { PTT_GUEST } from 'config'
+// biome-ignore lint/complexity/noBannedTypes: props
+type Props = {};
 
-import Empty from './Empty'
-import * as DoHomePage from '../reducers/homePage'
-import Header from './Header'
-import * as DoHeader from '../reducers/header'
-import { State as Header_s } from '../reducers/header'
+export default (_props: Props) => {
+  const [classHomePage, doHomePage] = useThunk<DoHomePage.State, TDoHomePage>(
+    DoHomePage,
+  );
+  const [classHeader, doHeader] = useThunk<DoHeader.State, TDoHeader>(DoHeader);
 
-type Props = {
+  const { width: innerWidth, height: innerHeight } = useWindowSize();
 
-}
+  //init
+  // biome-ignore lint/correctness/useExhaustiveDependencies: useEffect
+  useEffect(() => {
+    const headerID = genUUID();
+    doHeader.init(headerID);
 
-export default (props: Props) => {
-    const [stateHomePage, doHomePage] = useReducer(DoHomePage)
-    const [stateHeader, doHeader] = useReducer(DoHeader)
+    const homePageID = genUUID();
+    doHomePage.init(homePageID);
+  }, []);
 
-    //init
-    useEffect(() => {
-        let headerID = genUUID()
-        doHeader.init(headerID)
+  const header: Header_s = getState(classHeader) || DoHeader.defaultState;
+  const userID = header.user_id;
 
-        let homePageID = genUUID()
-        doHomePage.init(homePageID)
-    }, [])
-
-    let header: Header_s = getRoot(stateHeader) || { user_id: '' }
-    let userID = header.user_id
-
-    useEffect(() => {
-        if (!userID) {
-            return
-        }
-
-        if (userID === PTT_GUEST) {
-            window.location.href = '/boards/popular'
-        } else {
-            window.location.href = '/user/' + userID + '/favorites'
-        }
-    }, [userID])
-
-    //get data
-    let myID = getRootID(stateHomePage)
-
-    if (!myID) {
-        return (<Empty />)
+  useEffect(() => {
+    if (!userID) {
+      return;
     }
-    return (
-        <div className={'vh-100 ' + pageStyles['root']}>
-            <Header title={''} stateHeader={stateHeader} />
-        </div>
-    )
-}
+
+    if (userID === config.PTT_GUEST) {
+      window.location.href = "/boards/popular";
+    } else {
+      window.location.href = "/user/" + userID + "/favorites";
+    }
+  }, [userID]);
+
+  //get data
+  const myID = getDefaultID(classHomePage);
+
+  if (!myID) {
+    return <Empty />;
+  }
+
+  const style: CSSProperties = {
+    width: innerWidth,
+    height: innerHeight,
+  };
+
+  return (
+    <div className={pageStyles.root} style={style}>
+      <Header title={""} stateHeader={classHeader} />
+    </div>
+  );
+};

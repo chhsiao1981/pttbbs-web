@@ -1,34 +1,30 @@
 .root {
-    background-color: navy;
+  background-color: navy;
 }
 
 .title {
-    text-align: center;
-    font-size: x-large;
+  text-align: center;
+  font-size: x-large;
 }
 
 .navbar-brand {
-    margin: 10px;
-    font-size: x-large;
+  margin: 10px;
+  font-size: x-large;
 }
 
 .navbar-link {
-    color: #ffff00;
-    background: none;
-    border: none;
-    margin-right: 10px;
+  color: #ffff00;
+  background: none;
+  border: none;
+  margin-right: 10px;
+  font-size: x-large;
 }
 
 .navbar-link:hover {
-    color: #cccccc;
+  color: #cccccc;
 }
 
 .logo {
-    width: 32px;
-    height: 32px;
-    background-color: #ffff00;
-}
-
-.logo:hover {
-    background-color: #cccccc;
+  width: 32px;
+  height: 32px;
 }

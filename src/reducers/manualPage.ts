@@ -1,81 +1,106 @@
-import { Thunk, init as _init, setData as _setData, createReducer, getState } from 'react-reducer-utils'
-
-import * as ServerUtils from './ServerUtils'
-import api from './api'
+import {
+  init as _init,
+  setData as _setData,
+  getState,
+  type Thunk,
+} from "@chhsiao1981/use-thunk";
+import * as serverUtils from "./serverUtils";
 //import * as errors from './errors'
 
-import { Content, Line, Maybe, State_t } from '../types'
+import type { Content, Line, State as State_t } from "../types";
 
-export const myClass = 'demo-pttbbs/ManualPage'
+export const myClass = "demo-pttbbs/ManualPage";
 
 export interface State extends State_t {
-    theDate: Date
-    scrollTo: any
-    isPreEnd: boolean
-
+  theDate?: Date;
+  scrollTo?: any;
+  isPreEnd: boolean;
+  comments: Line[];
+  scrollToRow?: number;
+  content: Line[];
 }
 
-export interface State_m extends Maybe<State> { }
+export const defaultState: State = {
+  isPreEnd: true,
+  comments: [],
+  content: [],
+  errmsg: "",
+};
 
-export const init = (myID: string, bid: string, path: string): Thunk<State> => {
-    return async (dispatch, _) => {
-        let theDate = new Date()
-        let state: State = {
-            theDate,
-            scrollTo: null,
-            isPreEnd: true,
-        }
-        dispatch(_init({ myID, state }))
-        dispatch(GetManualContent(myID, bid, path))
-    }
-}
+export const init = (
+  myID: string,
+  bid: string,
+  path: string,
+  startIdx: string,
+): Thunk<State> => {
+  return async (dispatch, _) => {
+    const theDate = new Date();
+    const state: State = Object.assign({}, defaultState, { theDate });
+    dispatch(_init({ myID, state }));
+    dispatch(getManualContent(myID, bid, path, startIdx));
+  };
+};
 
-export const SetData = (myID: string, data: State_m): Thunk<State> => {
-    return async (dispatch, _) => {
-        dispatch(_setData(myID, data))
-    }
-}
+export const setData = (myID: string, data: Partial<State>): Thunk<State> => {
+  return async (dispatch, _) => {
+    dispatch(_setData(myID, data));
+  };
+};
 
-//GetManualContent
+//getManualContent
 //
 //1. 拿到 content.
 //2. parse content.
 //3. contentComments.
-export const GetManualContent = (myID: string, bid: string, path: string): Thunk<State> => {
-    return async (dispatch, getClassState) => {
-        const { data, errmsg, status } = await api(ServerUtils.GetManual(bid, path))
+export const getManualContent = (
+  myID: string,
+  bid: string,
+  path: string,
+  startIdx: string,
+): Thunk<State> => {
+  return async (dispatch, getClassState) => {
+    const { data, errmsg, status } = await serverUtils.getManual(
+      bid,
+      path,
+      startIdx,
+    );
 
-        console.log('GetManualContent: data:', data, 'status:', status, 'myID:', myID)
+    console.log(
+      "getManualContent: data:",
+      data,
+      "status:",
+      status,
+      "myID:",
+      myID,
+    );
 
-        if (status !== 200) {
-            dispatch(_setData(myID, { errmsg }))
-            return
-        }
-        if (!data) {
-            return
-        }
-
-        dispatch(_setData(myID, data))
-
-        let content = data.content
-        let lines = _parseLines(content)
-
-        let state = getClassState()
-        let me = getState(state, myID)
-        if (!me) {
-            return
-        }
-
-        let isPreEnd = me.isPreEnd || false
-        let comments = me.comments || []
-        let contentComments = isPreEnd ? lines.concat(comments) : comments
-
-        dispatch(_setData(myID, { content: lines, contentComments }))
+    if (status !== 200) {
+      dispatch(_setData(myID, { errmsg }));
+      return;
     }
-}
+    if (!data) {
+      return;
+    }
 
-const _parseLines = (content: Content): Line[] => {
-    return content.map((runes) => ({ runes }))
-}
+    dispatch(_setData(myID, data));
 
-export default createReducer<State>()
+    const content = data.content;
+    const lines = parseLines(content);
+
+    const classState = getClassState();
+    const me = getState(classState, myID);
+    if (!me) {
+      return;
+    }
+
+    const isPreEnd = me.isPreEnd || false;
+    const comments = me.comments || [];
+    const contentComments = isPreEnd ? lines.concat(comments) : comments;
+
+    dispatch(_setData(myID, { content: lines, contentComments }));
+  };
+};
+
+const parseLines = (content: Content): Line[] => {
+  return content.map((runes) => ({ runes }));
+};

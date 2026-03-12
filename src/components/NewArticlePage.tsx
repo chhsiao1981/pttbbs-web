@@ -1,207 +1,239 @@
-import React, { useEffect, useState, useRef, MutableRefObject, FormEvent, FocusEvent, MouseEvent } from 'react'
-import pageStyles from './Page.module.css'
-import styles from './NewArticlePage.module.css'
+import {
+  genUUID,
+  getDefaultID,
+  getState,
+  type ThunkModuleToFunc,
+  useThunk,
+} from "@chhsiao1981/use-thunk";
+import {
+  type FocusEvent,
+  type MouseEvent,
+  type SubmitEvent,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+import { useParams } from "react-router-dom";
+import { DropdownList } from "react-widgets";
+import useWindowSize from "../hooks/useWindowSize";
+import * as DoHeader from "../reducers/header";
+import * as DoNewArticlePage from "../reducers/newArticlePage";
+import type { EditLine } from "../types";
+import Editor from "./Editor";
+import Empty from "./Empty";
+import FunctionBar from "./FunctionBar";
+import Header from "./Header";
+import InitConsts from "./InitConsts";
+import styles from "./NewArticlePage.module.css";
+import pageStyles from "./Page.module.css";
 
-// eslint-disable-next-line
-import * as errors from './errors'
+type TDoHeader = ThunkModuleToFunc<typeof DoHeader>;
+type TDoNewArticlePage = ThunkModuleToFunc<typeof DoNewArticlePage>;
 
-import { useWindowSize } from 'react-use'
-import { useParams } from 'react-router-dom'
+// biome-ignore lint/complexity/noBannedTypes: props
+type Props = {};
+export default (_props: Props) => {
+  const [classNewArticlePage, doNewArticlePage] = useThunk<
+    DoNewArticlePage.State,
+    TDoNewArticlePage
+  >(DoNewArticlePage);
+  const [classHeader, doHeader] = useThunk<DoHeader.State, TDoHeader>(DoHeader);
 
-import { DropdownList } from 'react-widgets'
+  const [headerHeight, setHeaderHeight] = useState(0);
+  const [funcbarHeight, setFuncbarHeight] = useState(0);
+  const headerRef = useRef<HTMLDivElement>(null);
+  const funcbarRef = useRef<HTMLDivElement>(null);
+  const [isShowCursor, setIsShowCursor] = useState(true);
+  const isShowCursorRef = useRef(isShowCursor);
 
-import { useReducer, getRoot, genUUID, getRootID } from 'react-reducer-utils'
+  // eslint-disable-next-line
+  const [errMsg, setErrMsg] = useState("");
 
-import * as DoNewArticlePage from '../reducers/newArticlePage'
-import * as DoHeader from '../reducers/header'
+  const [isInitConsts, setIsInitConsts] = useState(false);
 
-import Header from './Header'
-import FunctionBar from './FunctionBar'
+  //init
+  const { bid: paramsBid } = useParams();
+  const bid = paramsBid || "";
+  // biome-ignore lint/correctness/useExhaustiveDependencies: useEffect
+  useEffect(() => {
+    const headerID = genUUID();
+    doHeader.init(headerID);
 
-import Editor from './Editor'
+    const newArticlePageID = genUUID();
 
-import { COLOR_FOREGROUND_WHITE, COLOR_BACKGROUND_BLACK } from '../constants'
-import { EditLine } from '../types'
-import Empty from './Empty'
-import InitConsts from './InitConsts'
-import { CONSTS } from './utils'
+    doNewArticlePage.init(newArticlePageID, bid);
 
+    const interval = setInterval(() => {
+      setIsShowCursor(!isShowCursorRef.current);
+    }, 500);
+    return () => clearInterval(interval);
+  }, []);
 
-type Props = {
-}
-
-
-export default (props: Props) => {
-    const [stateNewArticlePage, doNewArticlePage] = useReducer(DoNewArticlePage)
-    const [stateHeader, doHeader] = useReducer(DoHeader)
-
-    const [headerHeight, setHeaderHeight] = useState(0)
-    const [funcbarHeight, setFuncbarHeight] = useState(0)
-    const headerRef: MutableRefObject<HTMLDivElement | null> = useRef(null)
-    const funcbarRef: MutableRefObject<HTMLDivElement | null> = useRef(null)
-    const [isShowCursor, setIsShowCursor] = useState(true)
-    const isShowCursorRef = useRef(isShowCursor)
-
-    // eslint-disable-next-line
-    const [errMsg, setErrMsg] = useState('')
-
-    const [isInitConsts, setIsInitConsts] = useState(false)
-
-    //init
-    let { bid } = useParams()
-    useEffect(() => {
-        let headerID = genUUID()
-        doHeader.init(headerID)
-
-        let newArticlePageID = genUUID()
-
-        doNewArticlePage.init(newArticlePageID, bid)
-
-        const interval = setInterval(() => {
-            setIsShowCursor(!isShowCursorRef.current)
-        }, 500)
-        return () => clearInterval(interval)
-    }, [])
-
-    useEffect(() => {
-        if (!isInitConsts) {
-            return
-        }
-
-    }, [isInitConsts])
-
-    useEffect(() => {
-        if (headerRef.current === null) {
-            return
-        }
-        setHeaderHeight(headerRef.current.clientHeight)
-
-    }, [headerRef.current])
-
-    useEffect(() => {
-        if (funcbarRef.current === null) {
-            return
-        }
-        setFuncbarHeight(funcbarRef.current.clientHeight)
-    }, [funcbarRef.current])
-
-    const { width: innerWidth, height: innerHeight } = useWindowSize()
-    let screenWidth = innerWidth
-    let screenHeight = innerHeight - headerHeight - funcbarHeight
-
-    const [selectedRow, setSelectedRow] = useState(0)
-    const [selectedColumn, setSelectedColumn] = useState(0)
-
-    const [title, setTitle] = useState('')
-
-    const [content, setContent] = useState<EditLine[]>([])
-
-    //get data
-    let newArticlePage = getRoot(stateNewArticlePage)
-    if (!newArticlePage) {
-        return (<Empty />)
+  useEffect(() => {
+    if (!isInitConsts) {
+      return;
     }
-    let myID = getRootID(stateNewArticlePage)
-    let errmsg = newArticlePage.errmsg || ''
-    let brdname = newArticlePage.brdname
-    let postTypes = newArticlePage.post_type.map(each => ({ value: each, label: '[' + each + ']' }))
+  }, [isInitConsts]);
 
-    let theClass = newArticlePage.theClass
-    let setTheClass = (newClass: string) => {
-        doNewArticlePage.setData(myID, { theClass: newClass })
+  // biome-ignore lint/correctness/useExhaustiveDependencies: useEffect
+  useEffect(() => {
+    if (headerRef.current) {
+      setHeaderHeight(headerRef.current.clientHeight);
     }
+    if (funcbarRef.current) {
+      setFuncbarHeight(funcbarRef.current.clientHeight);
+    }
+  }, [headerRef.current, funcbarRef.current]);
 
-    let submit = (e: FormEvent) => {
-        if (!theClass) {
-            showErrMsg('您忘記類別囉～')
-            return
-        }
-        if (!title) {
-            showErrMsg('您忘記標題囉～')
-            return
-        }
-        doNewArticlePage.Submit(myID, bid, theClass, title, content)
-    }
+  const { width: innerWidth, height: innerHeight } = useWindowSize();
+  const screenWidth = innerWidth;
+  const screenHeight = innerHeight - headerHeight - funcbarHeight;
 
-    let allErrMsg: string[] = []
-    if (errMsg) {
-        allErrMsg.push(errMsg)
-    }
-    if (errmsg) {
-        allErrMsg.push(errmsg)
-    }
-    let renderError = () => {
-        return (<span className={'nav-link ' + styles['error']}>{allErrMsg.join(',')}</span>)
-    }
+  const [selectedRow, setSelectedRow] = useState(0);
+  const [selectedColumn, setSelectedColumn] = useState(0);
 
-    let loptions = [
-        { text: "發表文章", action: submit },
-        { render: renderError },
-    ]
-    let roptions = [
-        { text: (selectedRow + 1) + ',' + (selectedColumn + 1) },
-        { text: "離開", url: `/board/${bid}/articles` },
-    ]
+  const [title, setTitle] = useState("");
 
-    let onFocus = (e: FocusEvent) => {
-        //console.log('NewArticlePage: onFocus: start')
+  const [content, setContent] = useState<EditLine[]>([]);
+
+  //get data
+  const newArticlePage = getState(classNewArticlePage);
+  if (!newArticlePage) {
+    return <Empty />;
+  }
+  const myID = getDefaultID(classNewArticlePage);
+  const errmsg = newArticlePage.errmsg || "";
+  const brdname = newArticlePage.brdname;
+  const postTypes = newArticlePage.post_type.map((each) => ({
+    value: each,
+    label: "[" + each + "]",
+  }));
+
+  const theClass = newArticlePage.theClass;
+  const setTheClass = (newClass: string) => {
+    doNewArticlePage.setData(myID, { theClass: newClass });
+  };
+
+  const submit = (_e: SubmitEvent) => {
+    if (!theClass) {
+      showErrMsg("您忘記類別囉～");
+      return;
     }
-
-    let onBlur = (e: FocusEvent) => {
-        //console.log('NewArticlePage: onBlur: start')
+    if (!title) {
+      showErrMsg("您忘記標題囉～");
+      return;
     }
+    doNewArticlePage.submit(myID, bid, theClass, title, content);
+  };
 
-    let showErrMsg = (text: string) => {
-        setErrMsg(text)
-        setTimeout(() => cleanErrMsg(), 1000)
-    }
-
-    let cleanErrMsg = () => {
-        setErrMsg('')
-        doNewArticlePage.setData(myID, { errmsg: '' })
-    }
-
-    let onMouseDownHeader = (e: MouseEvent) => {
-        //console.log('NewArticlePage: onMouseDownHeader: start')
-    }
-
-    let classStyle = {
-        width: '170px',
-        display: 'inline-block',
-    }
-
-    let renderHeader = () => {
-        return (
-            <div className={'col ' + styles['title']}>
-                <span>{brdname} - </span>
-                <DropdownList style={classStyle} containerClassName={styles['title-class']} data={postTypes} value={theClass} dataKey='value' textField='label' onChange={(item) => { setTheClass(item.value) }} />
-                <input className={styles['title-input']} onChange={(e) => setTitle(e.target.value)} defaultValue={title} onMouseDown={onMouseDownHeader} placeholder={'標題:'} />
-            </div>
-        )
-    }
-
+  const allErrMsg: string[] = [];
+  if (errMsg) {
+    allErrMsg.push(errMsg);
+  }
+  if (errmsg) {
+    allErrMsg.push(errmsg);
+  }
+  const renderError = () => {
     return (
-        <div className={pageStyles['root']} onFocus={onFocus} onBlur={onBlur}>
-            <div ref={headerRef} >
-                <Header title={''} renderHeader={renderHeader} stateHeader={stateHeader} />
-            </div>
+      <span className={"nav-link " + styles.error}>{allErrMsg.join(",")}</span>
+    );
+  };
 
-            <Editor
-                contentLines={content}
-                setContentLines={setContent}
+  const loptions = [
+    { text: "發表文章", action: submit },
+    { render: renderError },
+  ];
+  const roptions = [
+    { text: selectedRow + 1 + "," + (selectedColumn + 1) },
+    { text: "離開", url: `/board/${bid}/articles` },
+  ];
 
-                width={screenWidth}
-                height={screenHeight}
-                selectedRow={selectedRow}
-                setSelectedRow={setSelectedRow}
-                selectedColumn={selectedColumn}
-                setSelectedColumn={setSelectedColumn}
-            />
+  const onFocus = (_e: FocusEvent) => {
+    //console.log('NewArticlePage: onFocus: start')
+  };
 
-            <div ref={funcbarRef}>
-                <FunctionBar optionsLeft={loptions} optionsRight={roptions} />
-            </div>
-            <InitConsts windowWidth={innerWidth} isMobile={false} isInitConsts={isInitConsts} setIsInitConsts={setIsInitConsts} />
+  const onBlur = (_e: FocusEvent) => {
+    //console.log('NewArticlePage: onBlur: start')
+  };
+
+  const showErrMsg = (text: string) => {
+    setErrMsg(text);
+    setTimeout(() => cleanErrMsg(), 1000);
+  };
+
+  const cleanErrMsg = () => {
+    setErrMsg("");
+    doNewArticlePage.setData(myID, { errmsg: "" });
+  };
+
+  const onMouseDownHeader = (_e: MouseEvent) => {
+    //console.log('NewArticlePage: onMouseDownHeader: start')
+  };
+
+  const classStyle = {
+    width: "170px",
+    display: "inline-block",
+  };
+
+  const renderHeader = () => {
+    return (
+      <div className={"col " + styles.title}>
+        <span>{brdname} - </span>
+        <DropdownList
+          style={classStyle}
+          containerClassName={styles["title-class"]}
+          data={postTypes}
+          value={theClass}
+          dataKey="value"
+          textField="label"
+          onChange={(item) => {
+            setTheClass(item.value);
+          }}
+        />
+        <input
+          className={styles["title-input"]}
+          onChange={(e) => setTitle(e.target.value)}
+          defaultValue={title}
+          onMouseDown={onMouseDownHeader}
+          placeholder={"標題:"}
+        />
+      </div>
+    );
+  };
+
+  return (
+    <>
+      {/* biome-ignore lint/a11y/noStaticElementInteractions: onFocus and onBlur on the whole page */}
+      <div className={pageStyles.root} onFocus={onFocus} onBlur={onBlur}>
+        <div ref={headerRef}>
+          <Header
+            title={""}
+            renderHeader={renderHeader}
+            stateHeader={classHeader}
+          />
         </div>
-    )
-}
+
+        <Editor
+          contentLines={content}
+          setContentLines={setContent}
+          width={screenWidth}
+          height={screenHeight}
+          selectedRow={selectedRow}
+          setSelectedRow={setSelectedRow}
+          selectedColumn={selectedColumn}
+          setSelectedColumn={setSelectedColumn}
+        />
+
+        <div ref={funcbarRef}>
+          <FunctionBar optionsLeft={loptions} optionsRight={roptions} />
+        </div>
+        <InitConsts
+          windowWidth={innerWidth}
+          isMobile={false}
+          isInitConsts={isInitConsts}
+          setIsInitConsts={setIsInitConsts}
+        />
+      </div>
+    </>
+  );
+};

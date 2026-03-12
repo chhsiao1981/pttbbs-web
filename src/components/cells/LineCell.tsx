@@ -1,23 +1,20 @@
-import { Cell } from 'fixed-data-table-2'
-import { PttColumn, TableData } from '../../types'
-import Empty from '../Empty'
+import { Cell } from "fixed-data-table-2";
+import type { PttColumn, TableData } from "../../types";
 
 type Props = {
-    data: TableData<any>
-    fontSize: number
-    rowIndex?: number
-    columnKey?: string
-    column: PttColumn
-}
+  data: TableData<any>;
+  fontSize: number;
+  rowIndex?: number;
+  columnKey?: string;
+  column: PttColumn;
+};
 
 export default (props: Props) => {
-    const { data, fontSize, rowIndex, columnKey } = props
+  const { data, fontSize, rowIndex, columnKey } = props;
 
-    // @ts-ignore
-    let item = data[rowIndex]
-    let renderLine = item[columnKey]
+  // @ts-expect-error
+  const item = data[rowIndex];
+  const renderLine = item[columnKey];
 
-    return (
-        <Cell>{renderLine(data, fontSize, rowIndex, columnKey)}</Cell>
-    )
-}
+  return <Cell>{renderLine(data, fontSize, rowIndex, columnKey)}</Cell>;
+};

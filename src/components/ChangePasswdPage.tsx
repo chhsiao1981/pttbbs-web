@@ -1,120 +1,151 @@
-import React, { useEffect, useState } from 'react'
-import pageStyles from './Page.module.css'
+import {
+  genUUID,
+  getState,
+  type ThunkModuleToFunc,
+  useThunk,
+} from "@chhsiao1981/use-thunk";
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import useWindowSize from "../hooks/useWindowSize";
+import * as DoChangePasswdPage from "../reducers/changePasswdPage";
+import * as DoHeader from "../reducers/header";
+import * as errors from "./errors";
+import Header from "./Header";
+import styles from "./Page.module.css";
 
-import * as errors from './errors'
+type TDoChangePasswdPage = ThunkModuleToFunc<typeof DoChangePasswdPage>;
+type TDoHeader = ThunkModuleToFunc<typeof DoHeader>;
 
-import { useWindowSize } from 'react-use'
+// biome-ignore lint/complexity/noBannedTypes: props
+type Props = {};
 
-import { useParams } from 'react-router-dom'
+export default (_props: Props) => {
+  const [classChangePasswdPage, doChangePasswdPage] = useThunk<
+    DoChangePasswdPage.State,
+    TDoChangePasswdPage
+  >(DoChangePasswdPage);
+  const [changePasswdPageID, _setChangePasswdPageID] = useState(genUUID);
+  const [classHeader, doHeader] = useThunk<DoHeader.State, TDoHeader>(DoHeader);
+  const [headerID, _setHeaderID] = useState(genUUID);
 
-import { useReducer, getRoot, genUUID, getRootID } from 'react-reducer-utils'
+  const [origPasswd, setOrigPasswd] = useState("");
+  const [password, setPassword] = useState("");
+  const [passwordConfirm, setPasswordConfirm] = useState("");
+  const [errMsg, setErrMsg] = useState("");
 
-import * as DoChangePasswdPage from '../reducers/changePasswdPage'
-import * as DoHeader from '../reducers/header'
+  //init
+  const { userid: paramsUserID } = useParams();
+  const userid = paramsUserID || "";
 
-import Header from './Header'
-import Empty from './Empty'
+  // biome-ignore lint/correctness/useExhaustiveDependencies: useEffect
+  useEffect(() => {
+    doHeader.init(headerID);
 
-type Props = {
+    doChangePasswdPage.init(changePasswdPageID, userid);
+  }, []);
 
-}
+  //get data
+  const changePasswdPage =
+    getState(classChangePasswdPage) || DoChangePasswdPage.defaultState;
+  const userID = changePasswdPage.userID;
+  const errmsg = changePasswdPage.errmsg || "";
 
-export default (props: Props) => {
-    const [stateChangePasswdPage, doChangePasswdPage] = useReducer(DoChangePasswdPage)
-    const [stateHeader, doHeader] = useReducer(DoHeader)
+  //render
+  const { height: innerHeight } = useWindowSize();
+  const style = {
+    height: innerHeight + "px",
+  };
 
-    const [origPasswd, setOrigPasswd] = useState('')
-    const [password, setPassword] = useState('')
-    const [passwordConfirm, setPasswordConfirm] = useState('')
-    const [errMsg, setErrMsg] = useState('')
+  const cleanErr = () => {
+    setErrMsg("");
+    doChangePasswdPage.cleanErr(changePasswdPageID);
+  };
 
-    //init
-    let { userid } = useParams()
+  const changeOrigPasswd = (origPasswd: string) => {
+    setOrigPasswd(origPasswd);
+    cleanErr();
+  };
 
-    useEffect(() => {
-        let headerID = genUUID()
-        doHeader.init(headerID)
+  const changePassword = (password: string) => {
+    setPassword(password);
+    cleanErr();
+  };
 
-        let changePasswdPageID = genUUID()
-        doChangePasswdPage.init(changePasswdPageID, userid)
-    }, [])
+  const changePasswordConfirm = (passwordConfirm: string) => {
+    setPasswordConfirm(passwordConfirm);
+    cleanErr();
+  };
 
-    //get data
-    let changePasswdPage = getRoot(stateChangePasswdPage)
-    if (!changePasswdPage) {
-        return (<Empty />)
+  const submit = () => {
+    if (password !== passwordConfirm) {
+      setErrMsg("新的密碼不相符合喔～");
+      return;
     }
-    let myID = getRootID(stateChangePasswdPage)
-    let userID = changePasswdPage.userID
-    let errmsg = changePasswdPage.errmsg || ''
 
-    //render
-    const { height: innerHeight } = useWindowSize()
-    let style = {
-        height: innerHeight + 'px',
-    }
+    doChangePasswdPage.changePasswd(
+      changePasswdPageID,
+      userID,
+      origPasswd,
+      password,
+      passwordConfirm,
+    );
+  };
 
-    let cleanErr = () => {
-        setErrMsg('')
-        doChangePasswdPage.CleanErr(myID)
-    }
+  const allErrMsg = errors.mergeErr(errMsg, errmsg);
 
-    let changeOrigPasswd = (origPasswd: string) => {
-        setOrigPasswd(origPasswd)
-        cleanErr()
-    }
-
-    let changePassword = (password: string) => {
-        setPassword(password)
-        cleanErr()
-    }
-
-    let changePasswordConfirm = (passwordConfirm: string) => {
-        setPasswordConfirm(passwordConfirm)
-        cleanErr()
-    }
-
-    let submit = () => {
-        if (password !== passwordConfirm) {
-            setErrMsg("新的密碼不相符合喔～")
-            return
-        }
-
-        doChangePasswdPage.ChangePasswd(myID, userID, origPasswd, password, passwordConfirm)
-    }
-
-    let allErrMsg = errors.mergeErr(errMsg, errmsg)
-
-    return (
-        <div className={pageStyles['root']} style={style}>
-            <div className={'container'} style={style}>
-                <Header title='我想換密碼' stateHeader={stateHeader} />
-                <div className='row'>
-                    <div className='col'>
-                        <label>我是 {userID}</label>
-                    </div>
-                </div>
-                <div className='row'>
-                    <input className="form-control" type="password" placeholder="原本的密碼:" aria-label="OrigPasswd" value={origPasswd} onChange={(e) => changeOrigPasswd(e.target.value)} />
-                </div>
-
-                <div className='row'>
-                    <input className="form-control" type="password" placeholder="新的密碼:" aria-label="Password" value={password} onChange={(e) => changePassword(e.target.value)} />
-                </div>
-
-                <div className='row'>
-                    <input className="form-control" type="password" placeholder="確認新的密碼:" aria-label="Password" value={passwordConfirm} onChange={(e) => changePasswordConfirm(e.target.value)} />
-                </div>
-
-                <div className='row'>
-                    <div>
-                        <button className="btn btn-primary" onClick={submit}>我確定要改密碼～</button>
-                    </div>
-                    <div className='col'>
-                        <label className={pageStyles['errMsg']}>{allErrMsg}</label>
-                    </div>
-                </div>
-            </div>
+  return (
+    <div className={styles.root} style={style}>
+      <div className={"container"} style={style}>
+        <Header title="我想換密碼" stateHeader={classHeader} />
+        <div className="row">
+          <div className="col">
+            <span>我是 {userID}</span>
+          </div>
         </div>
-    )
-}
+        <div className="row">
+          <input
+            className="form-control"
+            type="password"
+            placeholder="原本的密碼:"
+            aria-label="OrigPasswd"
+            value={origPasswd}
+            onChange={(e) => changeOrigPasswd(e.target.value)}
+          />
+        </div>
+
+        <div className="row">
+          <input
+            className="form-control"
+            type="password"
+            placeholder="新的密碼:"
+            aria-label="Password"
+            value={password}
+            onChange={(e) => changePassword(e.target.value)}
+          />
+        </div>
+
+        <div className="row">
+          <input
+            className="form-control"
+            type="password"
+            placeholder="確認新的密碼:"
+            aria-label="Password"
+            value={passwordConfirm}
+            onChange={(e) => changePasswordConfirm(e.target.value)}
+          />
+        </div>
+
+        <div className="row">
+          <div>
+            <button type="button" className="btn btn-primary" onClick={submit}>
+              我確定要改密碼～
+            </button>
+          </div>
+          <div className="col">
+            <span className={styles.errMsg}>{allErrMsg}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};

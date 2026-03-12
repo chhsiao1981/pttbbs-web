@@ -1,18 +1,15 @@
-import React from 'react'
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
-import HomePage from '../components/HomePage'
-import RegisterPage from '../components/RegisterPage'
+import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
+import HomePage from "../components/HomePage";
 
-type Props = {
+// biome-ignore lint/complexity/noBannedTypes: props
+type Props = {};
 
-}
-
-export default (props: Props) => {
-    return (
-        <Router>
-            <Routes>
-                <Route path="/" element={<HomePage />} />
-            </Routes>
-        </Router>
-    )
-}
+export default (_props: Props) => {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+      </Routes>
+    </Router>
+  );
+};

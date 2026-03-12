@@ -1,73 +1,86 @@
-import React from 'react'
-import styles from './Header.module.css'
-import config, { PTT_GUEST } from 'config'
-
-import { GITHUB_LINK } from '../constants'
-
-import { getRoot, ClassState } from 'react-reducer-utils'
-
-import Empty from './Empty'
-
-import { State } from '../reducers/header'
+import type { ClassState } from "@chhsiao1981/use-thunk";
+import config from "config";
+import { GITHUB_LINK } from "../constants";
+import type { State } from "../reducers/header";
+import Empty from "./Empty";
+import styles from "./Header.module.css";
 
 type Props = {
-    title: string
-    renderHeader?: any
-    stateHeader: ClassState<State>
-}
+  title: string;
+  renderHeader?: any;
+  stateHeader: ClassState<State>;
+};
 
 export default (props: Props) => {
-    const { title: paramsTitle, renderHeader: paramsRenderHeader, stateHeader } = props
+  const {
+    title: paramsTitle,
+    renderHeader: paramsRenderHeader,
+    // stateHeader,
+  } = props;
 
-    let me = getRoot(stateHeader)
-    let meUserID = me ? me.user_id : ''
-    let userID = meUserID || ''
+  // const me = getState(stateHeader);
+  // const meUserID = me ? me.user_id : "";
+  // const userID = meUserID || "";
 
-    // Links
-    let renderUserHome = () => {
-        let text = 'hi~ ' + userID
-        let url = '/user/' + userID
-        if (!userID || userID === PTT_GUEST) {
-            text = "登入/註冊"
-            url = '/login'
-        }
-        return (
-            <a className={'pull-right ' + styles['navbar-link']} href={url}>{text}</a>
-        )
+  // Links
+  /*
+  const renderUserHome = () => {
+    let text = "hi~ " + userID;
+    let url = "/user/" + userID;
+    if (!userID || userID === config.PTT_GUEST) {
+      text = "登入/註冊";
+      url = "/login";
+    }
+    return (
+      <a className={"pull-right " + styles["navbar-link"]} href={url}>
+        {text}
+      </a>
+    );
+  };
+  */
+
+  const renderHeader = () => {
+    if (paramsRenderHeader) {
+      return paramsRenderHeader();
     }
 
-    let renderHeader = () => {
-        if (paramsRenderHeader) {
-            return paramsRenderHeader()
-        }
-
-        let title = paramsTitle || ''
-        if (typeof title === 'function') {
-            // @ts-ignore because title is function
-            return <div className={'col ' + styles['title']}>{title()}</div>
-        } else {
-            return <div className={'col ' + styles['title']}>{title}</div>
-        }
+    const title = paramsTitle || "";
+    if (typeof title === "function") {
+      // @ts-expect-error because title is function
+      return <div className={"col " + styles.title}>{title()}</div>;
+    } else {
+      return <div className={"col " + styles.title}>{title}</div>;
     }
+  };
 
-    let renderTerm = () => {
-        if (!config.TERM_URL) {
-            return (<Empty />)
-        }
-
-        return (<a className={styles['navbar-link']} href={config.TERM_URL}>Term</a>)
-
+  const renderTerm = () => {
+    if (!config.TERM_URL) {
+      return <Empty />;
     }
 
     return (
-        <nav className={'navbar ' + styles['root']}>
-            <a className={'navbar-brand ' + styles['navbar-link']} href={'/'}>{config.BRAND}</a>
-            {renderTerm()}
-            {renderHeader()}
-            {renderUserHome()}
-            <a className={styles['navbar-link']} href={GITHUB_LINK}>
-                <div className={'ml-3 logo-github ' + styles['logo']}></div>
-            </a>
-        </nav>
-    )
-}
+      <a className={styles["navbar-link"]} href={config.TERM_URL}>
+        Term
+      </a>
+    );
+  };
+
+  return (
+    <nav className={"navbar navbar-dark " + styles.root}>
+      <a
+        className={
+          styles["navbar-brand"] + " " + "navbar-brand " + styles["navbar-link"]
+        }
+        href={"/"}
+      >
+        {config.BRAND}
+      </a>
+      {renderTerm()}
+      {renderHeader()}
+      {/* renderUserHome() */}
+      <a className={styles["navbar-link"]} href={GITHUB_LINK}>
+        <i className={"ml-3 bi bi-github " + styles.logo}></i>
+      </a>
+    </nav>
+  );
+};

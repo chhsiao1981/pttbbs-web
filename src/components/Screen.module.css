@@ -1,14 +1,14 @@
 .number {
-    width: 10%;
+  width: 10%;
 }
 
 .header {
-    color: #000;
-    background-color: #eee;
-    text-align: center;
+  color: #000;
+  background-color: #eee;
+  text-align: center;
 }
 
 .default {
-    color: #000;
-    background-color: #000;
+  color: #000;
+  background-color: #000;
 }

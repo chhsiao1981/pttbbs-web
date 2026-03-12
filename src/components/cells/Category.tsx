@@ -1,19 +1,19 @@
-import { TableData } from "../../types"
+import type { TableData } from "../../types";
 
 type Props = {
-    data: TableData<any>
-    rowIndex: number
-    columnKey: string
-}
+  data: TableData<any>;
+  rowIndex: number;
+  columnKey: string;
+};
 
 export default (props: Props) => {
-    const { data, rowIndex, columnKey } = props
-    let item = data[rowIndex]
+  const { data, rowIndex, columnKey } = props;
+  const item = data[rowIndex];
 
-    let text = item[columnKey] || ''
-    if (text === '') {
-        text = '其他'
-    }
+  let text = item[columnKey] || "";
+  if (text === "") {
+    text = "其他";
+  }
 
-    return (<div>{'[' + text + ']'}</div>)
-}
+  return <div>{"[" + text + "]"}</div>;
+};

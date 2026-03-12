@@ -1,182 +1,253 @@
 .idx {
-    text-align: right;
+  text-align: right;
 }
 
 .bottomArticle {
-    color: #ffff00
+  color: #ffff00;
 }
 
-.c30, .c30:before, .rc30:after { /* foreground-black */
-    color: #000000;
+.c30,
+.c30:before,
+.rc30:after {
+  /* foreground-black */
+  color: #000000;
 }
 
-.c31, .c31:before, .rc31:after { /* foreground-red */
-    color: #cc0000;
+.c31,
+.c31:before,
+.rc31:after {
+  /* foreground-red */
+  color: #cc0000;
 }
 
-.c32, .c32:before, .rc32:after { /* foreground-green */
-    color: #00cc00;
+.c32,
+.c32:before,
+.rc32:after {
+  /* foreground-green */
+  color: #00cc00;
 }
 
-.c33, .c33:before, .rc33:after { /* foreground-yellow */
-    color: #cccc00;
+.c33,
+.c33:before,
+.rc33:after {
+  /* foreground-yellow */
+  color: #cccc00;
 }
-.c34, .c34:before, .rc34:after { /* foreground-blue */
-    color: #0000cc;
+.c34,
+.c34:before,
+.rc34:after {
+  /* foreground-blue */
+  color: #0000cc;
 }
-.c35, .c35:before, .rc35:after { /* foreground-magenta */
-    color: #cc00cc;
+.c35,
+.c35:before,
+.rc35:after {
+  /* foreground-magenta */
+  color: #cc00cc;
 }
-.c36, .c36:before, .rc36:after { /* foreground-cyan */
-    color: #00cccc;
+.c36,
+.c36:before,
+.rc36:after {
+  /* foreground-cyan */
+  color: #00cccc;
 }
-.c37, .c37:before, .rc37:after { /* foreground-white */
-    color: #cccccc;
-}
-
-.h30, .h30:before, .rh30:after { /* foreground-black */
-    color: #888888;
-}
-
-.h31, .h31:before, .rh31:after { /* foreground-red */
-    color: #ff0000;
-}
-
-.h32, .h32:before, .rh32:after { /* foreground-green */
-    color: #00ff00;
-}
-
-.h33, .h33:before, .rh33:after { /* foreground-yellow */
-    color: #ffff00;
-}
-.h34, .h34:before, .rh34:after { /* foreground-blue */
-    color: #0000ff;
-}
-.h35, .h35:before, .rh35:after { /* foreground-magenta */
-    color: #ff00ff;
-}
-.h36, .h36:before, .rh36:after { /* foreground-cyan */
-    color: #00ffff;
-}
-.h37, .h37:before, .rh37:after { /* foreground-white */
-    color: #ffffff;
+.c37,
+.c37:before,
+.rc37:after {
+  /* foreground-white */
+  color: #cccccc;
 }
 
-.c40, .c40:before, .rc40:after {
-    background-color: #000000;
+.h30,
+.h30:before,
+.rh30:after {
+  /* foreground-black */
+  color: #888888;
 }
 
-.c41, .c41:before, .rc41:after {
-    background-color: #cc0000;
+.h31,
+.h31:before,
+.rh31:after {
+  /* foreground-red */
+  color: #ff0000;
 }
 
-.c42, .c42:before, .rc42:after {
-    background-color: #00cc00;
+.h32,
+.h32:before,
+.rh32:after {
+  /* foreground-green */
+  color: #00ff00;
 }
 
-.c43, .c43:before, .rc43:after {
-    background-color: #cccc00;
+.h33,
+.h33:before,
+.rh33:after {
+  /* foreground-yellow */
+  color: #ffff00;
 }
-.c44, .c44:before, .rc44:after {
-    background-color: #0000cc;
+.h34,
+.h34:before,
+.rh34:after {
+  /* foreground-blue */
+  color: #0000ff;
 }
-.c45, .c45:before, .rc45:after {
-    background-color: #cc00cc;
+.h35,
+.h35:before,
+.rh35:after {
+  /* foreground-magenta */
+  color: #ff00ff;
 }
-.c46, .c46:before, .rc46:after {
-    background-color: #00cccc;
+.h36,
+.h36:before,
+.rh36:after {
+  /* foreground-cyan */
+  color: #00ffff;
 }
-.c47, .c47:before, .rc47:after {
-    background-color: #cccccc;
+.h37,
+.h37:before,
+.rh37:after {
+  /* foreground-white */
+  color: #ffffff;
 }
 
-.hide-blink .c5, .hide-blink .c5:before, .hide-blink .rc5:after { /* blink */
-    color: transparent;
+.c40,
+.c40:before,
+.rc40:after {
+  background-color: #000000;
 }
 
-.halves { /* Container for the two halves of a character; selectable */
-    position: relative;
-    /* Prevent .halves elements from being drawn below the background */
-    z-index: 1;
-    color: transparent;
-    background: transparent;
+.c41,
+.c41:before,
+.rc41:after {
+  background-color: #cc0000;
 }
-.halves:before, .halves:after { /* The halves of a character; not selectable */
-    content: attr(data-text);
-    position: absolute;
-    left: 0px; /* for the left half */
-    width: 50%;
-    overflow: hidden;
-    z-index: -1; /* Draw below the selectable text */
+
+.c42,
+.c42:before,
+.rc42:after {
+  background-color: #00cc00;
 }
-.halves:after { /* The right half of a character; not selectable */
-    left: 50%;
-    text-indent: -100%;
+
+.c43,
+.c43:before,
+.rc43:after {
+  background-color: #cccc00;
+}
+.c44,
+.c44:before,
+.rc44:after {
+  background-color: #0000cc;
+}
+.c45,
+.c45:before,
+.rc45:after {
+  background-color: #cc00cc;
+}
+.c46,
+.c46:before,
+.rc46:after {
+  background-color: #00cccc;
+}
+.c47,
+.c47:before,
+.rc47:after {
+  background-color: #cccccc;
+}
+
+.hide-blink .c5,
+.hide-blink .c5:before,
+.hide-blink .rc5:after {
+  /* blink */
+  color: transparent;
+}
+
+.halves {
+  /* Container for the two halves of a character; selectable */
+  position: relative;
+  /* Prevent .halves elements from being drawn below the background */
+  z-index: 1;
+  color: transparent;
+  background: transparent;
+}
+.halves:before,
+.halves:after {
+  /* The halves of a character; not selectable */
+  content: attr(data-text);
+  position: absolute;
+  left: 0px; /* for the left half */
+  width: 50%;
+  overflow: hidden;
+  z-index: -1; /* Draw below the selectable text */
+}
+.halves:after {
+  /* The right half of a character; not selectable */
+  left: 50%;
+  text-indent: -100%;
 }
 
 .rune {
-    white-space: pre;
-    height: 100%;
-    display: inline-block;
+  white-space: pre;
+  height: 100%;
+  display: inline-block;
 }
 
 .pull-right {
-    float: right;
+  float: right;
 }
 .extend {
-    width: 100%;
+  width: 100%;
 }
 
 .calc {
-    color: rgba(0, 0, 0, 0);
-    background-color: rgba(0, 0, 0, 0);
-    border-color: rgba(0, 0, 0, 0);
-    z-index: -1;
-    position: fixed;
-    left: 0px;
-    overflow-y: 0px;
-    white-space: pre;
+  color: rgba(0, 0, 0, 0);
+  background-color: rgba(0, 0, 0, 0);
+  border-color: rgba(0, 0, 0, 0);
+  z-index: -1;
+  position: fixed;
+  left: 0px;
+  overflow-y: 0px;
+  white-space: pre;
 }
 
 .input {
-    height: 100%;
-    padding: 0px 0px 0px 0px;
-    outline-color: rgba(0, 0, 0, 0);
-    background-color: #666666;
-    border-width: 0px;
-    border-radius: 0px;
-    border-left: 0px;
-    border-right: 0px;
-    border-top: 0px;
-    border-bottom: 0px;
+  height: 100%;
+  padding: 0px 0px 0px 0px;
+  outline-color: rgba(0, 0, 0, 0);
+  background-color: #666666;
+  border-width: 0px;
+  border-radius: 0px;
+  border-left: 0px;
+  border-right: 0px;
+  border-top: 0px;
+  border-bottom: 0px;
 }
 
 .input:focus {
-    outline: none;
+  outline: none;
 }
 
 .edit-span {
-    color: rgba(0, 0, 0, 0);
-    background-color: rgba(0, 0, 0, 0);
-    border-color: rgba(0, 0, 0, 0);
-    border-radius: 0px;
-    outline-color: rgba(0, 0, 0, 0);
+  color: rgba(0, 0, 0, 0);
+  background-color: rgba(0, 0, 0, 0);
+  border-color: rgba(0, 0, 0, 0);
+  border-radius: 0px;
+  outline-color: rgba(0, 0, 0, 0);
 }
 
 .recommend {
-    font-size: x-large;
+  font-size: x-large;
 }
 
 .recommend-input {
-    width: 800px;
-    height: 38px;
-    border-radius: 4px 4px 4px 4px;
-    border-width: 1px 1px 1px 1px;
-    display: inline-block;
-    box-sizing: border-box;
-    position: relative;
+  width: 800px;
+  height: 38px;
+  border-radius: 4px 4px 4px 4px;
+  border-width: 1px 1px 1px 1px;
+  display: inline-block;
+  box-sizing: border-box;
+  position: relative;
 }
 
 .recommend-offset {
-    margin-left: 2px;
+  margin-left: 2px;
 }

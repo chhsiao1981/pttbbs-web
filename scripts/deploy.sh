@@ -11,4 +11,4 @@ theDir="$2"
 
 npm run build:${theModule}
 
-rsync -zah build/ ${theDir}
+rsync -zah dist/ ${theDir}

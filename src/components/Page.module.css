@@ -1,12 +1,12 @@
 .root {
-    color: #fff;
-    background: #000;
+  color: #fff;
+  background: #000;
 }
 
 .errMsg {
-    color: #f00;
+  color: #f00;
 }
 
 .infoMsg {
-    color: #0a0;
+  color: #0a0;
 }

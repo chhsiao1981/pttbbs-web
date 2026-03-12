@@ -1,247 +1,312 @@
-import React, { useEffect, useState, useRef } from 'react'
-import pageStyles from './Page.module.css'
+import {
+  genUUID,
+  getState,
+  type ThunkModuleToFunc,
+  useThunk,
+} from "@chhsiao1981/use-thunk";
+import QueryString from "query-string";
+import { type CSSProperties, useEffect, useRef, useState } from "react";
+import { useParams } from "react-router-dom";
+import { useKey } from "react-use";
+import useWindowSize from "../hooks/useWindowSize";
+import * as DoArticlePage from "../reducers/articlePage";
+import * as DoHeader from "../reducers/header";
+import type { CharMap, Line } from "../types";
+import Article from "./Article";
+import FunctionBar from "./FunctionBar";
+import Header from "./Header";
+import InitConsts from "./InitConsts";
+import styles from "./Page.module.css";
 
-import * as errors from './errors'
+type TDoArticlePage = ThunkModuleToFunc<typeof DoArticlePage>;
+type TDoHeader = ThunkModuleToFunc<typeof DoHeader>;
 
-import { useWindowSize, useKey, useStartTyping } from 'react-use'
-import { useParams } from 'react-router-dom'
+// biome-ignore lint/complexity/noBannedTypes: props
+type Props = {};
 
-import { useReducer, getRoot, getRootID, genUUID } from 'react-reducer-utils'
+export default (_props: Props) => {
+  const [classArticlePage, doArticlePage] = useThunk<
+    DoArticlePage.State,
+    TDoArticlePage
+  >(DoArticlePage);
+  const [articlePageID] = useState(genUUID);
+  const articlePage = getState(classArticlePage) || DoArticlePage.defaultState;
+  const {
+    isInit,
+    isBusyLoading,
+    // errmsg,
+    brdname,
+    title,
+    theClass,
+    contentComments,
+    isNextEnd,
+    isPreEnd,
+    scrollToRow,
+    rank: _rank,
+    nRecommend: _nRecommend,
+    nComments: _nComments,
+    comments,
+  } = articlePage;
 
-import * as DoArticlePage from '../reducers/articlePage'
-import * as DoHeader from '../reducers/header'
+  const [classHeader, doHeader] = useThunk<DoHeader.State, TDoHeader>(DoHeader);
+  const [headerID] = useState(genUUID);
 
-import Header from './Header'
-import FunctionBar from './FunctionBar'
+  const [isInitConsts, setIsInitConsts] = useState(false);
 
-import Article from './Article'
-import Recommend from './cells/Recommend'
+  //init
+  const { bid: paramsBid, aid: paramsAid } = useParams();
+  const bid = paramsBid || "";
+  const aid = paramsAid || "";
 
-import QueryString from 'query-string'
-import Empty from './Empty'
-import { CharMap, Content, Line } from '../types'
-import { CHAR_WIDTH, CalcScreenScale } from './utils'
-import InitConsts from './InitConsts'
-import { prefix } from 'react-bootstrap/lib/utils/bootstrapUtils'
+  // eslint-disable-next-line
+  const [_errMsg, _setErrMsg] = useState("");
 
-type Props = {
+  //render
+  const [headerHeight, setHeaderHeight] = useState(0);
+  const [funcbarHeight, setFuncbarHeight] = useState(0);
+  const headerRef = useRef<HTMLDivElement>(null);
+  const funcbarRef = useRef<HTMLDivElement>(null);
+  const { width: innerWidth, height: innerHeight } = useWindowSize();
+  console.info(
+    "ArticlePage: after useWindowSize: innerWidth:",
+    innerWidth,
+    "innerHeight:",
+    innerHeight,
+  );
+  const [_charMap, _setCharMap] = useState<CharMap>({
+    width: innerWidth,
+    height: innerHeight,
+    charMap: {},
+  });
 
-}
+  const [scrollTop, _setScrollTop] = useState(0);
+  const [isRecommend, setIsRecommend] = useState(false);
+  const [_recommendType, setRecommendStyle] = useState(1);
+  const recommendTypeRef = useRef<HTMLDivElement>(null);
+  const [_recommend, setRecommend] = useState("");
+  const [isRecommending, _setIsRecommending] = useState(false);
 
-export default (props: Props) => {
-    const [stateArticlePage, doArticlePage] = useReducer(DoArticlePage)
-    const [articlePageID] = useState(genUUID())
+  // the states that needs to be updated with some lazy-eval functions.
+  const [stateDict, _setStateDict] = useState({ isEditing: false });
 
-    const [stateHeader, doHeader] = useReducer(DoHeader)
-    const [headerID] = useState(genUUID())
+  // const charWidth = CHAR_WIDTH * 2;
 
-    const [isInitConsts, setIsInitConsts] = useState(false)
+  stateDict.isEditing = isRecommending;
 
-    //init
-    let { bid, aid } = useParams()
-
-    // eslint-disable-next-line
-    const [errMsg, setErrMsg] = useState('')
-
-    //render
-    const [headerHeight, setHeaderHeight] = useState(0)
-    const [funcbarHeight, setFuncbarHeight] = useState(0)
-    const headerRef: React.MutableRefObject<HTMLDivElement | null> = useRef(null)
-    const funcbarRef: React.MutableRefObject<HTMLDivElement | null> = useRef(null)
-    const { width: innerWidth, height: innerHeight } = useWindowSize()
-    const [charMap, setCharMap] = useState<CharMap>({ width: innerWidth, height: innerHeight, charMap: {} })
-
-    const [scrollTop, setScrollTop] = useState(0)
-    const [isRecommend, setIsRecommend] = useState(false)
-    const [recommendType, setRecommendStyle] = useState(1)
-    const recommendTypeRef: React.MutableRefObject<HTMLDivElement | null> = useRef(null)
-    const [recommend, setRecommend] = useState('')
-    const [isRecommending, setIsRecommending] = useState(false)
-
-    // the states that needs to be updated with some lazy-eval functions.
-    const [stateDict, setStateDict] = useState({ isEditing: false })
-
-    let charWidth = CHAR_WIDTH * 2
-    let { lineHeight, fontSize } = CalcScreenScale(innerWidth)
-
-    stateDict.isEditing = isRecommending
-
-    //keys
-    useKey('X', (e) => {
-        if (stateDict.isEditing) {
-            return
-        }
-        setIsRecommend(true)
-    })
-
-    useKey('Escape', (e) => {
-        if (stateDict.isEditing) {
-            return
-        }
-        setIsRecommend(false)
-    })
-
-    useKey('ArrowLeft', (e) => {
-        if (stateDict.isEditing) {
-            return
-        }
-        window.location.href = `/board/${bid}/articles`
-    })
-
-    useEffect(() => {
-        if (isRecommend) {
-            setRecommendStyle(1)
-            setRecommend('')
-
-            if (recommendTypeRef.current) {
-                recommendTypeRef.current.focus()
-            }
-        } else {
-            setRecommendStyle(1)
-            setRecommend('')
-        }
-    }, [isRecommend])
-
-    useEffect(() => {
-        if (!isInitConsts) {
-            return
-        }
-        doHeader.init(headerID)
-
-        let query = QueryString.parse(window.location.search)
-        let startIdx = query.start_idx || ''
-
-        doArticlePage.init(articlePageID, bid, aid, startIdx)
-    }, [isInitConsts])
-
-    useEffect(() => {
-        if (headerRef.current === null) {
-            return
-        }
-        setHeaderHeight(headerRef.current.clientHeight)
-    }, [headerRef.current])
-
-    useEffect(() => {
-        if (funcbarRef.current === null) {
-            return
-        }
-        setFuncbarHeight(funcbarRef.current.clientHeight)
-    }, [funcbarRef.current])
-
-    //get data
-    let articlePage = getRoot(stateArticlePage)
-    if (!articlePage) {
-        return (
-            <div className={pageStyles['root']}>
-                <InitConsts windowWidth={innerWidth} isMobile={false} isInitConsts={isInitConsts} setIsInitConsts={setIsInitConsts} />
-            </div>
-        )
+  //keys
+  useKey("X", (_e) => {
+    if (stateDict.isEditing) {
+      return;
     }
-    let myID = getRootID(stateArticlePage)
-    let errmsg = articlePage.errmsg || ''
-    let brdname = articlePage.brdname
-    let title = articlePage.title
-    let theClass = articlePage.class
-    let contentComments = articlePage.contentComments
-    let isNextEnd = articlePage.isNextEnd
-    let isPreEnd = articlePage.isPreEnd
-    let scrollToRow = articlePage.scrollToRow
+    setIsRecommend(true);
+  });
 
-    let rank = articlePage.rank
-    let nRecommend = articlePage.recommend
-    let nComments = articlePage.n_comments
-    let comments = articlePage.comments
-
-    let width = innerWidth
-    let listHeight = innerHeight - headerHeight - funcbarHeight
-
-    let fullTitle = theClass ? `[${theClass}] ` : ''
-    fullTitle += title
-    let headerTitle = brdname ? `${brdname} - ${fullTitle}` : ''
-
-    let loadPre = (item: Line) => {
-        if (!comments.length) {
-            return
-        }
-        if (isPreEnd) {
-            return
-        }
-        let startIdx = comments[0].idx
-        doArticlePage.GetComments(myID, bid, aid, startIdx, true, true)
+  useKey("Escape", (_e) => {
+    if (stateDict.isEditing) {
+      return;
     }
+    setIsRecommend(false);
+  });
 
-    let loadNext = (item: Line) => {
-        if (!comments.length) {
-            return
-        }
-        if (isNextEnd) {
-            return
-        }
-        let startIdx = comments[comments.length - 1].idx
-        doArticlePage.GetComments(myID, bid, aid, startIdx, false, true)
+  useKey("ArrowLeft", (_e) => {
+    if (stateDict.isEditing) {
+      return;
     }
+    window.location.href = `/board/${bid}/articles`;
+  });
 
-    let onVerticalScroll = (scrollTop: number): boolean => {
-        setScrollTop(scrollTop)
-        if (typeof scrollToRow === 'undefined') {
-            return false
-        }
+  useEffect(() => {
+    if (isRecommend) {
+      setRecommendStyle(1);
+      setRecommend("");
 
-        doArticlePage.SetData(myID, { scrollToRow: undefined })
-
-        return true
+      if (recommendTypeRef.current) {
+        recommendTypeRef.current.focus();
+      }
+    } else {
+      setRecommendStyle(1);
+      setRecommend("");
     }
+  }, [isRecommend]);
 
-    // eslint-disable-next-line
-    let allErrMsg = errors.mergeErr(errMsg, errmsg)
-    let renderArticle = () => {
-        return (
-            <Article lines={contentComments} width={width} height={listHeight} loadPre={loadPre} loadNext={loadNext} scrollToRow={scrollToRow} onVerticalScroll={undefined} scrollTop={scrollTop} />
-        )
+  // biome-ignore lint/correctness/useExhaustiveDependencies: useEffect
+  useEffect(() => {
+    if (!isInitConsts) {
+      return;
     }
+    doHeader.init(headerID);
 
-    let startRecommend = () => {
-        setIsRecommend(true)
+    const query = QueryString.parse(window.location.search);
+    const startIdx = (query.start_idx || "") as string;
+
+    doArticlePage.init(articlePageID, bid, aid, startIdx);
+  }, [isInitConsts]);
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: useEffect
+  useEffect(() => {
+    if (headerRef.current) {
+      setHeaderHeight(headerRef.current.clientHeight);
     }
+    if (funcbarRef.current) {
+      setFuncbarHeight(funcbarRef.current.clientHeight);
+    }
+  }, [headerRef.current, funcbarRef.current]);
 
-    let header = getRoot(stateHeader)
-    let userID = header ? header.user_id : ''
-    let prefixLength = userID.length
+  //get data
 
-    let renderRecommend = () => {
-        let submit = (recommendType: string, recommend: Content) => {
-            if (recommend) {
-                doArticlePage.AddRecommend(myID, bid, aid, recommendType, recommend)
-            }
-            setIsRecommend(false)
-        }
-        let cancel = () => {
-            setIsRecommend(false)
-        }
+  if (!isInit) {
+    return (
+      <div className={styles.root}>
+        <InitConsts
+          windowWidth={innerWidth}
+          isMobile={false}
+          isInitConsts={isInitConsts}
+          setIsInitConsts={setIsInitConsts}
+        />
+      </div>
+    );
+  }
 
-        return (
-            <Recommend recommendTypeRef={recommendTypeRef} isRecommend={isRecommend} recommendType={recommendType} setRecommendStyle={setRecommendStyle} recommend={recommend} setRecommend={setRecommend} submit={submit} cancel={cancel} prefixLength={prefixLength} setIsRecommending={setIsRecommending} />
-        )
+  const width = innerWidth;
+  const listHeight = innerHeight - headerHeight - funcbarHeight;
+
+  let fullTitle = theClass ? `[${theClass}] ` : "";
+  fullTitle += title;
+  const headerTitle = brdname ? `${brdname} - ${fullTitle}` : "";
+
+  const loadPre = (_item: Line) => {
+    if (!comments.length) {
+      return;
+    }
+    if (isPreEnd) {
+      return;
+    }
+    const startIdx = comments[0].idx || "";
+    doArticlePage.getComments(articlePageID, bid, aid, startIdx, true, true);
+  };
+
+  const loadNext = (_item: Line) => {
+    if (!comments.length) {
+      return;
+    }
+    if (isNextEnd) {
+      return;
+    }
+    const startIdx = comments[comments.length - 1].idx || "";
+    doArticlePage.getComments(articlePageID, bid, aid, startIdx, false, true);
+  };
+
+  /*
+  const onVerticalScroll = (scrollTop: number): boolean => {
+    setScrollTop(scrollTop);
+    if (typeof scrollToRow === "undefined") {
+      return false;
     }
 
-    let loptions = [
-        { text: "推/噓", action: startRecommend, hotkey: 'X' },
-        { render: renderRecommend }
-    ]
-    let roptions = [
-        { text: "離開", url: `/board/${bid}/articles`, hotkey: "←" },
-    ]
+    doArticlePage.setData(articlePageID, { scrollToRow: undefined });
+
+    return true;
+  };
+  */
+
+  // const allErrMsg = errors.mergeErr(errMsg, errmsg);
+  const renderArticle = () => {
+    if (isInit && !isBusyLoading && contentComments.length === 0) {
+      const style: CSSProperties = {
+        width: `${width}px`,
+        height: `${listHeight}px`,
+      };
+      return (
+        <div style={style}>
+          <h3 className="mx-4"> (目前無法看到文章喔～) </h3>
+        </div>
+      );
+    }
 
     return (
-        <div className={pageStyles['root']}>
-            <div ref={headerRef}>
-                <Header title={headerTitle} stateHeader={stateHeader} />
-            </div>
-            {renderArticle()}
-            <div ref={funcbarRef}>
-                <FunctionBar optionsLeft={loptions} optionsRight={roptions} />
-            </div>
-            <InitConsts windowWidth={innerWidth} isMobile={false} isInitConsts={isInitConsts} setIsInitConsts={setIsInitConsts} />
-        </div>
-    )
-}
+      <Article
+        lines={contentComments}
+        width={width}
+        height={listHeight}
+        loadPre={loadPre}
+        loadNext={loadNext}
+        scrollToRow={scrollToRow}
+        onVerticalScroll={undefined}
+        scrollTop={scrollTop}
+      />
+    );
+  };
+
+  /*
+  const startRecommend = () => {
+    setIsRecommend(true);
+  };
+  */
+
+  // const header = getState(classHeader);
+  // const userID = header ? header.user_id : "";
+  // const prefixLength = userID.length;
+
+  /*
+  const renderRecommend = () => {
+    const submit = (recommendType: string, recommend: Content) => {
+      if (recommend) {
+        doArticlePage.addRecommend(
+          articlePageID,
+          bid,
+          aid,
+          recommendType,
+          recommend,
+        );
+      }
+      setIsRecommend(false);
+    };
+    const cancel = () => {
+      setIsRecommend(false);
+    };
+
+    return (
+      <Recommend
+        recommendTypeRef={recommendTypeRef}
+        isRecommend={isRecommend}
+        recommendType={recommendType}
+        setRecommendStyle={setRecommendStyle}
+        recommend={recommend}
+        setRecommend={setRecommend}
+        submit={submit}
+        cancel={cancel}
+        prefixLength={prefixLength}
+        setIsRecommending={setIsRecommending}
+      />
+    );
+  };
+  */
+
+  /*
+  const loptions = [
+    { text: "推/噓", action: startRecommend, hotkey: "X" },
+    { render: renderRecommend },
+  ];
+  */
+  const roptions = [
+    { text: "離開", url: `/board/${bid}/articles`, hotkey: "←" },
+  ];
+
+  return (
+    <div className={styles.root}>
+      <div ref={headerRef}>
+        <Header title={headerTitle} stateHeader={classHeader} />
+      </div>
+      {renderArticle()}
+      <div ref={funcbarRef}>
+        <FunctionBar optionsLeft={[]} optionsRight={roptions} />
+      </div>
+      <InitConsts
+        windowWidth={innerWidth}
+        isMobile={false}
+        isInitConsts={isInitConsts}
+        setIsInitConsts={setIsInitConsts}
+      />
+    </div>
+  );
+};

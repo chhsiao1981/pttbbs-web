@@ -1,22 +1,19 @@
 .title {
-    width: 800px;
-    font-size: x-large;
-    text-align: center;
-}
-
-.title-class {
+  width: 800px;
+  font-size: x-large;
+  text-align: center;
 }
 
 .title-input {
-    width: 600px;
-    height: 42px;
-    border-radius: 4px 4px 4px 4px;
-    border-width: 1px 1px 1px 1px;
-    display: inline-block;
-    box-sizing: border-box;
-    position: relative;
+  width: 600px;
+  height: 42px;
+  border-radius: 4px 4px 4px 4px;
+  border-width: 1px 1px 1px 1px;
+  display: inline-block;
+  box-sizing: border-box;
+  position: relative;
 }
 
 .error {
-    color: #ff0000;
+  color: #ff0000;
 }

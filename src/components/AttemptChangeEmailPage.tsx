@@ -1,141 +1,166 @@
-import React, { useEffect, useState } from 'react'
-import pageStyles from './Page.module.css'
+import {
+  genUUID,
+  getState,
+  type ThunkModuleToFunc,
+  useThunk,
+} from "@chhsiao1981/use-thunk";
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import useWindowSize from "../hooks/useWindowSize";
+import * as DoAttemptChangeEmailPage from "../reducers/attemptChangeEmailPage";
+import * as DoHeader from "../reducers/header";
+import Empty from "./Empty";
+import * as errors from "./errors";
+import Header from "./Header";
+import styles from "./Page.module.css";
 
-import * as errors from './errors'
+type TDoAttemptChangeEmailPage = ThunkModuleToFunc<
+  typeof DoAttemptChangeEmailPage
+>;
+type TDoHeader = ThunkModuleToFunc<typeof DoHeader>;
 
-import { useWindowSize } from 'react-use'
+// biome-ignore lint/complexity/noBannedTypes: props
+type Props = {};
 
-import { useParams } from 'react-router-dom'
+export default (_props: Props) => {
+  const [classAttemptChangeEmailPage, doAttemptChangeEmailPage] = useThunk<
+    DoAttemptChangeEmailPage.State,
+    TDoAttemptChangeEmailPage
+  >(DoAttemptChangeEmailPage);
+  const [attemptChangeEmailPageID, _setAttemptChangeEmailPageID] =
+    useState(genUUID);
+  const [classHeader, doHeader] = useThunk<DoHeader.State, TDoHeader>(DoHeader);
+  const [headerID, _setHeaderID] = useState(genUUID);
 
-import { useReducer, getRoot, genUUID, getRootID } from 'react-reducer-utils'
+  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("");
+  const [errMsg, setErrMsg] = useState("");
 
-import * as DoAttemptChangeEmailPage from '../reducers/attemptChangeEmailPage'
-import * as DoHeader from '../reducers/header'
+  //init
+  const { userid: paramsUserID } = useParams();
+  const userid = paramsUserID || "";
 
-import Header from './Header'
-import Empty from './Empty'
+  // biome-ignore lint/correctness/useExhaustiveDependencies: useEffect
+  useEffect(() => {
+    doHeader.init(headerID);
+    doAttemptChangeEmailPage.init(attemptChangeEmailPageID, userid);
+  }, []);
 
-type Props = {
+  //get data
+  const attemptChangeEmailPage =
+    getState(classAttemptChangeEmailPage) ||
+    DoAttemptChangeEmailPage.defaultState;
+  const userID = attemptChangeEmailPage.userID;
+  const errmsg = attemptChangeEmailPage.errmsg || "";
+  const isDone = attemptChangeEmailPage.isDone;
 
-}
-
-export default (props: Props) => {
-    const [stateAttemptChangeEmailPage, doAttemptChangeEmailPage] = useReducer(DoAttemptChangeEmailPage)
-    const [stateHeader, doHeader] = useReducer(DoHeader)
-
-    const [password, setPassword] = useState('')
-    const [email, setEmail] = useState('')
-    const [errMsg, setErrMsg] = useState('')
-
-    //init
-    let { userid } = useParams()
-
-    useEffect(() => {
-        let headerID = genUUID()
-        doHeader.init(headerID)
-
-        let attemptChangeEmailPageID = genUUID()
-        doAttemptChangeEmailPage.init(attemptChangeEmailPageID, userid)
-    }, [])
-
-    //get data
-    let attemptChangeEmailPage = getRoot(stateAttemptChangeEmailPage)
-    if (!attemptChangeEmailPage) {
-        attemptChangeEmailPage = { theDate: new Date(0), userID: '', isDone: false }
-    }
-    let myID = getRootID(stateAttemptChangeEmailPage)
-    let userID = attemptChangeEmailPage.userID
-    let errmsg = attemptChangeEmailPage.errmsg || ''
-    let isDone = attemptChangeEmailPage.isDone
-
-    useEffect(() => {
-        if (!isDone) {
-            return
-        }
-
-        doAttemptChangeEmailPage.SleepAndRedirect(myID, userid)
-
-    }, [isDone])
-
-    //render
-    const { height: innerHeight } = useWindowSize()
-    let style = {
-        height: innerHeight + 'px',
+  // biome-ignore lint/correctness/useExhaustiveDependencies: useEffect
+  useEffect(() => {
+    if (!isDone) {
+      return;
     }
 
-    let cleanErr = () => {
-        setErrMsg('')
-        doAttemptChangeEmailPage.CleanErr(myID)
+    doAttemptChangeEmailPage.sleepAndRedirect(attemptChangeEmailPageID, userid);
+  }, [isDone]);
+
+  //render
+  const { height: innerHeight } = useWindowSize();
+  const style = {
+    height: innerHeight + "px",
+  };
+
+  const cleanErr = () => {
+    setErrMsg("");
+    doAttemptChangeEmailPage.cleanErr(attemptChangeEmailPageID);
+  };
+
+  const changePassword = (password: string) => {
+    setPassword(password);
+    cleanErr();
+  };
+
+  const changeEmail = (email: string) => {
+    setEmail(email);
+    cleanErr();
+  };
+
+  const submit = () => {
+    if (!email) {
+      setErrMsg("您是忘記您的 email 了？～");
+      return;
     }
-
-    let changePassword = (password: string) => {
-        setPassword(password)
-        cleanErr()
+    if (!password) {
+      setErrMsg("您是忘記您的密碼了？～");
+      return;
     }
+    doAttemptChangeEmailPage.changeEmail(
+      attemptChangeEmailPageID,
+      userID,
+      password,
+      email,
+    );
+    cleanErr();
+  };
 
-    let changeEmail = (email: string) => {
-        setEmail(email)
-        cleanErr()
+  const renderData = () => {
+    if (!isDone) {
+      return <Empty />;
     }
-
-    let submit = () => {
-        if (!email) {
-            setErrMsg('您是忘記您的 email 了？～')
-            return
-        }
-        if (!password) {
-            setErrMsg('您是忘記您的密碼了？～')
-            return
-        }
-        doAttemptChangeEmailPage.ChangeEmail(myID, userID, password, email)
-        cleanErr()
-    }
-
-    let renderData = () => {
-        if (!isDone) {
-            return (<Empty />)
-        }
-
-        return (
-            <label className=''>已經成功送出確認信囉～請您到您設定的信箱確認～</label>
-        )
-    }
-
-    let allErrMsg = errors.mergeErr(errMsg, errmsg)
 
     return (
-        <div className={pageStyles['root']} style={style}>
-            <div className={'container'}>
-                <Header title='我想換聯絡 Email' stateHeader={stateHeader} />
-                <div className='row'>
-                    <div className='col'>
-                        <label>我是 {userID}</label>
-                    </div>
-                </div>
-                <div className='row'>
-                    <div className='col'>
-                        <input className="form-control" type="text" placeholder="新的聯絡 Email:" aria-label="email" value={email} onChange={(e) => changeEmail(e.target.value)} />
-                    </div>
-                    <div className='col'></div>
-                </div>
-                <div className='row'>
-                    <div className='col'>
-                        <input className="form-control" type="password" placeholder="我的密碼:" aria-label="password" value={password} onChange={(e) => changePassword(e.target.value)} />
-                    </div>
-                    <div className='col'></div>
-                </div>
-                <div className='row'>
-                    <div className='col'>
-                        <button className="btn btn-primary" onClick={submit}>我確定要換聯絡 Email～</button>
-                    </div>
-                    <div className='col'>
-                        {renderData()}
-                    </div>
-                    <div className='col'>
-                        <label className={pageStyles['errMsg']}>{allErrMsg}</label>
-                    </div>
-                </div>
-            </div>
+      <span className="">已經成功送出確認信囉～請您到您設定的信箱確認～</span>
+    );
+  };
+
+  const allErrMsg = errors.mergeErr(errMsg, errmsg);
+
+  return (
+    <div className={styles.root} style={style}>
+      <div className={"container"}>
+        <Header title="我想換聯絡 Email" stateHeader={classHeader} />
+        <div className="row">
+          <div className="col">
+            <span>我是 {userID}</span>
+          </div>
         </div>
-    )
-}
+        <div className="row">
+          <div className="col">
+            <input
+              className="form-control"
+              type="text"
+              placeholder="新的聯絡 Email:"
+              aria-label="email"
+              value={email}
+              onChange={(e) => changeEmail(e.target.value)}
+            />
+          </div>
+          <div className="col"></div>
+        </div>
+        <div className="row">
+          <div className="col">
+            <input
+              className="form-control"
+              type="password"
+              placeholder="我的密碼:"
+              aria-label="password"
+              value={password}
+              onChange={(e) => changePassword(e.target.value)}
+            />
+          </div>
+          <div className="col"></div>
+        </div>
+        <div className="row">
+          <div className="col">
+            <button type="button" className="btn btn-primary" onClick={submit}>
+              我確定要換聯絡 Email～
+            </button>
+          </div>
+          <div className="col">{renderData()}</div>
+          <div className="col">
+            <span className={styles.errMsg}>{allErrMsg}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
