@@ -1,163 +1,188 @@
-import React, { useEffect, useState, useRef, MutableRefObject } from 'react'
-import pageStyles from './Page.module.css'
+import {
+  genUUID,
+  getDefaultID,
+  getState,
+  type ThunkModuleToFunc,
+  useThunk,
+} from "@chhsiao1981/use-thunk";
+import QueryString from "query-string";
+import { useEffect, useRef, useState } from "react";
+import { useParams } from "react-router-dom";
+import useWindowSize from "../hooks/useWindowSize";
+import * as DoHeader from "../reducers/header";
+import * as DoUserFavoritesPage from "../reducers/userFavoritesPage";
+import type { BoardSummary_i } from "../types";
+import BoardList from "./BoardList";
+import Empty from "./Empty";
+import FunctionBar from "./FunctionBar";
+import Header from "./Header";
+import pageStyles from "./Page.module.css";
 
-import * as errors from './errors'
+type TDoHeader = ThunkModuleToFunc<typeof DoHeader>;
+type TDoUserFavoritesPage = ThunkModuleToFunc<typeof DoUserFavoritesPage>;
 
-import { useWindowSize } from 'react-use'
-import { useParams } from 'react-router-dom'
+// biome-ignore lint/complexity/noBannedTypes: props
+type Props = {};
 
-import { useReducer, getRoot, genUUID, getRootID } from 'react-reducer-utils'
+export default (_props: Props) => {
+  const [classUserFavoritesPage, doUserFavoritesPage] = useThunk<
+    DoUserFavoritesPage.State,
+    TDoUserFavoritesPage
+  >(DoUserFavoritesPage);
+  const [userFavoritesPageID, _setUserFavoritesPageID] = useState(genUUID);
+  const [classHeader, doHeader] = useThunk<DoHeader.State, TDoHeader>(DoHeader);
+  const [headerID, _setHeaderID] = useState(genUUID);
 
-import * as DoUserFavoritesPage from '../reducers/userFavoritesPage'
-import * as DoHeader from '../reducers/header'
+  // eslint-disable-next-line
+  const [_errMsg, _setErrMsg] = useState("");
 
-import Header from './Header'
-import BoardList from './BoardList'
-import FunctionBar from './FunctionBar'
+  //init
+  const { userid: paramsUserID } = useParams();
+  const userid = paramsUserID || "";
 
-import QueryString from 'query-string'
-import Empty from './Empty'
-import { BoardSummary_i } from '../types'
+  //render
+  const [headerHeight, setHeaderHeight] = useState(0);
+  const [funcbarHeight, setFuncbarHeight] = useState(0);
+  const headerRef = useRef<HTMLDivElement>(null);
+  const funcbarRef = useRef<HTMLDivElement>(null);
+  const { width: innerWidth, height: innerHeight } = useWindowSize();
+  const [scrollTop, setScrollTop] = useState(0);
 
-type Props = {
+  // biome-ignore lint/correctness/useExhaustiveDependencies: useEffect
+  useEffect(() => {
+    doHeader.init(headerID);
 
-}
+    const query = QueryString.parse(window.location.search);
+    const { start_idx: queryStartIdx, level: queryLevel } = query;
+    const startIdx = (queryStartIdx || "") as string;
+    const level = (queryLevel || "") as string;
 
-export default (props: Props) => {
-    const [stateUserFavoritesPage, doUserFavoritesPage] = useReducer(DoUserFavoritesPage)
-    const [stateHeader, doHeader] = useReducer(DoHeader)
+    doUserFavoritesPage.init(userFavoritesPageID, userid, level, startIdx);
+  }, []);
 
-    // eslint-disable-next-line
-    const [errMsg, setErrMsg] = useState('')
-
-    //init
-    let { userid } = useParams()
-
-    //render
-    const [headerHeight, setHeaderHeight] = useState(0)
-    const [funcbarHeight, setFuncbarHeight] = useState(0)
-    const headerRef: MutableRefObject<HTMLDivElement | null> = useRef(null)
-    const funcbarRef: MutableRefObject<HTMLDivElement | null> = useRef(null)
-    const { width: innerWidth, height: innerHeight } = useWindowSize()
-    const [scrollTop, setScrollTop] = useState(0)
-
-    useEffect(() => {
-        let headerID = genUUID()
-        doHeader.init(headerID, doHeader, null, null)
-
-        let userFavoritesPageID = genUUID()
-        const query = QueryString.parse(window.location.search)
-        const { start_idx: startIdx, level } = query
-
-        doUserFavoritesPage.init(userFavoritesPageID, userid, level, startIdx)
-    }, [])
-
-    useEffect(() => {
-        if (headerRef.current === null) {
-            return
-        }
-        setHeaderHeight(headerRef.current.clientHeight)
-    }, [headerRef.current])
-
-    useEffect(() => {
-        if (funcbarRef.current === null) {
-            return
-        }
-        setFuncbarHeight(funcbarRef.current.clientHeight)
-    }, [funcbarRef.current])
-
-    //get data
-    let boardsPage = getRoot(stateUserFavoritesPage)
-    if (!boardsPage) {
-        return (<Empty />)
+  // biome-ignore lint/correctness/useExhaustiveDependencies: useEffect
+  useEffect(() => {
+    if (headerRef.current) {
+      setHeaderHeight(headerRef.current.clientHeight);
     }
-    let myID = getRootID(stateUserFavoritesPage)
-    let errmsg = boardsPage.errmsg || ''
-    let boards = boardsPage.list
-    let isPreEnd = boardsPage.isPreEnd
-    let isNextEnd = boardsPage.isNextEnd
-    let scrollToRow = boardsPage.scrollToRow
-    let level = boardsPage.level
+    if (funcbarRef.current) {
+      setFuncbarHeight(funcbarRef.current.clientHeight);
+    }
+  }, [headerRef.current, funcbarRef.current]);
 
-    let width = innerWidth
-    let listHeight = innerHeight - headerHeight - funcbarHeight
+  //get data
+  const boardsPage = getState(classUserFavoritesPage);
+  if (!boardsPage) {
+    return <Empty />;
+  }
+  const myID = getDefaultID(classUserFavoritesPage);
+  // const errmsg = boardsPage.errmsg || "";
+  const boards = boardsPage.list;
+  const isPreEnd = boardsPage.isPreEnd;
+  const isNextEnd = boardsPage.isNextEnd;
+  const scrollToRow = boardsPage.scrollToRow;
+  const level = boardsPage.level;
 
-    let headerTitle = '我的最愛'
+  const width = innerWidth;
+  const listHeight = innerHeight - headerHeight - funcbarHeight;
 
-    let loadPre = (item: BoardSummary_i) => {
-        if (item.numIdx === 1 || isPreEnd) {
-            return
-        }
+  const headerTitle = "我的最愛";
 
-        let idx = item.idx || ''
-        if (!idx) {
-            return
-        }
-        doUserFavoritesPage.GetBoards(myID, userid, level, idx, true, true)
+  const loadPre = (item: BoardSummary_i) => {
+    if (item.numIdx === 1 || isPreEnd) {
+      return;
     }
 
-    let loadNext = (item: BoardSummary_i) => {
-        if (isNextEnd) {
-            return
-        }
+    const idx = item.idx || "";
+    if (!idx) {
+      return;
+    }
+    doUserFavoritesPage.getBoards(myID, userid, level, idx, true, true);
+  };
 
-        let idx = item.idx || ''
-        if (!idx) {
-            return
-        }
-
-        doUserFavoritesPage.GetBoards(myID, userid, level, idx, false, true)
+  const loadNext = (item: BoardSummary_i) => {
+    if (isNextEnd) {
+      return;
     }
 
-    let onVerticalScroll = (scrollTop: number): boolean => {
-        setScrollTop(scrollTop)
-        if (typeof scrollToRow === 'undefined') {
-            return false
-        }
-
-        doUserFavoritesPage.SetData(myID, { scrollToRow: undefined })
-        return true
+    const idx = item.idx || "";
+    if (!idx) {
+      return;
     }
 
-    // eslint-disable-next-line
-    let allErrMsg = errors.mergeErr(errMsg, errmsg)
+    doUserFavoritesPage.getBoards(myID, userid, level, idx, false, true);
+  };
 
-    let renderBoards = () => {
-        if (boards.length === 0) {
-            let style = {
-                height: listHeight
-            }
-            return (
-                <div className="container" style={style}>
-                    <h3 className="mx-4">目前找不到看板喔～</h3>
-                </div>
-            )
-        } else {
-            return (
-                <BoardList boards={boards} width={width} height={listHeight} loadPre={loadPre} loadNext={loadNext} scrollToRow={scrollToRow} onVerticalScroll={onVerticalScroll} scrollTop={scrollTop} />
-            )
-        }
+  const onVerticalScroll = (scrollTop: number): boolean => {
+    setScrollTop(scrollTop);
+    if (typeof scrollToRow === "undefined") {
+      return false;
     }
 
-    let loptions = [
-        { text: "搜尋看板", action: () => { } },
-    ]
+    doUserFavoritesPage.setData(myID, { scrollToRow: undefined });
+    return true;
+  };
 
-    let roptions = [
-        { text: "熱門看板", action: () => { window.location.href = '/boards/popular' } },
-        { text: "所有看板", action: () => { window.location.href = '/boards' } },
-        { text: "分類看板", action: () => { window.location.href = '/cls/1' } },
-    ]
+  // const allErrMsg = errors.mergeErr(errMsg, errmsg);
 
-    return (
-        <div className={pageStyles['root']}>
-            <div ref={headerRef}>
-                <Header title={headerTitle} stateHeader={stateHeader} />
-            </div>
-            {renderBoards()}
-            <div ref={funcbarRef}>
-                <FunctionBar optionsLeft={loptions} optionsRight={roptions} />
-            </div>
+  const renderBoards = () => {
+    if (boards.length === 0) {
+      const style = {
+        height: listHeight,
+      };
+      return (
+        <div className="container" style={style}>
+          <h3 className="mx-4">目前找不到看板喔～</h3>
         </div>
-    )
-}
+      );
+    } else {
+      return (
+        <BoardList
+          boards={boards}
+          width={width}
+          height={listHeight}
+          loadPre={loadPre}
+          loadNext={loadNext}
+          scrollToRow={scrollToRow}
+          onVerticalScroll={onVerticalScroll}
+          scrollTop={scrollTop}
+        />
+      );
+    }
+  };
+
+  const loptions = [{ text: "搜尋看板", action: () => {} }];
+
+  const roptions = [
+    {
+      text: "熱門看板",
+      action: () => {
+        window.location.href = "/boards/popular";
+      },
+    },
+    {
+      text: "所有看板",
+      action: () => {
+        window.location.href = "/boards";
+      },
+    },
+    {
+      text: "分類看板",
+      action: () => {
+        window.location.href = "/cls/1";
+      },
+    },
+  ];
+
+  return (
+    <div className={pageStyles.root}>
+      <div ref={headerRef}>
+        <Header title={headerTitle} stateHeader={classHeader} />
+      </div>
+      {renderBoards()}
+      <div ref={funcbarRef}>
+        <FunctionBar optionsLeft={loptions} optionsRight={roptions} />
+      </div>
+    </div>
+  );
+};

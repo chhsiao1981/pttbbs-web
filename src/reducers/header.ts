@@ -1,48 +1,50 @@
-import { init as _init, setData as _setData, createReducer, DispatchedAction, Thunk } from 'react-reducer-utils'
+import {
+  init as _init,
+  setData as _setData,
+  type Thunk,
+} from "@chhsiao1981/use-thunk";
+import type { State as State_t } from "../types";
+import * as errors from "./errors";
+import * as serverUtils from "./serverUtils";
 
-import * as ServerUtils from './ServerUtils'
-import api from './api'
-import * as errors from './errors'
-import { State_t, Maybe } from '../types'
-
-export const myClass = 'demo-pttbbs/Header'
-
+export const myClass = "demo-pttbbs/Header";
 
 export interface State extends State_t {
-    user_id: string
+  user_id: string;
+  isInit: boolean;
 }
 
+export const defaultState: State = {
+  user_id: "",
+  isInit: false,
 
-interface State_m extends Maybe<State> { }
+  errmsg: "",
+};
 
-export const init = (myID: string, parentID?: string, doParent?: DispatchedAction<State>): Thunk<State> => {
-    return async (dispatch, _) => {
-        let state: State_m = {
-            user_id: '',
-        }
-        dispatch(_init({ myID, parentID, doParent, state }))
-        dispatch(getData(myID))
-    }
-}
+export const init = (myID: string): Thunk<State> => {
+  return async (dispatch, _) => {
+    const state = Object.assign({}, defaultState, { isInit: true });
+    dispatch(_init({ myID, state }));
+    dispatch(getData(myID));
+  };
+};
 
 const getData = (myID: string): Thunk<State> => {
-    return async (dispatch, _) => {
-        const { data, errmsg, status } = await api(ServerUtils.GetUserID())
+  return async (dispatch, _) => {
+    const { data, errmsg, status } = await serverUtils.getUserID();
 
-        if (!status) {
-            dispatch(_setData(myID, { errmsg: errors.ERR_NETWORK }))
-            return
-        }
-        if (status !== 200) {
-            dispatch(_setData(myID, { errmsg }))
-            return
-        }
-        if (!data) {
-            return
-        }
-
-        dispatch(_setData(myID, data))
+    if (!status) {
+      dispatch(_setData(myID, { errmsg: errors.ERR_NETWORK }));
+      return;
     }
-}
+    if (status !== 200) {
+      dispatch(_setData(myID, { errmsg }));
+      return;
+    }
+    if (!data) {
+      return;
+    }
 
-export default createReducer<State>()
+    dispatch(_setData(myID, data));
+  };
+};

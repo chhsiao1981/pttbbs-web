@@ -1,36 +1,44 @@
-import styles from './ContentRenderer.module.css'
-import { COLOR_BACKGROUND_BLACK } from "../../constants"
-import { Runes_t } from '../../types'
-import { MouseEvent } from 'react'
+import type { MouseEvent } from "react";
+import { COLOR_BACKGROUND_BLACK } from "../../constants";
+import type { Runes_t } from "../../types";
+import styles from "./ContentRenderer.module.css";
 
-import Rune from './Rune'
+import Rune from "./Rune";
 
 type Props = {
-    data: any
-    fontSize: number
-    rowIndex: number
-    columnKey: string
-    loadPre?: (arg0: any) => void
-    loadNext?: (arg0: any) => void
-    onMouseDown?: (e: MouseEvent) => void
-}
+  data: any;
+  fontSize: number;
+  rowIndex: number;
+  columnKey: string;
+  loadPre?: (arg0: any) => void;
+  loadNext?: (arg0: any) => void;
+  onMouseDown?: (e: MouseEvent) => void;
+};
 
 export default (props: Props) => {
-    const { data, rowIndex, columnKey, loadPre, loadNext, onMouseDown } = props
-    let item = data[rowIndex]
-    let runes: Runes_t[] = item[columnKey] || []
-    let background = item.background || COLOR_BACKGROUND_BLACK
+  const { data, rowIndex, columnKey, loadPre, loadNext, onMouseDown } = props;
+  const item = data[rowIndex];
+  const runes: Runes_t[] = item[columnKey] || [];
+  const background = item.background || COLOR_BACKGROUND_BLACK;
 
-    if (rowIndex === 0 && loadPre) {
-        loadPre(item)
-    }
-    if (rowIndex === data.length - 1 && loadNext) {
-        loadNext(item)
-    }
+  if (rowIndex === 0 && loadPre) {
+    loadPre(item);
+  }
+  if (rowIndex === data.length - 1 && loadNext) {
+    loadNext(item);
+  }
 
-    return (
-        <div className={styles['c' + background]}>
-            {runes.map((each, idx) => (<Rune key={'runes-' + idx} rune={each} rowIndex={rowIndex} idx={idx} onMouseDown={onMouseDown} />))}
-        </div>
-    )
-}
+  return (
+    <div className={styles["c" + background]}>
+      {runes.map((each, idx) => (
+        <Rune
+          key={"runes-" + idx}
+          rune={each}
+          rowIndex={rowIndex}
+          idx={idx}
+          onMouseDown={onMouseDown}
+        />
+      ))}
+    </div>
+  );
+};

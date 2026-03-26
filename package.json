@@ -1,85 +1,80 @@
 {
   "name": "pttbbs-web",
-  "version": "0.14.5",
   "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "npm run dev:dev && vite",
+    "build": "tsc -b && vite build",
+
+    "dev:dev": "rm -f src/main.tsx; cd src && ln -s dev.tsx main.tsx && cd ..",
+
+    "dev:all": "rm -f src/main.tsx; cd src && ln -s all.tsx main.tsx && cd ..",
+    "build:all": "npm run dev:all && npm run build && cp dist/index.html dist/all.html",
+
+    "dev:home": "rm -f src/main.tsx; cd src && ln -s home.tsx main.tsx && cd ..",
+    "build:home": "npm run dev:home && npm run build && cp dist/index.html dist/home.html",
+
+    "dev:login": "rm -f src/main.tsx; cd src && ln -s login.tsx main.tsx && cd ..",
+    "build:login": "npm run dev:login && npm run build && cp dist/index.html dist/login.html",
+
+    "dev:register": "rm -f src/main.tsx; cd src && ln -s register.tsx main.tsx && cd ..",
+    "build:register": "npm run dev:register && npm run build && cp dist/index.html dist/register.html",
+
+    "dev:user-info": "rm -f src/main.tsx; cd src && ln -s userInfo.tsx main.tsx && cd ..",
+    "build:user-info": "npm run dev:user-info && npm run build && cp dist/index.html dist/user-info.html",
+
+    "dev:change-passwd": "rm -f src/main.tsx; cd src && ln -s changePasswd.tsx main.tsx && cd ..",
+    "build:change-passwd": "npm run dev:change-passwd && npm run build && cp dist/index.html dist/change-passwd.html",
+
+    "dev:change-email": "rm -f src/main.tsx; cd src && ln -s changeEmail.tsx main.tsx && cd ..",
+    "build:change-email": "npm run dev:change-email && npm run build && cp dist/index.html dist/change-email.html",
+
+    "dev:set-id-email": "rm -f src/main.tsx; cd src && ln -s setIDEmail.tsx main.tsx && cd ..",
+    "build:set-id-email": "npm run dev:set-id-email && npm run build && cp dist/index.html dist/set-id-email.html",
+
+    "dev:attempt-change-email": "rm -f src/main.tsx; cd src && ln -s attemptChangeEmail.tsx main.tsx && cd ..",
+    "build:attempt-change-email": "npm run dev:attempt-change-email && npm run build && cp dist/index.html dist/attempt-change-email.html",
+
+    "dev:attempt-set-id-email": "rm -f src/main.tsx; cd src && ln -s attemptSetIDEmail.tsx main.tsx && cd ..",
+    "build:attempt-set-id-email": "npm run dev:attempt-set-id-email && npm run build && cp dist/index.html dist/attempt-set-id-email.html",
+
+    "fmt": "biome format --write .",
+    "lint": "biome lint .",
+    "test": "vitest",
+    "preview": "vite preview"
+  },
   "dependencies": {
-    "bootstrap": "^4.6.2",
-    "fixed-data-table-2": "^1.2.22",
-    "js-cookie": "^2.2.1",
-    "moment": "^2.29.1",
-    "moment-timezone": "^0.5.33",
-    "normalize.css": "^8.0.1",
-    "query-string": "^6.13.8",
-    "react": "^18.2.0",
-    "react-bootstrap": "^2.7.0",
-    "react-dom": "^18.2.0",
-    "react-dropdown": "^1.11.0",
-    "react-reducer-utils": "^4.0.1",
-    "react-router-dom": "^6.5.0",
-    "react-use": "^17.4.0",
-    "react-widgets": "^5.8.4",
-    "web-vitals": "^2.1.4"
+    "@chhsiao1981/use-thunk": "^10.1.2",
+    "bootstrap": "^5.3.8",
+    "bootstrap-icons": "^1.13.1",
+    "fixed-data-table-2": "^2.0.22",
+    "moment": "^2.30.1",
+    "moment-timezone": "^0.6.0",
+    "query-string": "^9.3.1",
+    "react": "^19.2.0",
+    "react-bootstrap": "^2.10.10",
+    "react-dom": "^19.2.0",
+    "react-router-dom": "^6.30.3",
+    "react-use": "^17.6.0",
+    "react-widgets": "^5.8.6",
+    "web-vitals": "^5.1.0"
   },
   "devDependencies": {
-    "@testing-library/jest-dom": "^5.16.5",
-    "@testing-library/react": "^13.4.0",
-    "@testing-library/user-event": "^13.5.0",
-    "@types/fixed-data-table-2": "^0.8.8",
-    "@types/jest": "^27.5.2",
-    "@types/node": "^16.18.10",
-    "@types/react": "^18.0.26",
-    "@types/react-bootstrap": "^0.32.32",
-    "@types/react-dom": "^18.0.9",
-    "@types/react-router-dom": "^5.3.3",
-    "@types/superagent": "^4.1.16",
-    "miragejs": "^0.1.46",
-    "react-scripts": "5.0.1",
-    "typescript": "^4.9.4",
-    "typescript-plugin-css-modules": "^4.1.1"
-  },
-  "scripts": {
-    "start": "npm run dev:dev && react-scripts start",
-    "start-no-dev": "react-scripts start",
-    "dev:dev": "rm src/index.tsx; cd src && ln -s dev.tsx index.tsx && cd ..",
-    "dev:all": "rm src/index.tsx; cd src && ln -s all.tsx index.tsx && cd ..",
-    "build:all": "npm run dev:all && react-scripts build && cp build/index.html build/all.html",
-    "dev:home": "rm src/index.tsx; cd src && ln -s home.tsx index.tsx && cd ..",
-    "build:home": "npm run dev:home && react-scripts build && cp build/index.html build/home.html",
-    "dev:login": "rm src/index.tsx; cd src && ln -s login.tsx index.tsx && cd ..",
-    "build:login": "npm run dev:login && react-scripts build && cp build/index.html build/login.html",
-    "dev:register": "rm src/index.tsx; cd src && ln -s register.tsx index.tsx && cd ..",
-    "build:register": "npm run dev:register && react-scripts build && cp build/index.html build/register.html",
-    "dev:user-info": "rm src/index.tsx; cd src && ln -s userInfo.tsx index.tsx && cd ..",
-    "build:user-info": "npm run dev:user-info && react-scripts build && cp build/index.html build/user-info.html",
-    "dev:change-passwd": "rm src/index.tsx; cd src && ln -s changePasswd.tsx index.tsx && cd ..",
-    "build:change-passwd": "npm run dev:change-passwd && react-scripts build && cp build/index.html build/change-passwd.html",
-    "dev:change-email": "rm src/index.tsx; cd src && ln -s changeEmail.tsx index.tsx && cd ..",
-    "build:change-email": "npm run dev:change-email && react-scripts build && cp build/index.html build/change-email.html",
-    "dev:set-id-email": "rm src/index.tsx; cd src && ln -s setIDEmail.tsx index.tsx && cd ..",
-    "build:set-id-email": "npm run dev:set-id-email && react-scripts build && cp build/index.html build/set-id-email.html",
-    "dev:attempt-change-email": "rm src/index.tsx; cd src && ln -s attemptChangeEmail.tsx index.tsx && cd ..",
-    "build:attempt-change-email": "npm run dev:attempt-change-email && react-scripts build && cp build/index.html build/attempt-change-email.html",
-    "dev:attempt-set-id-email": "rm src/index.tsx; cd src && ln -s attemptSetIDEmail.tsx index.tsx && cd ..",
-    "build:attempt-set-id-email": "npm run dev:attempt-set-id-email && react-scripts build && cp build/index.html build/attempt-set-id-email.html",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
+    "@biomejs/biome": "2.4.6",
+    "@eslint/js": "^9.39.1",
+    "@types/fixed-data-table-2": "^1.0.2",
+    "@types/node": "^24.10.1",
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react-swc": "^4.2.2",
+    "eslint": "^9.39.1",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-react-refresh": "^0.4.24",
+    "globals": "^16.5.0",
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.48.0",
+    "vite": "^7.3.1",
+    "vitest": "^4.1.0"
   }
 }

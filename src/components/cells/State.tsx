@@ -1,21 +1,19 @@
-import { TableData } from '../../types'
+import type { TableData } from "../../types";
 
 type Props = {
-    data: TableData<any>
-    rowIndex: number
-    columnKey: string
-}
+  data: TableData<any>;
+  rowIndex: number;
+  columnKey: string;
+};
 
 export default (props: Props) => {
-    const { data, rowIndex, columnKey } = props
+  const { data, rowIndex, columnKey } = props;
 
-    let item = data[rowIndex]
-    let text = (item[columnKey] === true) ? '+' : ''
+  const item = data[rowIndex];
+  const text = item[columnKey] === true ? "+" : "";
 
-    let style = {
-        color: (item[columnKey] === true) ? '#fff' : '#000'
-    }
-    return (
-        <div style={style}>{text}</div>
-    )
-}
+  const style = {
+    color: item[columnKey] === true ? "#fff" : "#000",
+  };
+  return <div style={style}>{text}</div>;
+};

@@ -1,94 +1,102 @@
-import React, { useEffect } from 'react'
-import pageStyles from './Page.module.css'
+import {
+  genUUID,
+  getState,
+  type ThunkModuleToFunc,
+  useThunk,
+} from "@chhsiao1981/use-thunk";
+import QueryString from "query-string";
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import useWindowSize from "../hooks/useWindowSize";
+import * as DoChangeEmailPage from "../reducers/changeEmailPage";
+import * as DoHeader from "../reducers/header";
+import Empty from "./Empty";
+import Header from "./Header";
+import pageStyles from "./Page.module.css";
 
-import { useWindowSize } from 'react-use'
+type TDoChangeEmailPage = ThunkModuleToFunc<typeof DoChangeEmailPage>;
+type TDoHeader = ThunkModuleToFunc<typeof DoHeader>;
 
-import { useParams } from 'react-router-dom'
+// biome-ignore lint/complexity/noBannedTypes: props
+type Props = {};
 
-import { useReducer, getRoot, genUUID, getRootID } from 'react-reducer-utils'
+export default (_props: Props) => {
+  const [classChangeEmailPage, doChangeEmailPage] = useThunk<
+    DoChangeEmailPage.State,
+    TDoChangeEmailPage
+  >(DoChangeEmailPage);
+  const [changeEmailPageID, _setChangeEmailPageID] = useState(genUUID);
 
-import * as DoChangeEmailPage from '../reducers/changeEmailPage'
-import * as DoHeader from '../reducers/header'
+  const [classHeader, doHeader] = useThunk<DoHeader.State, TDoHeader>(DoHeader);
+  const [headerID, _setHeaderID] = useState(genUUID);
 
-import Header from './Header'
-import Empty from './Empty'
+  //init
+  const { userid: paramsUserID } = useParams();
+  const userid = paramsUserID || "";
 
-import QueryString from 'query-string'
-
-type Props = {
-
-}
-
-export default (props: Props) => {
-    const [stateChangeEmailPage, doChangeEmailPage] = useReducer(DoChangeEmailPage)
-    const [stateHeader, doHeader] = useReducer(DoHeader)
-
-    //init
-    let { userid } = useParams()
-
-    useEffect(() => {
-        const { token } = QueryString.parse(window.location.search)
-
-        let headerID = genUUID()
-        doHeader.init(headerID)
-
-        let changeEmailPageID = genUUID()
-        doChangeEmailPage.init(changeEmailPageID, userid, token)
-    }, [])
-
-    //get data
-    let changeEmailPage = getRoot(stateChangeEmailPage)
-    if (!changeEmailPage) {
-        changeEmailPage = { theDate: new Date(0), userID: '', token: '', isDone: false }
+  // biome-ignore lint/correctness/useExhaustiveDependencies: useEffect
+  useEffect(() => {
+    if (!userid) {
+      return;
     }
-    let myID = getRootID(stateChangeEmailPage)
-    let errmsg = changeEmailPage.errmsg || ''
-    let isDone = changeEmailPage.isDone
-    let data = changeEmailPage.data
+    const { token: paramsToken } = QueryString.parse(window.location.search);
+    const token = (paramsToken || "") as string;
 
-    useEffect(() => {
-        if (!isDone) {
-            return
-        }
+    doHeader.init(headerID);
+    doChangeEmailPage.init(changeEmailPageID, userid, token);
+  }, [userid]);
 
-        doChangeEmailPage.SleepAndRedirect(myID, userid)
+  //get data
+  const changeEmailPage =
+    getState(classChangeEmailPage) || DoChangeEmailPage.defaultState;
+  let errmsg = changeEmailPage.errmsg || "";
+  const isDone = changeEmailPage.isDone;
+  const data = changeEmailPage.data;
 
-    }, [isDone])
-
-
-    //render
-    const { height: innerHeight } = useWindowSize()
-    let style = {
-        height: innerHeight + 'px',
+  // biome-ignore lint/correctness/useExhaustiveDependencies: useEffect
+  useEffect(() => {
+    if (!isDone) {
+      return;
     }
 
-    let renderData = () => {
-        if (!data.email) {
-            return (<Empty />)
-        }
+    doChangeEmailPage.sleepAndRedirect(changeEmailPageID, userid);
+  }, [isDone]);
 
-        return (
-            <label className=''>您的聯絡信箱已更改為 {data.email} 囉～(將會回到您的個人資訊)</label>
-        )
-    }
+  //render
+  const { height: innerHeight } = useWindowSize();
+  const style = {
+    height: innerHeight + "px",
+  };
 
-    if (errmsg) {
-        errmsg += ' (將會回到您的個人資訊)'
+  const renderData = () => {
+    // @ts-expect-error data is unknown
+    if (!data.email) {
+      return <Empty />;
     }
 
     return (
-        <div className={pageStyles['root']} style={style}>
-            <div className={'container'} style={style}>
-                <Header title='更改聯絡信箱' stateHeader={stateHeader} />
-                <div className='row'>
-                    <div className='col'>
-                        {renderData()}
-                    </div>
-                    <div className='col'>
-                        <label className={pageStyles['errMsg']}>{errmsg}</label>
-                    </div>
-                </div>
-            </div>
+      <span className="">
+        {/* @ts-expect-error data is unknown */}
+        您的聯絡信箱已更改為 {data.email} 囉～(將會回到您的個人資訊)
+      </span>
+    );
+  };
+
+  if (errmsg) {
+    errmsg += " (將會回到您的個人資訊)";
+  }
+
+  return (
+    <div className={pageStyles.root} style={style}>
+      <div className={"container"} style={style}>
+        <Header title="更改聯絡信箱" stateHeader={classHeader} />
+        <div className="row">
+          <div className="col">{renderData()}</div>
+          <div className="col">
+            <span className={pageStyles.errMsg}>{errmsg}</span>
+          </div>
         </div>
-    )
-}
+      </div>
+    </div>
+  );
+};

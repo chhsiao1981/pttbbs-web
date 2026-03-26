@@ -1,210 +1,268 @@
-import React, { useEffect, useState } from 'react'
-import pageStyles from './Page.module.css'
+import {
+  genUUID,
+  getDefaultID,
+  getState,
+  type ThunkModuleToFunc,
+  useThunk,
+} from "@chhsiao1981/use-thunk";
+import config from "config";
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import * as DoHeader from "../reducers/header";
+import * as DoUserPage from "../reducers/userInfoPage";
+import Empty from "./Empty";
+import * as errors from "./errors";
+import Header from "./Header";
+import pageStyles from "./Page.module.css";
+import { TSToDateTimeStr } from "./utils";
 
-import * as errors from './errors'
+type TDoHeader = ThunkModuleToFunc<typeof DoHeader>;
+type TDoUserPage = ThunkModuleToFunc<typeof DoUserPage>;
 
-import { useParams } from 'react-router-dom'
+// biome-ignore lint/complexity/noBannedTypes: props
+type Props = {};
 
-import { useReducer, getRoot, genUUID, getRootID } from 'react-reducer-utils'
+export default (_props: Props) => {
+  const [classUserPage, doUserPage] = useThunk<DoUserPage.State, TDoUserPage>(
+    DoUserPage,
+  );
+  const [classHeader, doHeader] = useThunk<DoHeader.State, TDoHeader>(DoHeader);
 
-import * as DoUserPage from '../reducers/userInfoPage'
-import * as DoHeader from '../reducers/header'
+  // eslint-disable-next-line
+  const [errMsg, _setErrMsg] = useState("");
 
-import { TSToDateTimeStr } from './utils'
+  //init
+  const { userid: paramsUserID } = useParams();
+  const userid = paramsUserID || "";
 
-import Empty from './Empty'
-import Header from './Header'
+  // biome-ignore lint/correctness/useExhaustiveDependencies: useEffect
+  useEffect(() => {
+    const headerID = genUUID();
+    doHeader.init(headerID);
 
-type Props = {
+    const userPageID = genUUID();
+    doUserPage.init(userPageID, userid);
+  }, []);
 
-}
+  //get data
+  const userPage = getState(classUserPage);
+  if (!userPage) {
+    return <Empty />;
+  }
+  const myID = getDefaultID(classUserPage);
+  const errmsg = userPage.errmsg || "";
 
-export default (props: Props) => {
-    const [stateUserPage, doUserPage] = useReducer(DoUserPage)
-    const [stateHeader, doHeader] = useReducer(DoHeader)
+  //actions
+  const changePassword = () => {
+    window.location.href = "/user/" + userid + "/resetpassword";
+  };
 
-    // eslint-disable-next-line
-    const [errMsg, setErrMsg] = useState('')
+  const changeEmail = () => {
+    window.location.href = "/user/" + userid + "/attemptchangeemail";
+  };
 
-    //init
-    let { userid } = useParams()
+  const setIDEmail = () => {
+    window.location.href = "/user/" + userid + "/attemptsetidemail";
+  };
 
-    useEffect(() => {
-        let headerID = genUUID()
-        doHeader.init(headerID)
-
-        let userPageID = genUUID()
-        doUserPage.init(userPageID, userid)
-    }, [])
-
-    //get data
-    let userPage = getRoot(stateUserPage)
+  const renderPttEmail = () => {
     if (!userPage) {
-        return (<Empty />)
+      return <Empty />;
     }
-    let myID = getRootID(stateUserPage)
-    let errmsg = userPage.errmsg || ''
-
-    //actions
-    let changePassword = () => {
-        window.location.href = "/user/" + userid + "/resetpassword"
+    if (!userPage.pttemail) {
+      return <span>我在 {config.BRAND} 的 Email 是 (還沒有設定～)</span>;
     }
-
-    let changeEmail = () => {
-        window.location.href = "/user/" + userid + "/attemptchangeemail"
-    }
-
-    let setIDEmail = () => {
-        window.location.href = "/user/" + userid + "/attemptsetidemail"
+    if (!userPage.justify) {
+      return (
+        <span>
+          我在 {config.BRAND} 的 Email 是 {userPage.pttemail} (審核: 還沒有通過)
+        </span>
+      );
     }
 
-    let renderPttEmail = () => {
-        if (!userPage) {
-            return (<Empty />)
-        }
-        if (!userPage.pttemail) {
-            return (<label>我在 Ptt 的 Email 是 (還沒有設定～)</label>)
-        }
-        if (!userPage.justify) {
-            return (<label>我在 Ptt 的 Email 是 {userPage.pttemail} (審核: 還沒有通過)</label>)
-        }
-
-        return (<label>我在 Ptt 的 Email 是 {userPage.pttemail} (審核: {userPage.justify})</label>)
-    }
-
-    let renderPost = () => {
-        if (!userPage) {
-            return (<Empty />)
-        }
-        let badposts = (!userPage.bad_post) ? '' : ' (被退 ' + userPage.bad_post + ' 篇)'
-
-        return (<label>我已經 po 了 {userPage.posts} 篇文章{badposts}</label>)
-    }
-
-    let renderOver18 = () => {
-        if (!userPage) {
-            return (<Empty />)
-        }
-        let isOver18Str = (!userPage.over18) ? '還沒' : '已經'
-        let isOver18Suffix = (!userPage.over18) ? '捏' : '囉'
-
-        return (<label>我{isOver18Str}18歲{isOver18Suffix}～</label>)
-    }
-
-    let allErrMsg = errors.mergeErr(errMsg, errmsg)
-
-    let headerTitle = userid + '的資訊'
-
-    let email = userPage.email || '(還沒有設定～)'
-    if (userPage.email && !userPage.email_set) {
-        email += '(正在設定～)'
-    }
-
-    let idemail = userPage.idemail || '(還沒有設定～)'
-    if (userPage.idemail && !userPage.idemail_set) {
-        idemail += '(正在設定～)'
-    }
-
-    let career = userPage.Career || '(某個角落)'
-
-    //render
-    if (!myID) {
-        return (<Empty />)
-    }
     return (
-        <div className={'vh-100 ' + pageStyles['root']}>
-            <Header title={headerTitle} stateHeader={stateHeader} />
-            <div className={'container'}>
-                <div className='row'>
-                    <div className='col'>
-                        <label>我是 {userPage.username}({userPage.nickname}) {userPage.realname}</label>
-                    </div>
-                    <div className='col'>
-                        <button className="btn btn-primary" onClick={changePassword}>我想換密碼～</button>
-                    </div>
-                </div>
-                <div className='row'>
-                    <div className='col'>
-                        {renderPttEmail()}
-                    </div>
-                </div>
-                <div className='row'>
-                    <div className='col'>
-                        <label>我平常聯絡的 Email 是 {email}</label>
-                    </div>
-                    <div className='col'>
-                        <button className="btn btn-primary" onClick={changeEmail}>我想換聯絡 Email</button>
-                    </div>
-                </div>
-                <div className='row'>
-                    <div className='col'>
-                        <label>我認證的 Email 是 {idemail}</label>
-                    </div>
-                    <div className='col'>
-                        <button className="btn btn-primary" onClick={setIDEmail}>我想換認證 Email</button>
-                    </div>
-                </div>
-                <div className='row'>
-                    <div className='col'>
-                        <label>我有 {userPage.money} P 幣～</label>
-                    </div>
-                </div>
-                <div className='row'>
-                    <div className='col'>
-                        <label>我已經上站 {userPage.login_days} 天了～</label>
-                    </div>
-                </div>
-                <div className='row'>
-                    <div className='col'>
-                        <label>我上次上站的 IP: {userPage.last_ip} ({userPage.last_host}) 時間: {TSToDateTimeStr(userPage.last_login)}</label>
-                    </div>
-                </div>
-                <div className='row'>
-                    <div className='col'>
-                        {renderPost()}
-                    </div>
-                </div>
-                <div className='row'>
-                    <div className='col'>
-                        {renderOver18()}
-                    </div>
-                </div>
-                <div className='row'>
-                    <div className='col'>
-                        <label>我平常在 {career} 畫圈圈～</label>
-                    </div>
-                </div>
-                <div className='row'>
-                    <div className='col'>
-                        <label>我的五子棋: 贏: {userPage.five_win} 輸: {userPage.five_lose} 和: {userPage.five_tie}</label>
-                    </div>
-                </div>
-                <div className='row'>
-                    <div className='col'>
-                        <label>我的六子棋: 贏: {userPage.conn6_win} 輸: {userPage.conn6_lose} 和: {userPage.conn6_tie}</label>
-                    </div>
-                </div>
-                <div className='row'>
-                    <div className='col'>
-                        <label>我的象棋: 贏: {userPage.chc_win} 輸: {userPage.chc_lose} 和: {userPage.chc_tie} 等級: {userPage.chess_rank}</label>
-                    </div>
-                </div>
-                <div className='row'>
-                    <div className='col'>
-                        <label>我的暗棋: 贏: {userPage.dark_win} 輸: {userPage.dark_lose} 和: {userPage.dark_tie}</label>
-                    </div>
-                </div>
-                <div className='row'>
-                    <div className='col'>
-                        <label>我的圍棋: 贏: {userPage.go_win} 輸: {userPage.go_lose} 和: {userPage.go_tie}</label>
-                    </div>
-                </div>
-                <div className='row'>
-                    <div className='col'>
-                        <label className={pageStyles['errMsg']}>{allErrMsg}</label>
-                    </div>
-                </div>
-            </div>
+      <span>
+        我在 {config.BRAND} 的 Email 是 {userPage.pttemail} (審核:{" "}
+        {userPage.justify})
+      </span>
+    );
+  };
+
+  const renderPost = () => {
+    if (!userPage) {
+      return <Empty />;
+    }
+    const badposts = !userPage.bad_post
+      ? ""
+      : " (被退 " + userPage.bad_post + " 篇)";
+
+    return (
+      <span>
+        我已經 po 了 {userPage.posts} 篇文章{badposts}
+      </span>
+    );
+  };
+
+  const renderOver18 = () => {
+    if (!userPage) {
+      return <Empty />;
+    }
+    const isOver18Str = !userPage.over18 ? "還沒" : "已經";
+    const isOver18Suffix = !userPage.over18 ? "捏" : "囉";
+
+    return (
+      <span>
+        我{isOver18Str}18歲{isOver18Suffix}～
+      </span>
+    );
+  };
+
+  const allErrMsg = errors.mergeErr(errMsg, errmsg);
+
+  const headerTitle = userid + "的資訊";
+
+  let email = userPage.email || "(還沒有設定～)";
+  if (userPage.email && !userPage.email_set) {
+    email += "(正在設定～)";
+  }
+
+  let idemail = userPage.idemail || "(還沒有設定～)";
+  if (userPage.idemail && !userPage.idemail_set) {
+    idemail += "(正在設定～)";
+  }
+
+  // const career = userPage.Career || "(某個角落)";
+
+  //render
+  if (!myID) {
+    return <Empty />;
+  }
+  return (
+    <div className={"vh-100 " + pageStyles.root}>
+      <Header title={headerTitle} stateHeader={classHeader} />
+      <div className={"container"}>
+        <div className="row">
+          <div className="col">
+            <span>
+              我是 {userPage.username}({userPage.nickname}) {userPage.realname}
+            </span>
+          </div>
+          <div className="col">
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={changePassword}
+            >
+              我想換密碼～
+            </button>
+          </div>
         </div>
-    )
-}
+        <div className="row">
+          <div className="col">{renderPttEmail()}</div>
+        </div>
+        <div className="row">
+          <div className="col">
+            <span>我平常聯絡的 Email 是 {email}</span>
+          </div>
+          <div className="col">
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={changeEmail}
+            >
+              我想換聯絡 Email
+            </button>
+          </div>
+        </div>
+        <div className="row">
+          <div className="col">
+            <span>我認證的 Email 是 {idemail}</span>
+          </div>
+          <div className="col">
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={setIDEmail}
+            >
+              我想換認證 Email
+            </button>
+          </div>
+        </div>
+        <div className="row">
+          <div className="col">
+            <span>我有 {userPage.money} P 幣～</span>
+          </div>
+        </div>
+        <div className="row">
+          <div className="col">
+            <span>我已經上站 {userPage.login_days} 天了～</span>
+          </div>
+        </div>
+        <div className="row">
+          <div className="col">
+            <span>
+              我上次上站的 IP: {userPage.last_ip} ({userPage.last_host}) 時間:{" "}
+              {TSToDateTimeStr(userPage.last_login)}
+            </span>
+          </div>
+        </div>
+        <div className="row">
+          <div className="col">{renderPost()}</div>
+        </div>
+        <div className="row">
+          <div className="col">{renderOver18()}</div>
+        </div>
+        <div className="row">
+          <div className="col">
+            <span>我平常在 {userPage.career} 畫圈圈～</span>
+          </div>
+        </div>
+        <div className="row">
+          <div className="col">
+            <span>
+              我的五子棋: 贏: {userPage.five_win} 輸: {userPage.five_lose} 和:{" "}
+              {userPage.five_tie}
+            </span>
+          </div>
+        </div>
+        <div className="row">
+          <div className="col">
+            <span>
+              我的六子棋: 贏: {userPage.conn6_win} 輸: {userPage.conn6_lose} 和:{" "}
+              {userPage.conn6_tie}
+            </span>
+          </div>
+        </div>
+        <div className="row">
+          <div className="col">
+            <span>
+              我的象棋: 贏: {userPage.chc_win} 輸: {userPage.chc_lose} 和:{" "}
+              {userPage.chc_tie} 等級: {userPage.chess_rank}
+            </span>
+          </div>
+        </div>
+        <div className="row">
+          <div className="col">
+            <span>
+              我的暗棋: 贏: {userPage.dark_win} 輸: {userPage.dark_lose} 和:{" "}
+              {userPage.dark_tie}
+            </span>
+          </div>
+        </div>
+        <div className="row">
+          <div className="col">
+            <span>
+              我的圍棋: 贏: {userPage.go_win} 輸: {userPage.go_lose} 和:{" "}
+              {userPage.go_tie}
+            </span>
+          </div>
+        </div>
+        <div className="row">
+          <div className="col">
+            <span className={pageStyles.errMsg}>{allErrMsg}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};

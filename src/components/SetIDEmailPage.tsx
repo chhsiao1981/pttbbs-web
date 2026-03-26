@@ -1,100 +1,100 @@
-import React, { useEffect } from 'react'
-import pageStyles from './Page.module.css'
+import {
+  genUUID,
+  getState,
+  type ThunkModuleToFunc,
+  useThunk,
+} from "@chhsiao1981/use-thunk";
+import QueryString from "query-string";
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import useWindowSize from "../hooks/useWindowSize";
+import * as DoHeader from "../reducers/header";
+import * as DoSetIDEmailPage from "../reducers/setIDEmailPage";
+import Empty from "./Empty";
+import Header from "./Header";
+import pageStyles from "./Page.module.css";
 
-import { useWindowSize } from 'react-use'
+type TDoHeader = ThunkModuleToFunc<typeof DoHeader>;
+type TDoSetIDEmailPage = ThunkModuleToFunc<typeof DoSetIDEmailPage>;
 
-import { useParams } from 'react-router-dom'
+// biome-ignore lint/complexity/noBannedTypes: props
+type Props = {};
 
-import { useReducer, getRoot, genUUID, getRootID } from 'react-reducer-utils'
+export default (_props: Props) => {
+  const [classSetIDEmailPage, doSetIDEmailPage] = useThunk<
+    DoSetIDEmailPage.State,
+    TDoSetIDEmailPage
+  >(DoSetIDEmailPage);
+  const [setIDEmailPageID, _setSetIDEmailPageID] = useState(genUUID);
 
-import * as DoSetIDEmailPage from '../reducers/setIDEmailPage'
-import * as DoHeader from '../reducers/header'
+  const [classHeader, doHeader] = useThunk<DoHeader.State, TDoHeader>(DoHeader);
+  const [headerID, _setHeaderID] = useState(genUUID);
 
-import Empty from './Empty'
-import Header from './Header'
+  //init
+  const { userid: paramsUserID } = useParams();
+  const userid = paramsUserID || "";
 
-import QueryString from 'query-string'
+  // biome-ignore lint/correctness/useExhaustiveDependencies: useEffect
+  useEffect(() => {
+    const { token: queryToken } = QueryString.parse(window.location.search);
+    const token = (queryToken || "") as string;
+    doHeader.init(headerID);
 
-type Props = {
+    doSetIDEmailPage.init(setIDEmailPageID, userid, token);
+  }, []);
 
-}
+  //get data
+  const setIDEmailPage =
+    getState(classSetIDEmailPage) || DoSetIDEmailPage.defaultState;
+  const errmsg = setIDEmailPage.errmsg || "";
+  const isDone = setIDEmailPage.isDone;
+  const data = setIDEmailPage.data;
 
-export default (props: Props) => {
-    const [stateSetIDEmailPage, doSetIDEmailPage] = useReducer(DoSetIDEmailPage)
-    const [stateHeader, doHeader] = useReducer(DoHeader)
-
-    //init
-    let { userid } = useParams()
-
-    useEffect(() => {
-        const { token } = QueryString.parse(window.location.search)
-        let headerID = genUUID()
-        doHeader.init(headerID)
-
-        let setIDEmailPageID = genUUID()
-        doSetIDEmailPage.init(setIDEmailPageID, userid, token)
-    }, [])
-
-    //get data
-    let setIDEmailPage = getRoot(stateSetIDEmailPage)
-    if (!setIDEmailPage) {
-        setIDEmailPage = { theDate: new Date(0), userID: '', token: '', isDone: false }
-    }
-    let myID = getRootID(stateSetIDEmailPage)
-    let errmsg = setIDEmailPage.errmsg || ''
-    let isDone = setIDEmailPage.isDone
-    let data = setIDEmailPage.data
-
-    useEffect(() => {
-        if (!isDone) {
-            return
-        }
-
-        doSetIDEmailPage.SleepAndRedirect(myID, userid)
-    }, [isDone])
-
-    //render
-    const { height: innerHeight } = useWindowSize()
-    let style = {
-        height: innerHeight + 'px',
+  // biome-ignore lint/correctness/useExhaustiveDependencies: useEffect
+  useEffect(() => {
+    if (!isDone) {
+      return;
     }
 
-    let renderData = () => {
-        if (!data.idemail) {
-            return (<Empty />)
-        }
+    doSetIDEmailPage.sleepAndRedirect(setIDEmailPageID, userid);
+  }, [isDone]);
 
-        return (
-            <label className=''>您的認證信箱已更改為 {data.idemail} 囉～</label>
-        )
+  //render
+  const { height: innerHeight } = useWindowSize();
+  const style = {
+    height: innerHeight + "px",
+  };
+
+  const renderData = () => {
+    // @ts-expect-error the type of data is unknown
+    if (!data.idemail) {
+      return <Empty />;
     }
 
-    let renderInfo = () => {
-        if (!isDone) {
-            return (<Empty />)
-        }
+    // @ts-expect-error the type of data is unknown
+    return <span className="">您的認證信箱已更改為 {data.idemail} 囉～</span>;
+  };
 
-        return (
-            <label className=''>將會回到您的個人資訊</label>
-        )
+  const renderInfo = () => {
+    if (!isDone) {
+      return <Empty />;
     }
 
-    return (
-        <div className={pageStyles['root']} style={style}>
-            <div className={'container'} style={style}>
-                <Header title='更改認證信箱' stateHeader={stateHeader} />
-                <div className='row'>
-                    <div className='col'>
-                        {renderData()}
-                    </div>
-                    <div className='col'>
-                        <label className={pageStyles['errMsg']}>{errmsg}</label>
-                    </div>
-                    <div className='col'>
-                        {renderInfo()}
-                    </div>
-                </div>
-            </div>
+    return <span className="">將會回到您的個人資訊</span>;
+  };
+
+  return (
+    <div className={pageStyles.root} style={style}>
+      <div className={"container"} style={style}>
+        <Header title="更改認證信箱" stateHeader={classHeader} />
+        <div className="row">
+          <div className="col">{renderData()}</div>
+          <div className="col">
+            <span className={pageStyles.errMsg}>{errmsg}</span>
+          </div>
+          <div className="col">{renderInfo()}</div>
         </div>
-    )
-}
+      </div>
+    </div>
+  );
+};

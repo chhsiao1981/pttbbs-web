@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   BRAND: 'DevPtt',
   API_ROOT: '',
   CLIENT_ID: 'test_client_id',

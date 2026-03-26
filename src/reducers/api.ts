@@ -1,130 +1,127 @@
-import config from 'config'
+import config from "config";
 
 export type Query = {
-    [key: string]: any
-}
+  [key: string]: any;
+};
 
 export type Params = {
-    [key: string]: any
-}
+  [key: string]: any;
+};
 
 export type Files = {
-    [key: string]: any
-}
+  [key: string]: any;
+};
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export type CallAPI<T> = {
-    endpoint: string
-    method?: string
-    query?: Query
-    params?: Params
-    files?: Files
-    json?: any
-    accessToken?: string
-}
+export type ApiParams = {
+  endpoint: string;
+  query?: Query;
+  method?: string;
+  params?: Params;
+  files?: Files;
+  json?: any;
+  accessToken?: string;
+};
 
-type ApiParams = {
-    query?: Query
-    method?: string
-    params?: Params
-    files?: Files
-    json?: any
-    accessToken?: string
-}
-
-type ApiResult<T> = {
-    status: number
-    data?: T
-    errmsg?: string
-}
-
+export type ApiResult<T> = {
+  status: number;
+  data?: T;
+  errmsg?: string;
+};
 
 const serialize = (data: any): string => {
-    if (typeof data === 'object') {
-        data = JSON.stringify(data)
+  if (typeof data === "object") {
+    data = JSON.stringify(data);
+  }
+
+  return encodeURIComponent(data);
+};
+
+const queryToString = (query: Query | Params) =>
+  Object.keys(query)
+    .map((k) => `${serialize(k)}=${serialize(query[k])}`)
+    .join("&");
+
+export default <T>(apiParams: ApiParams): Promise<ApiResult<T>> => {
+  const {
+    endpoint: propsEndpoint,
+    query,
+    method: propsMethod,
+    params,
+    files,
+    json,
+    accessToken: propsAccessToken,
+  } = apiParams;
+  const method = propsMethod || "get";
+  const accessToken = propsAccessToken || "";
+
+  const { API_ROOT: CONFIG_API_ROOT } = config;
+
+  const default_api_root = window.location.origin;
+
+  const API_ROOT = CONFIG_API_ROOT || default_api_root;
+
+  let endpoint = propsEndpoint;
+  if (endpoint.indexOf(API_ROOT) === -1) {
+    endpoint = API_ROOT + endpoint;
+  }
+  if (query) {
+    endpoint = `${endpoint}?${queryToString(query)}`;
+  }
+
+  const headers: HeadersInit = {};
+  let body: string | undefined;
+  if (files) {
+    for (const _name in files) {
     }
-
-    return encodeURIComponent(data)
-}
-
-const queryToString = (query: Query | Params) => Object.keys(query).map(k => `${serialize(k)}=${serialize(query[k])}`).join('&')
-
-
-const callApi = <T>(endpoint: string, { query, method = 'get', params, files, json, accessToken }: ApiParams): Promise<ApiResult<T>> => {
-    const { API_ROOT: CONFIG_API_ROOT } = config
-
-    let default_api_root = window.location.origin
-
-    let API_ROOT = CONFIG_API_ROOT || default_api_root
-
-    if (endpoint.indexOf(API_ROOT) === -1) {
-        endpoint = API_ROOT + endpoint
+    // eslint-disable-next-line
+    for (const _k in params) {
     }
+  } else if (params) {
+    const paramsStr = queryToString(params);
+    headers["Content-Type"] = "application/x-www-form-urlencoded";
+    body = paramsStr;
+  } else if (json) {
+    body = JSON.stringify(json);
+    headers["Content-Type"] = "application/json";
+  }
 
-    if (query) {
-        endpoint = `${endpoint}?${queryToString(query)}`
-    }
+  if (accessToken) {
+    headers.Authorization = "bearer " + accessToken;
+  }
 
-    let headers: HeadersInit = {}
-    let body: string | undefined = undefined
-    if (files) {
-        // eslint-disable-next-line
-        for (let name in files) {
-        }
-        // eslint-disable-next-line
-        for (let k in params) {
-        }
-    } else if (params) {
-        let paramsStr = queryToString(params)
-        headers['Content-Type'] = 'application/x-www-form-urlencoded'
-        body = paramsStr
-    } else if (json) {
-        body = JSON.stringify(json)
-        headers['Content-Type'] = 'application/json'
-    }
+  const csrftokenDOM = document.getElementById("__csrftoken__");
+  const csrftoken =
+    (csrftokenDOM ? csrftokenDOM.getAttribute("value") : "") || "";
+  headers["X-CSRFToken"] = csrftoken;
 
-    if (accessToken) {
-        headers['Authorization'] = 'bearer ' + accessToken
-    }
+  const options: RequestInit = {
+    method,
+    headers,
+    body,
+    credentials: "include",
+  };
 
-    let csrftokenDOM = document.getElementById('__csrftoken__')
-    let csrftoken = (csrftokenDOM ? csrftokenDOM.getAttribute('value') : '') || ''
-    headers['X-CSRFToken'] = csrftoken
-
-    let options: RequestInit = {
-        method,
-        headers,
-        body,
-        credentials: 'include',
-    }
-
-    return fetch(endpoint, options)
-        .then((res) => {
-            let status = res.status
-            return res.json()
-                .then((data) => {
-                    if (res.status !== 200) {
-                        let msg = data.Msg || ''
-                        return { status, 'errmsg': msg }
-                    } else {
-                        return { 'status': res.status, 'data': data }
-                    }
-                })
-                .catch((err) => {
-                    console.log('api.callApi: json: err:', err)
-                    return { 'status': 598, 'errmsg': err.message }
-                })
+  return fetch(endpoint, options)
+    .then((res) => {
+      const status = res.status;
+      return res
+        .json()
+        .then((data) => {
+          if (res.status >= 400) {
+            // error messages
+            const msg = data.Msg || "";
+            return { status, errmsg: msg };
+          } else {
+            return { status: res.status, data: data };
+          }
         })
         .catch((err) => {
-            return { 'status': 599, 'errmsg': err.message }
-        })
-
-}
-
-export default <T>(callAPI: CallAPI<T>): Promise<ApiResult<T>> => {
-    let { endpoint, method, query, params, files, json, accessToken } = callAPI
-
-    accessToken = accessToken || ''
-
-    return callApi(endpoint, { method, query, params, files, json, accessToken })
-}
+          console.log("api: json: err:", err);
+          return { status: 598, errmsg: err.message };
+        });
+    })
+    .catch((err) => {
+      return { status: 599, errmsg: err.message };
+    });
+};

@@ -1,72 +1,85 @@
-import { Thunk, init as _init, setData as _setData, createReducer } from 'react-reducer-utils'
+import {
+  init as _init,
+  setData as _setData,
+  type Thunk,
+} from "@chhsiao1981/use-thunk";
+import type { State as State_t } from "../types";
+import * as errors from "./errors";
+import * as serverUtils from "./serverUtils";
+import { goUserHome } from "./utils";
 
-import * as ServerUtils from './ServerUtils'
-import api from './api'
-import * as errors from './errors'
-
-import { GoUserHome } from './utils'
-import { State_t } from '../types'
-
-export const myClass = 'demo-pttbbs/attemptSetIDEmailPage'
+export const myClass = "pttbbs-web/attemptSetIDEmailPage";
 
 export interface State extends State_t {
-    theDate: Date
-    userID: string
-    isDone: boolean
+  theDate?: Date;
+  userID: string;
+  isDone: boolean;
 }
+
+export const defaultState: State = {
+  userID: "",
+  isDone: false,
+  errmsg: "",
+};
 
 // init
 export const init = (myID: string, userID: string): Thunk<State> => {
-    let theDate = new Date()
-    return async (dispatch, _) => {
-        let state: State = {
-            theDate,
-            userID,
-            isDone: false,
-        }
-        dispatch(_init({ myID, state }))
+  const theDate = new Date();
+  return async (dispatch, _) => {
+    const state: State = Object.assign({}, defaultState, { theDate, userID });
+    dispatch(_init({ myID, state }));
+  };
+};
+
+export const SetIDEmail = (
+  myID: string,
+  userID: string,
+  password: string,
+  email: string,
+): Thunk<State> => {
+  return async (dispatch, _) => {
+    const { errmsg, status } = await serverUtils.attemptSetIDEmail(
+      userID,
+      password,
+      email,
+    );
+
+    if (!status) {
+      dispatch(_setData(myID, { errmsg: errors.ERR_NETWORK }));
+      return;
     }
-}
 
-export const SetIDEmail = (myID: string, userID: string, password: string, email: string): Thunk<State> => {
-    return async (dispatch, _) => {
-        const { errmsg, status } = await api(ServerUtils.AttemptSetIDEmail(userID, password, email))
-
-        if (!status) {
-            dispatch(_setData(myID, { errmsg: errors.ERR_NETWORK }))
-            return
-        }
-
-        if (status === 403) {
-            let theErrMsg = errors.ERR_PASSWD
-            if (errmsg === 'already exists') {
-                theErrMsg = errors.ERR_EMAIL_ALREADY_EXISTS
-            }
-            dispatch(_setData(myID, { errmsg: theErrMsg }))
-            return
-        }
-
-        if (status !== 200) {
-            dispatch(_setData(myID, { errmsg }))
-            return
-        }
-
-        dispatch(_setData(myID, { isDone: true }))
+    if (status === 403) {
+      let theErrMsg = errors.ERR_PASSWD;
+      if (errmsg === "already exists") {
+        theErrMsg = errors.ERR_EMAIL_ALREADY_EXISTS;
+      }
+      dispatch(_setData(myID, { errmsg: theErrMsg }));
+      return;
     }
-}
 
-export const SleepAndRedirect = (myID: string, userID: string): Thunk<State> => {
-    return async (dispatch, _) => {
-        setTimeout(() => {
-            GoUserHome(userID)
-        }, 5000)
+    if (status !== 200) {
+      dispatch(_setData(myID, { errmsg }));
+      return;
     }
-}
 
-export const CleanErr = (myID: string): Thunk<State> => {
-    return async (dispatch, _) => {
-        dispatch(_setData(myID, { errmsg: '' }))
-    }
-}
+    dispatch(_setData(myID, { isDone: true }));
+  };
+};
 
-export default createReducer<State>()
+export const sleepAndRedirect = (
+  _myID: string,
+  userID: string,
+): Thunk<State> => {
+  return async (_dispatch, _) => {
+    setTimeout(() => {
+      goUserHome(userID);
+    }, 5000);
+  };
+};
+
+export const cleanErr = (myID: string): Thunk<State> => {
+  return async (dispatch, _) => {
+    dispatch(_setData(myID, { errmsg: "" }));
+  };
+};
