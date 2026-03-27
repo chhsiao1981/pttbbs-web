@@ -12,7 +12,8 @@ import { CHAR_WIDTH } from "./utils";
 
 const _COLUMNS: PttColumn[] = [
   { Header: "", accessor: "", width: 0, fixed: true, type: "rest" },
-  { Header: "編號", accessor: "numIdx", width: CHAR_WIDTH * 6, fixed: true },
+  // { Header: "編號", accessor: "numIdx", width: CHAR_WIDTH * 6, fixed: true },
+  /*
   {
     Header: "",
     accessor: "read",
@@ -20,6 +21,7 @@ const _COLUMNS: PttColumn[] = [
     fixed: true,
     type: "read",
   },
+  */
   {
     Header: "看板",
     accessor: "brdname",
@@ -42,6 +44,12 @@ const _COLUMNS: PttColumn[] = [
     fixed: true,
   },
   { Header: "人氣", accessor: "nuser", width: CHAR_WIDTH * 5, fixed: true },
+  {
+    Header: "",
+    accessor: "",
+    width: CHAR_WIDTH * 10,
+    fixed: true,
+  },
   /*
   {
     Header: "板主",
