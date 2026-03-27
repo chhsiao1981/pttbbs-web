@@ -135,6 +135,7 @@ export default (props: Props) => {
   scroll.onVerticalScroll = onVerticalScroll ?? undefined;
   scroll.onScrollStart = onScrollStart ?? undefined;
   scroll.onScrollEnd = onScrollEnd ?? undefined;
+  scroll.touchScrollEnabled = true;
 
   console.info("Screen: Table: width:", width, "height:", height);
 
