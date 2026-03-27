@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-const MIN_INNER_WIDTH = 1360;
+const MIN_INNER_WIDTH = 960;
 
 export type WidthAndHeight = {
   width: number;
@@ -10,7 +10,7 @@ export type WidthAndHeight = {
 // useWindowSize
 //
 // 1. more stable useWindowSize as no change if the differece of the window size is < diff.
-// 2. min-width as 1360
+// 2. min-width as MIN_INNER_WIDTH
 //
 // addEventListener in the very beginning.
 //
@@ -25,13 +25,6 @@ export default (diff: number = 10) => {
 
   useEffect(() => {
     const handler = () => {
-      console.info(
-        "useWindowSize: start: window:",
-        [window.innerWidth, window.innerHeight],
-        "widthAndHeight:",
-        widthAndHeight,
-      );
-
       if (
         Math.abs(window.innerWidth - widthAndHeight.width) < diff &&
         Math.abs(window.innerHeight - widthAndHeight.height) < diff
@@ -53,7 +46,7 @@ export default (diff: number = 10) => {
       console.info("useWindowSize: to remove handler");
       window.removeEventListener("resize", handler);
     };
-  }, [widthAndHeight, diff]);
+  }, [widthAndHeight.width, widthAndHeight.height, diff]);
 
   return displayWidthAndHeight;
 };
