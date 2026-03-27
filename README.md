@@ -1,7 +1,8 @@
-# demo-pttbbs
-This is the demo of web-based pttbbs using openbbs-middleware.
+# pttbbs-web
 
-# Getting Started
+This is the demo of web-based pttbbs using [pttbbs-backend](https://github.com/Ptt-official-app/pttbbs-backend) as the backend server.
+
+## Getting Started
 
 You can get started by visiting the following website:
 
@@ -13,7 +14,7 @@ The corresponding backend repository of this website is:
 
 The architecture is based on [中台架構-站台部屬規劃(20210126版本for測試計畫)](https://hackmd.io/@twbbs/Root#%E6%9E%B6%E6%A7%8B%E5%9C%96).
 
-## Starting server at localhost
+### Starting server at localhost
 
 ``` sh
 npm install
@@ -23,9 +24,9 @@ npm run dev
 
 Then you should be able to access the page on localhost:5173.
 
-# Development
+## Development
 
-## For building multiple html pages
+### For building multiple html pages
 
 Besides the home-page, we would like to have
 several complete-independent pages,
