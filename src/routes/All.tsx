@@ -1,3 +1,9 @@
+import {
+  genUUID,
+  type ThunkModuleToFunc,
+  useThunk,
+} from "@chhsiao1981/use-thunk";
+import { useEffect, useState } from "react";
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import ArticlePage from "../components/ArticlePage";
 import ArticlesPage from "../components/ArticlesPage";
@@ -8,11 +14,19 @@ import HotBoardsPage from "../components/HotBoardsPage";
 import ManualsPage from "../components/ManualsPage";
 import NewArticlePage from "../components/NewArticlePage";
 import UserFavoritesPage from "../components/UserFavoritesPage";
+import * as DoHeader from "../reducers/header";
 
-// biome-ignore lint/complexity/noBannedTypes: props
-type Props = {};
+type TDoHeader = ThunkModuleToFunc<typeof DoHeader>;
 
-export default (_props: Props) => {
+export default () => {
+  const [_, doHeader] = useThunk<DoHeader.State, TDoHeader>(DoHeader);
+  const [headerID] = useState(genUUID);
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: useEffect
+  useEffect(() => {
+    doHeader.init(headerID);
+  }, []);
+
   return (
     <Router
       future={{

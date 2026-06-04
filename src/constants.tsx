@@ -43,3 +43,5 @@ export const COMMENT_TYPE_FORWARD = 4;
 export const COMMENT_TYPE_REPLY = 5;
 export const COMMENT_TYPE_EDIT = 6;
 export const COMMENT_TYPE_DELETED = 7;
+
+export const STATUS_OK = 200;

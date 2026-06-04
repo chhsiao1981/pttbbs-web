@@ -1,19 +1,16 @@
-import {
-  init as _init,
-  setData as _setData,
-  type Thunk,
-} from "@chhsiao1981/use-thunk";
+import { init as _init, setData, type Thunk } from "@chhsiao1981/use-thunk";
 import type { State as State_t } from "../types";
 import * as errors from "./errors";
 import * as serverUtils from "./serverUtils";
 
-export const myClass = "demo-pttbbs/LoginPage";
+export const myClass = "pttbbs-web/LoginPage";
 
 export interface State extends State_t {
   theDate?: Date;
+  isRequested: boolean;
 }
 
-export const defaultState: State = { errmsg: "" };
+export const defaultState: State = { errmsg: "", isRequested: false };
 
 // init
 export const init = (myID: string): Thunk<State> => {
@@ -24,42 +21,75 @@ export const init = (myID: string): Thunk<State> => {
   };
 };
 
-export const login = (
-  myID: string,
-  username: string,
-  password: string,
-): Thunk<State> => {
+export const attemptLogin = (myID: string, input: string): Thunk<State> => {
   return async (dispatch, _) => {
-    const { data, errmsg, status } = await serverUtils.login(
-      username,
-      password,
-    );
-
-    if (!status) {
-      dispatch(_setData(myID, { errmsg: errors.ERR_NETWORK }));
+    dispatch(setData<State>(myID, { isRequested: true }));
+    const { errmsg, status } = await serverUtils.attemptLogin(input);
+    if (errmsg) {
+      dispatch(setData<State>(myID, { errmsg }));
       return;
     }
 
-    if (status === 401) {
-      dispatch(_setData(myID, { errmsg: errors.ERR_PASSWD }));
+    if (!status) {
+      dispatch(setData<State>(myID, { errmsg: errors.ERR_NETWORK }));
       return;
     }
 
     if (status !== 200) {
-      dispatch(_setData(myID, { errmsg }));
-      return;
-    }
-    if (!data) {
-      dispatch(_setData(myID, { errmsg: "no data" }));
+      dispatch(setData<State>(myID, { errmsg: `status not 200: ${status}` }));
       return;
     }
 
-    window.location.href = "/user/" + data.user_id + "/favorites";
+    dispatch(setData<State>(myID, { isRequested: true }));
+  };
+};
+
+export const reset = (myID: string): Thunk<State> => {
+  return (dispatch, _) => {
+    const state: State = Object.assign({}, defaultState);
+    dispatch(setData<State>(myID, state));
   };
 };
 
 export const cleanErr = (myID: string): Thunk<State> => {
+  return (dispatch, _) => {
+    dispatch(setData<State>(myID, { errmsg: "" }));
+  };
+};
+
+export const login = (
+  myID: string,
+  input: string,
+  verifyCode: string,
+): Thunk<State> => {
   return async (dispatch, _) => {
-    dispatch(_setData(myID, { errmsg: "" }));
+    const { data, errmsg, status } = await serverUtils.login(input, verifyCode);
+
+    if (errmsg) {
+      dispatch(setData<State>(myID, { errmsg }));
+      return;
+    }
+
+    if (!status) {
+      dispatch(setData<State>(myID, { errmsg: errors.ERR_NETWORK }));
+      return;
+    }
+
+    if (status === 401) {
+      dispatch(setData<State>(myID, { errmsg: errors.ERR_PASSWD }));
+      return;
+    }
+
+    if (status !== 200) {
+      dispatch(setData<State>(myID, { errmsg }));
+      return;
+    }
+
+    if (!data) {
+      dispatch(setData<State>(myID, { errmsg: "no data" }));
+      return;
+    }
+
+    window.location.href = "/user/" + data.user_id + "/favorites";
   };
 };

@@ -4,9 +4,8 @@
   "version": "0.15.5",
   "type": "module",
   "scripts": {
-    "dev": "npm run dev:dev && vite",
+    "start": "npm run dev:dev && vite",
     "build": "tsc -b && vite build",
-
     "dev:dev": "rm -f src/main.tsx; cd src && ln -s dev.tsx main.tsx && cd ..",
 
     "dev:all": "rm -f src/main.tsx; cd src && ln -s all.tsx main.tsx && cd ..",
@@ -39,22 +38,31 @@
     "dev:attempt-set-id-email": "rm -f src/main.tsx; cd src && ln -s attemptSetIDEmail.tsx main.tsx && cd ..",
     "build:attempt-set-id-email": "npm run dev:attempt-set-id-email && npm run build && cp dist/index.html dist/attempt-set-id-email.html",
 
+    "dev:init": "rm -f src/main.tsx; cd src && ln -s init.tsx main.tsx && cd ..",
+    "build:init": "npm run dev:init && npm run build && cp dist/index.html dist/init.html",
+
+    "dev:error": "rm -f src/main.tsx; cd src && ln -s error.tsx main.tsx && cd ..",
+    "build:error": "npm run dev:error && npm run build && cp dist/index.html dist/error.html",
+
     "fmt": "biome format --write .",
     "lint": "biome lint .",
     "test": "vitest",
     "preview": "vite preview"
   },
   "dependencies": {
-    "@chhsiao1981/use-thunk": "^10.1.2",
+    "@chhsiao1981/use-thunk": "^10.3.0",
     "bootstrap": "^5.3.8",
     "bootstrap-icons": "^1.13.1",
     "fixed-data-table-2": "^2.0.22",
+    "i18next": "^26.3.1",
+    "i18next-browser-languagedetector": "^8.2.1",
     "moment": "^2.30.1",
     "moment-timezone": "^0.6.2",
     "query-string": "^9.3.1",
     "react": "^19.2.7",
     "react-bootstrap": "^2.10.10",
     "react-dom": "^19.2.0",
+    "react-i18next": "^17.0.8",
     "react-router-dom": "^6.30.3",
     "react-use": "^17.6.0",
     "react-widgets": "^5.8.6",

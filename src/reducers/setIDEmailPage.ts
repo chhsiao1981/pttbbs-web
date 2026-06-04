@@ -7,7 +7,7 @@ import type { State as State_t } from "../types";
 import * as serverUtils from "./serverUtils";
 import { goUserHome } from "./utils";
 
-export const myClass = "demo-pttbbs/SetIDEmailPage";
+export const myClass = "pttbbs-web/SetIDEmailPage";
 
 export interface State extends State_t {
   theDate?: Date;

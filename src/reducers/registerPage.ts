@@ -1,25 +1,21 @@
-import {
-  init as _init,
-  setData as _setData,
-  type Thunk,
-} from "@chhsiao1981/use-thunk";
+import { init as _init, setData, type Thunk } from "@chhsiao1981/use-thunk";
 import type { State as State_t } from "../types";
 import * as errors from "./errors";
 import * as serverUtils from "./serverUtils";
 import { goUserHome } from "./utils";
 
-export const myClass = "demo-pttbbs/RegisterPage";
+export const myClass = "pttbbs-web/RegisterPage";
 
 export interface State extends State_t {
   theDate?: Date;
   infomsg?: string;
-  isSetVerifyEmail: boolean;
+
+  isAttemptRegister: boolean;
 }
 
 export const defaultState: State = {
-  isSetVerifyEmail: false,
-
   errmsg: "",
+  isAttemptRegister: false,
 };
 
 // init
@@ -31,33 +27,23 @@ export const init = (myID: string): Thunk<State> => {
   };
 };
 
-export const verifyEmail = (
-  myID: string,
-  username: string,
-  email: string,
-): Thunk<State> => {
+export const attemptRegister = (myID: string, email: string): Thunk<State> => {
   return async (dispatch, _) => {
-    const { errmsg, status } = await serverUtils.attemptRegister(
-      username,
-      email,
-    );
-
-    if (!status) {
-      dispatch(_setData(myID, { errmsg: errors.ERR_NETWORK }));
+    const { errmsg, status } = await serverUtils.attemptRegister(email);
+    if (errmsg) {
+      dispatch(setData<State>(myID, { errmsg }));
       return;
     }
-
     if (status !== 200) {
-      dispatch(_setData(myID, { errmsg }));
+      dispatch(
+        setData<State>(myID, {
+          errmsg: `unable to register: status: ${status}`,
+        }),
+      );
       return;
     }
 
-    dispatch(
-      _setData(myID, {
-        infomsg: errors.INFO_VERIFY_EMAIL,
-        isSetVerifyEmail: true,
-      }),
-    );
+    dispatch(setData<State>(myID, { isAttemptRegister: true }));
   };
 };
 
@@ -81,17 +67,17 @@ export const register = (
     );
 
     if (!status) {
-      dispatch(_setData(myID, { errmsg: errors.ERR_NETWORK }));
+      dispatch(setData(myID, { errmsg: errors.ERR_NETWORK }));
       return;
     }
 
     if (status === 400) {
-      dispatch(_setData(myID, { errmsg: errors.ERR_REGISTER }));
+      dispatch(setData(myID, { errmsg: errors.ERR_REGISTER }));
       return;
     }
 
     if (status !== 200) {
-      dispatch(_setData(myID, { errmsg }));
+      dispatch(setData(myID, { errmsg }));
       return;
     }
     if (!data) {
@@ -106,6 +92,6 @@ export const register = (
 
 export const cleanMsg = (myID: string): Thunk<State> => {
   return async (dispatch, _) => {
-    dispatch(_setData(myID, { infomsg: "", errmsg: "" }));
+    dispatch(setData(myID, { infomsg: "", errmsg: "" }));
   };
 };

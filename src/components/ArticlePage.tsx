@@ -1,16 +1,15 @@
 import {
   genUUID,
   getState,
+  mustGetStateByThunk,
   type ThunkModuleToFunc,
   useThunk,
 } from "@chhsiao1981/use-thunk";
-import QueryString from "query-string";
 import { type CSSProperties, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useKey } from "react-use";
 import useWindowSize from "../hooks/useWindowSize";
 import * as DoArticlePage from "../reducers/articlePage";
-import * as DoHeader from "../reducers/header";
 import type { CharMap, Line } from "../types";
 import Article from "./Article";
 import FunctionBar from "./FunctionBar";
@@ -19,18 +18,13 @@ import InitConsts from "./InitConsts";
 import styles from "./Page.module.css";
 
 type TDoArticlePage = ThunkModuleToFunc<typeof DoArticlePage>;
-type TDoHeader = ThunkModuleToFunc<typeof DoHeader>;
 
-// biome-ignore lint/complexity/noBannedTypes: props
-type Props = {};
-
-export default (_props: Props) => {
-  const [classArticlePage, doArticlePage] = useThunk<
-    DoArticlePage.State,
-    TDoArticlePage
-  >(DoArticlePage);
+export default () => {
   const [articlePageID] = useState(genUUID);
-  const articlePage = getState(classArticlePage) || DoArticlePage.defaultState;
+  const useArticlePage = useThunk<DoArticlePage.State, TDoArticlePage>(
+    DoArticlePage,
+  );
+  const [articlePage, doArticlePage] = mustGetStateByThunk(useArticlePage);
   const {
     isInit,
     isBusyLoading,
@@ -48,15 +42,17 @@ export default (_props: Props) => {
     comments,
   } = articlePage;
 
-  const [classHeader, doHeader] = useThunk<DoHeader.State, TDoHeader>(DoHeader);
-  const [headerID] = useState(genUUID);
-
   const [isInitConsts, setIsInitConsts] = useState(false);
 
   //init
-  const { bid: paramsBid, aid: paramsAid } = useParams();
+  const {
+    bid: paramsBid,
+    aid: paramsAid,
+    start_idx: paramsStartIdx,
+  } = useParams();
   const bid = paramsBid || "";
   const aid = paramsAid || "";
+  const startIdx = paramsStartIdx || "";
 
   // eslint-disable-next-line
   const [_errMsg, _setErrMsg] = useState("");
@@ -88,9 +84,6 @@ export default (_props: Props) => {
 
   // the states that needs to be updated with some lazy-eval functions.
   const [stateDict, _setStateDict] = useState({ isEditing: false });
-
-  // const charWidth = CHAR_WIDTH * 2;
-
   stateDict.isEditing = isRecommending;
 
   //keys
@@ -115,6 +108,15 @@ export default (_props: Props) => {
     window.location.href = `/board/${bid}/articles`;
   });
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: useEffect
+  useEffect(() => {
+    if (!isInitConsts) {
+      return;
+    }
+
+    doArticlePage.init(articlePageID, bid, aid, startIdx);
+  }, [isInitConsts, bid, aid, startIdx]);
+
   useEffect(() => {
     if (isRecommend) {
       setRecommendStyle(1);
@@ -131,19 +133,6 @@ export default (_props: Props) => {
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: useEffect
   useEffect(() => {
-    if (!isInitConsts) {
-      return;
-    }
-    doHeader.init(headerID);
-
-    const query = QueryString.parse(window.location.search);
-    const startIdx = (query.start_idx || "") as string;
-
-    doArticlePage.init(articlePageID, bid, aid, startIdx);
-  }, [isInitConsts]);
-
-  // biome-ignore lint/correctness/useExhaustiveDependencies: useEffect
-  useEffect(() => {
     if (headerRef.current) {
       setHeaderHeight(headerRef.current.clientHeight);
     }
@@ -151,8 +140,6 @@ export default (_props: Props) => {
       setFuncbarHeight(funcbarRef.current.clientHeight);
     }
   }, [headerRef.current, funcbarRef.current]);
-
-  //get data
 
   if (!isInit) {
     return (
@@ -295,7 +282,7 @@ export default (_props: Props) => {
   return (
     <div className={styles.root}>
       <div ref={headerRef}>
-        <Header title={headerTitle} stateHeader={classHeader} />
+        <Header title={headerTitle} />
       </div>
       {renderArticle()}
       <div ref={funcbarRef}>

@@ -1,51 +1,42 @@
 import {
   genUUID,
-  getDefaultID,
-  getState,
+  mustGetStateByThunk,
   type ThunkModuleToFunc,
   useThunk,
 } from "@chhsiao1981/use-thunk";
-import QueryString from "query-string";
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useKey } from "react-use";
 import useWindowSize from "../hooks/useWindowSize";
-import * as DoHeader from "../reducers/header";
 import * as DoManualsPage from "../reducers/manualsPage";
 import type { ManArticleSummary_i, PttOption } from "../types";
-import Empty from "./Empty";
 import EmptyList from "./EmptyList";
 import FunctionBar from "./FunctionBar";
 import Header from "./Header";
 import ManualList from "./ManualList";
 import styles from "./Page.module.css";
 
-type TDoHeader = ThunkModuleToFunc<typeof DoHeader>;
 type TDoManualsPage = ThunkModuleToFunc<typeof DoManualsPage>;
 
-// biome-ignore lint/complexity/noBannedTypes: props
-type Props = {};
+export default () => {
+  const [manualsPageID] = useState(genUUID);
+  const useManualsPage = useThunk<DoManualsPage.State, TDoManualsPage>(
+    DoManualsPage,
+  );
+  const [manualsPage, doManualsPage] = mustGetStateByThunk(useManualsPage);
+  const { brdname, title, scrollToRow, allManuals: manuals } = manualsPage;
 
-// biome-ignore lint/complexity/noBannedTypes: props
-type HeaderProps = {};
-
-export default (_props: Props) => {
-  //init
-  const { bid: paramsBid, path: paramsPath } = useParams();
+  const {
+    bid: paramsBid,
+    path: paramsPath,
+    start_idx: paramsStartIdx,
+    title: paramsTitle,
+  } = useParams();
   const bid = paramsBid || "";
   const path = paramsPath || "";
   const pathList = path.split("/");
   const dirname = pathList.slice(0, pathList.length - 1).join("/");
-  let parentUrl = `/board/${bid}/manual`;
-  if (dirname !== "") {
-    parentUrl += "/" + dirname;
-  }
-
-  const [classManualsPage, doManualsPage] = useThunk<
-    DoManualsPage.State,
-    TDoManualsPage
-  >(DoManualsPage);
-  const [classHeader, doHeader] = useThunk<DoHeader.State, TDoHeader>(DoHeader);
+  const parentUrl = `/board/${bid}/manual${dirname === "" ? "" : "/" + dirname}`;
 
   const [_errMsg, _setErrMsg] = useState("");
 
@@ -54,7 +45,6 @@ export default (_props: Props) => {
     window.location.href = parentUrl;
   });
 
-  //render
   const [headerHeight, setHeaderHeight] = useState(0);
   const [funcbarHeight, setFuncbarHeight] = useState(0);
   const headerRef = useRef<HTMLDivElement>(null);
@@ -64,14 +54,8 @@ export default (_props: Props) => {
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: useEffect
   useEffect(() => {
-    const headerID = genUUID();
-    doHeader.init(headerID);
-
-    const manualsPageID = genUUID();
-    const query = QueryString.parse(window.location.search);
-    const { start_idx: queryStartIdx, title: queryTitle } = query;
-    const searchTitle = (queryTitle || "") as string;
-    const startIdx = (queryStartIdx || "") as string;
+    const searchTitle = (paramsTitle || "") as string;
+    const startIdx = (paramsStartIdx || "") as string;
 
     doManualsPage.init(manualsPageID, bid, path, searchTitle, startIdx);
   }, []);
@@ -86,17 +70,7 @@ export default (_props: Props) => {
     }
   }, [headerRef.current, funcbarRef.current]);
 
-  //get data
-  const manualsPage = getState(classManualsPage);
-  if (!manualsPage) {
-    return <Empty />;
-  }
-  const myID = getDefaultID(classManualsPage);
   // const errmsg = manualsPage.errmsg || "";
-  const brdname = manualsPage.brdname;
-  const title = manualsPage.title;
-  const scrollToRow = manualsPage.scrollToRow;
-  const manuals = manualsPage.allManuals;
 
   const width = innerWidth;
   const listHeight = innerHeight - headerHeight - funcbarHeight;
@@ -113,7 +87,7 @@ export default (_props: Props) => {
       return false;
     }
 
-    doManualsPage.setData(myID, { scrollToRow: undefined });
+    doManualsPage.setData(manualsPageID, { scrollToRow: undefined });
     return true;
   };
 
@@ -155,7 +129,7 @@ export default (_props: Props) => {
     roptions = roptions_p.concat(roptions);
   }
 
-  const renderHeader = (_props: HeaderProps) => {
+  const renderHeader = () => {
     return (
       <div
         className={"col d-flex justify-content-between align-items-center px-4"}
@@ -174,11 +148,7 @@ export default (_props: Props) => {
   return (
     <div className={styles.root}>
       <div ref={headerRef}>
-        <Header
-          title={headerTitle}
-          stateHeader={classHeader}
-          renderHeader={renderHeader}
-        />
+        <Header title={headerTitle} renderHeader={renderHeader} />
       </div>
       {renderManuals()}
       <div ref={funcbarRef}>

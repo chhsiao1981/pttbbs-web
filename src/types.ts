@@ -3,8 +3,10 @@
 import type { State as State_r } from "@chhsiao1981/use-thunk";
 import type CSS from "csstype";
 
+export type Err = string;
+
 export interface State extends State_r {
-  errmsg: string;
+  errmsg: Err;
 }
 
 // biome-ignore lint/complexity/noBannedTypes: Data
@@ -54,10 +56,11 @@ export type AccessToken = {
 
 export type Username = {
   username: string;
+  is_init: boolean;
 };
 
-export type UserID = {
-  user_id: string;
+export type InitResult = {
+  success: boolean;
 };
 
 export type AccountLoginParams = {
@@ -251,10 +254,15 @@ export interface Comment_i extends Comment, IdxData {}
 export type CommentList = List<Comment_i>;
 
 export type UserDetail = {
-  user_id: string;
   username: string;
   nickname: string;
   realname: string;
+  birthdate: string;
+
+  is_government_id: boolean;
+  is_mobile_id: boolean;
+  over18: boolean;
+
   flag: number;
   perm: number;
   login_days: number;
@@ -266,7 +274,7 @@ export type UserDetail = {
   money: number;
   pttemail: string;
   justify: string;
-  over18: boolean;
+
   pager_ui: number;
   pager: number;
   invisible: boolean;

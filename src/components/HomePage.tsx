@@ -1,17 +1,14 @@
 import {
   genUUID,
-  getDefaultID,
-  getState,
+  mustGetStateByThunk,
   type ThunkModuleToFunc,
   useThunk,
 } from "@chhsiao1981/use-thunk";
 import config from "config";
-import { type CSSProperties, useEffect } from "react";
+import { type CSSProperties, useEffect, useState } from "react";
 import useWindowSize from "../hooks/useWindowSize";
-import type { State as Header_s } from "../reducers/header";
 import * as DoHeader from "../reducers/header";
 import * as DoHomePage from "../reducers/homePage";
-import Empty from "./Empty";
 import Header from "./Header";
 import pageStyles from "./Page.module.css";
 
@@ -22,44 +19,36 @@ type TDoHomePage = ThunkModuleToFunc<typeof DoHomePage>;
 type Props = {};
 
 export default (_props: Props) => {
-  const [classHomePage, doHomePage] = useThunk<DoHomePage.State, TDoHomePage>(
+  const [homePageID] = useState(genUUID);
+  const [_classHomePage, doHomePage] = useThunk<DoHomePage.State, TDoHomePage>(
     DoHomePage,
   );
-  const [classHeader, doHeader] = useThunk<DoHeader.State, TDoHeader>(DoHeader);
+
+  const useHeader = useThunk<DoHeader.State, TDoHeader>(DoHeader);
+  const [header, _doHeader, _headerID] = mustGetStateByThunk(useHeader);
+  const { username } = header;
 
   const { width: innerWidth, height: innerHeight } = useWindowSize();
 
   //init
   // biome-ignore lint/correctness/useExhaustiveDependencies: useEffect
   useEffect(() => {
-    const headerID = genUUID();
-    doHeader.init(headerID);
-
-    const homePageID = genUUID();
     doHomePage.init(homePageID);
   }, []);
 
-  const header: Header_s = getState(classHeader) || DoHeader.defaultState;
-  const userID = header.user_id;
-
   useEffect(() => {
-    if (!userID) {
+    if (!username) {
       return;
     }
 
-    if (userID === config.PTT_GUEST) {
+    if (username === config.PTT_GUEST) {
       window.location.href = "/boards/popular";
     } else {
-      window.location.href = "/user/" + userID + "/favorites";
+      window.location.href = "/user/" + username + "/favorites";
     }
-  }, [userID]);
+  }, [username]);
 
   //get data
-  const myID = getDefaultID(classHomePage);
-
-  if (!myID) {
-    return <Empty />;
-  }
 
   const style: CSSProperties = {
     width: innerWidth,
@@ -68,7 +57,7 @@ export default (_props: Props) => {
 
   return (
     <div className={pageStyles.root} style={style}>
-      <Header title={""} stateHeader={classHeader} />
+      <Header title={""} />
     </div>
   );
 };

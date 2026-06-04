@@ -1,12 +1,10 @@
 import {
   genUUID,
-  getDefaultID,
-  getState,
+  mustGetStateByThunk,
   type ThunkModuleToFunc,
   useThunk,
 } from "@chhsiao1981/use-thunk";
 import config from "config";
-import QueryString from "query-string";
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import useWindowSize from "../hooks/useWindowSize";
@@ -14,7 +12,6 @@ import * as DoClassBoardsPage from "../reducers/classBoardsPage";
 import * as DoHeader from "../reducers/header";
 import type { BoardSummary_i } from "../types";
 import BoardList from "./BoardList";
-import Empty from "./Empty";
 import FunctionBar from "./FunctionBar";
 import Header from "./Header";
 import pageStyles from "./Page.module.css";
@@ -26,14 +23,18 @@ type TDoHeader = ThunkModuleToFunc<typeof DoHeader>;
 type Props = {};
 
 export default (_props: Props) => {
-  const [classClassBoardsPage, doClassBoardsPage] = useThunk<
+  const [classBoardsPageID] = useState(genUUID);
+  const useClassBoardsPage = useThunk<
     DoClassBoardsPage.State,
     TDoClassBoardsPage
   >(DoClassBoardsPage);
-  const [classBoardsPageID, _setclassBoardsPageID] = useState(genUUID);
+  const [classBoardsPage, doClassBoardsPage] =
+    mustGetStateByThunk(useClassBoardsPage);
+  const { list: boards, isNextEnd, isPreEnd, scrollToRow } = classBoardsPage;
 
-  const [classHeader, doHeader] = useThunk<DoHeader.State, TDoHeader>(DoHeader);
-  const [headerID, _setHeaderID] = useState(genUUID);
+  const useHeader = useThunk<DoHeader.State, TDoHeader>(DoHeader);
+  const [header] = mustGetStateByThunk(useHeader);
+  const { userID } = header;
 
   // eslint-disable-next-line
   const [_errMsg, _setErrMsg] = useState("");
@@ -46,18 +47,13 @@ export default (_props: Props) => {
   const { width: innerWidth, height: innerHeight } = useWindowSize();
   const [scrollTop, setScrollTop] = useState(0);
 
-  //init
-  const { clsID: paramsClsID } = useParams();
+  const { clsID: paramsClsID, start_idx: paramsStartIdx } = useParams();
   const clsID = parseInt(paramsClsID || "0", 10);
+  const startIdx = paramsStartIdx || "";
 
+  //init
   // biome-ignore lint/correctness/useExhaustiveDependencies: useEffect
   useEffect(() => {
-    doHeader.init(headerID);
-
-    const query = QueryString.parse(window.location.search);
-    const { start_idx: queryStartIdx } = query;
-    const startIdx = (queryStartIdx || "") as string;
-
     doClassBoardsPage.init(classBoardsPageID, clsID, startIdx);
   }, []);
 
@@ -71,28 +67,10 @@ export default (_props: Props) => {
     }
   }, [headerRef.current, funcbarRef.current]);
 
-  //get data
-  const boardsPage = getState(classClassBoardsPage);
-  if (!boardsPage) {
-    return <Empty />;
-  }
-  const myID = getDefaultID(classClassBoardsPage);
-  // const errmsg = boardsPage.errmsg || "";
-  const boards = boardsPage.list;
-  const isNextEnd = boardsPage.isNextEnd;
-  const isPreEnd = boardsPage.isPreEnd;
-  const scrollToRow = boardsPage.scrollToRow;
-
-  const header = getState(classHeader);
-  if (!header) {
-    return <Empty />;
-  }
-  const myUserID = header.user_id;
-
   const width = innerWidth;
   const listHeight = innerHeight - headerHeight - funcbarHeight;
 
-  const headerTitle = "分類看板";
+  const title = "分類看板";
 
   const loadPre = (item: BoardSummary_i) => {
     if (item.numIdx === 1 || isPreEnd) {
@@ -103,7 +81,7 @@ export default (_props: Props) => {
     if (!idx) {
       return;
     }
-    doClassBoardsPage.getBoards(myID, clsID, idx, true, true);
+    doClassBoardsPage.getBoards(classBoardsPageID, clsID, idx, true, true);
   };
 
   const loadNext = (item: BoardSummary_i) => {
@@ -116,7 +94,7 @@ export default (_props: Props) => {
       return;
     }
 
-    doClassBoardsPage.getBoards(myID, clsID, idx, false, true);
+    doClassBoardsPage.getBoards(classBoardsPageID, clsID, idx, false, true);
   };
 
   const onVerticalScroll = (scrollTop: number): boolean => {
@@ -125,7 +103,7 @@ export default (_props: Props) => {
       return false;
     }
 
-    doClassBoardsPage.setData(myID, { scrollToRow: undefined });
+    doClassBoardsPage.setData(classBoardsPageID, { scrollToRow: undefined });
     return true;
   };
 
@@ -160,11 +138,11 @@ export default (_props: Props) => {
   const loptions = [{ text: "搜尋看板", action: () => {} }];
 
   const roptions = [];
-  if (myUserID && myUserID !== config.PTT_GUEST) {
+  if (userID && userID !== config.PTT_GUEST) {
     roptions.push({
       text: "我的最愛",
       action: () => {
-        window.location.href = "/user/" + myUserID + "/favorites";
+        window.location.href = "/user/" + userID + "/favorites";
       },
     });
   }
@@ -184,7 +162,7 @@ export default (_props: Props) => {
   return (
     <div className={pageStyles.root}>
       <div ref={headerRef}>
-        <Header title={headerTitle} stateHeader={classHeader} />
+        <Header title={title} />
       </div>
       {renderBoards()}
       <div ref={funcbarRef}>

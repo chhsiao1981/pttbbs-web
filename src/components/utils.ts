@@ -1,7 +1,10 @@
-import moment from "moment";
+import config from "config";
+import moment from "moment-timezone";
+import type { Err } from "../types";
 
-export const TSToDateTimeStr = (ts: number) => {
-  return moment.unix(ts).format("YYYY-MM-DD hh:mm:ss");
+export const tsToDateTimeStr = (ts: number) => {
+  const datetimeStr = moment.unix(ts).format("YYYY-MM-DD hh:mm:ss");
+  return datetimeStr;
 };
 
 //board-list: 特殊記號+已讀+看板+類別+種類+中文敘述+人氣+板主
@@ -57,7 +60,7 @@ const calcScale = (
   }
 };
 
-export const CalcFontSizeScaleScreenWidth = (
+export const calcFontSizeScaleScreenWidth = (
   windowWidth: number,
   isMobile: boolean,
 ) => {
@@ -78,7 +81,7 @@ export const CalcFontSizeScaleScreenWidth = (
   }
 };
 
-export const InitCONSTS = (
+export const initCONSTS = (
   windowWidth: number,
   lineHeight: number,
   isMobile: boolean,
@@ -109,7 +112,7 @@ export const InitCONSTS = (
   console.log("utils.InitCONSTS: CONSTS:", CONSTS);
 };
 
-export const CalcScreenScale = (width: number) => {
+export const calcScreenScale = (width: number) => {
   let scale = width / (DEFAULT_CHAR_WIDTH * CONSTS.SCREEN_WIDTH);
   scale = scale < MAX_SCALE ? scale : MAX_SCALE;
   const lineHeight = CONSTS.LINE_HEIGHT;
@@ -118,8 +121,38 @@ export const CalcScreenScale = (width: number) => {
   return { scale, lineHeight, fontSize };
 };
 
-export const GetBoardParent = () => {
+export const getBoardParent = () => {
   //XXX TODO: imagine that there should be a session data remembering the last board list visited
   // If the board is visited directly by url there will be no record => return ""
+  return "";
+};
+
+export const validateEmail = (text: string) => {
+  return (
+    text.indexOf("@") !== -1 &&
+    text[0] !== "@" &&
+    text[text.length - 1] !== "@" &&
+    text[0] !== "." &&
+    text[text.length - 1] !== "."
+  );
+};
+
+export const validateUsername = (username: string) => {
+  return username && username !== config.PTT_GUEST;
+};
+
+export const checkUsername = (username: string): Err => {
+  if (!/^[0-9A-Za-z.]+$/.test(username)) {
+    return "errmsg.usernameInvalidChars";
+  }
+
+  if (username[0] === ".") {
+    return "errmsg.usernameStartsWithDot";
+  }
+
+  if (username[username.length - 1] === ".") {
+    return "errmsg.usernameEndsWithDot";
+  }
+
   return "";
 };

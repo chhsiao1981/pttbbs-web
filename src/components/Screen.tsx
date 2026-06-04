@@ -4,7 +4,7 @@ import type { PttColumn, TableData } from "../types";
 import runeStyles from "./cells/ContentRenderer.module.css";
 import LineCell from "./cells/LineCell";
 import styles from "./Screen.module.css";
-import { CalcScreenScale, CONSTS } from "./utils";
+import { CONSTS, calcScreenScale } from "./utils";
 
 const _DEFAULT_COLUMNS: PttColumn[] = [
   { Header: "", accessor: "", width: 0, fixed: true, type: "rest" },
@@ -77,7 +77,7 @@ export default (props: Props) => {
 
   const columns = propsColumns || _DEFAULT_COLUMNS;
 
-  const { scale, lineHeight, fontSize } = CalcScreenScale(width);
+  const { scale, lineHeight, fontSize } = calcScreenScale(width);
 
   //console.log('Screen: scale:', scale, 'lineHeight:', lineHeight, 'fontSize:', fontSize)
   const headerHeight = typeof renderHeader !== "undefined" ? lineHeight : 0;

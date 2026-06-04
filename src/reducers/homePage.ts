@@ -4,7 +4,7 @@ import {
   type Thunk,
 } from "@chhsiao1981/use-thunk";
 
-export const myClass = "demo-pttbbs/HomePage";
+export const myClass = "pttbbs-web/HomePage";
 
 export interface State extends rState {
   theDate?: Date;

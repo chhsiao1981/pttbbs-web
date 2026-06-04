@@ -6,7 +6,7 @@ import {
 import type { EditLine, State as State_t } from "../types";
 import * as serverUtils from "./serverUtils";
 
-export const myClass = "demo-pttbbs/NewArticlePage";
+export const myClass = "pttbbs-web/NewArticlePage";
 
 const _DEFAULT_POST_TYPES = [
   "問題",

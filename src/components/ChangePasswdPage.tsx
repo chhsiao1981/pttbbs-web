@@ -1,6 +1,6 @@
 import {
   genUUID,
-  getState,
+  mustGetStateByThunk,
   type ThunkModuleToFunc,
   useThunk,
 } from "@chhsiao1981/use-thunk";
@@ -8,47 +8,36 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import useWindowSize from "../hooks/useWindowSize";
 import * as DoChangePasswdPage from "../reducers/changePasswdPage";
-import * as DoHeader from "../reducers/header";
 import * as errors from "./errors";
 import Header from "./Header";
 import styles from "./Page.module.css";
 
 type TDoChangePasswdPage = ThunkModuleToFunc<typeof DoChangePasswdPage>;
-type TDoHeader = ThunkModuleToFunc<typeof DoHeader>;
 
-// biome-ignore lint/complexity/noBannedTypes: props
-type Props = {};
-
-export default (_props: Props) => {
-  const [classChangePasswdPage, doChangePasswdPage] = useThunk<
+export default () => {
+  const [changePasswdPageID, _setChangePasswdPageID] = useState(genUUID);
+  const useChangePasswdPage = useThunk<
     DoChangePasswdPage.State,
     TDoChangePasswdPage
   >(DoChangePasswdPage);
-  const [changePasswdPageID, _setChangePasswdPageID] = useState(genUUID);
-  const [classHeader, doHeader] = useThunk<DoHeader.State, TDoHeader>(DoHeader);
-  const [headerID, _setHeaderID] = useState(genUUID);
+  const [changePasswdPage, doChangePasswdPage] =
+    mustGetStateByThunk(useChangePasswdPage);
+  const { userID, errmsg } = changePasswdPage;
 
   const [origPasswd, setOrigPasswd] = useState("");
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
   const [errMsg, setErrMsg] = useState("");
 
-  //init
   const { userid: paramsUserID } = useParams();
   const userid = paramsUserID || "";
 
+  //init
+
   // biome-ignore lint/correctness/useExhaustiveDependencies: useEffect
   useEffect(() => {
-    doHeader.init(headerID);
-
     doChangePasswdPage.init(changePasswdPageID, userid);
   }, []);
-
-  //get data
-  const changePasswdPage =
-    getState(classChangePasswdPage) || DoChangePasswdPage.defaultState;
-  const userID = changePasswdPage.userID;
-  const errmsg = changePasswdPage.errmsg || "";
 
   //render
   const { height: innerHeight } = useWindowSize();
@@ -96,7 +85,7 @@ export default (_props: Props) => {
   return (
     <div className={styles.root} style={style}>
       <div className={"container"} style={style}>
-        <Header title="我想換密碼" stateHeader={classHeader} />
+        <Header title="我想換密碼" />
         <div className="row">
           <div className="col">
             <span>我是 {userID}</span>
