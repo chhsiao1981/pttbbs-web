@@ -26,18 +26,24 @@ type TDoRegisterPage = ThunkModuleToFunc<typeof DoRegisterPage>;
 type Props = {};
 
 export default (_props: Props) => {
+  // register-page
   const useRegisterPage = useThunk<DoRegisterPage.State, TDoRegisterPage>(
     DoRegisterPage,
   );
   const [registerPageID, _setRegisterPageID] = useState(genUUID);
-  const [registerPage, doRegisterPage] = mustGetStateByThunk(useRegisterPage);
+  const [registerPage, doRegisterPage] = mustGetStateByThunk(
+    useRegisterPage,
+    registerPageID,
+  );
   const { isAttemptRegister, errmsg } = registerPage;
 
+  // header
   const [_classHeader, doHeader] = useThunk<DoHeader.State, TDoHeader>(
     DoHeader,
   );
   const [headerID, _setHeaderID] = useState(genUUID);
 
+  // component-states
   const [email, setEmail] = useState("");
   const [isValidEmail, setIsValidEmail] = useState(false);
 
@@ -50,20 +56,25 @@ export default (_props: Props) => {
   //init
   // biome-ignore lint/correctness/useExhaustiveDependencies: useEffect
   useEffect(() => {
+    if (!headerID) {
+      return;
+    }
+    if (!registerPageID) {
+      return;
+    }
     doHeader.init(headerID);
     doRegisterPage.init(registerPageID);
-  }, []);
+  }, [headerID, registerPageID]);
 
-  //get data
-
+  // event-functions
   const cleanErr = () => {
+    setErrEmail("");
     doRegisterPage.cleanMsg(registerPageID);
   };
 
-  const changeEmail = (text: string) => {
+  const onChangeEmail = (text: string) => {
     setEmail(text);
 
-    setErrEmail("");
     cleanErr();
 
     const isValid = validateEmail(text);
@@ -76,11 +87,14 @@ export default (_props: Props) => {
 
     if (!validateEmail(email)) {
       setErrEmail(errors.ERR_EMAIL_WRONGFORMAT);
+      return;
     }
 
+    cleanErr();
     doRegisterPage.attemptRegister(registerPageID, email);
   };
 
+  // render
   const headerTitle = t("register.title");
 
   const isDisabledInput = isAttemptRegister;
@@ -109,7 +123,7 @@ export default (_props: Props) => {
                   placeholder="Email:"
                   aria-label="Email"
                   value={email}
-                  onChange={(e) => changeEmail(e.target.value)}
+                  onChange={(e) => onChangeEmail(e.target.value)}
                   required
                   disabled={isDisabledInput}
                 />
