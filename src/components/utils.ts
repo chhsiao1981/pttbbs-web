@@ -123,3 +123,13 @@ export const GetBoardParent = () => {
   // If the board is visited directly by url there will be no record => return ""
   return "";
 };
+
+export const validateEmail = (text: string) => {
+  return (
+    text.indexOf("@") !== -1 &&
+    text[0] !== "@" &&
+    text[text.length - 1] !== "@" &&
+    text[0] !== "." &&
+    text[text.length - 1] !== "."
+  );
+};

@@ -34,14 +34,11 @@ export const login = (username: string, password: string) =>
     },
   });
 
-export const attemptRegister = (username: string, email: string) =>
+export const attemptRegister = (email: string) =>
   api<Username>({
     endpoint: "/api/account/attemptregister",
     method: "post",
     json: {
-      client_id: config.CLIENT_ID,
-      client_secret: config.CLIENT_SECRET,
-      username,
       email,
     },
   });

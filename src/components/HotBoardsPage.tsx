@@ -124,7 +124,7 @@ export default (_props: Props) => {
   return (
     <div className={pageStyles.root}>
       <div ref={headerRef}>
-        <Header title={headerTitle} stateHeader={stateHeader} />
+        <Header title={headerTitle} />
       </div>
       {renderBoardList()}
       <div ref={funcbarRef}>

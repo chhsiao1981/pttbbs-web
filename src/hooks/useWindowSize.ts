@@ -14,14 +14,14 @@ export type WidthAndHeight = {
 //
 // addEventListener in the very beginning.
 //
-export default (diff: number = 10) => {
+export default (diff: number = 10, minWidth: number = MIN_INNER_WIDTH) => {
   const [widthAndHeight, setWidthAndHeight] = useState<WidthAndHeight>(() => ({
     width: window.innerWidth,
     height: window.innerHeight,
   }));
 
   const [displayWidthAndHeight, setDisplayWidthAndHeight] =
-    useState<WidthAndHeight>(getDisplayWidthAndHeight);
+    useState<WidthAndHeight>(() => getDisplayWidthAndHeight(minWidth));
 
   useEffect(() => {
     const handler = () => {
@@ -37,21 +37,20 @@ export default (diff: number = 10) => {
         height: window.innerHeight,
       });
 
-      const displayWidthAndHeight = getDisplayWidthAndHeight();
+      const displayWidthAndHeight = getDisplayWidthAndHeight(minWidth);
       setDisplayWidthAndHeight(displayWidthAndHeight);
     };
 
     window.addEventListener("resize", handler);
     return () => {
-      console.info("useWindowSize: to remove handler");
       window.removeEventListener("resize", handler);
     };
-  }, [widthAndHeight.width, widthAndHeight.height, diff]);
+  }, [widthAndHeight.width, widthAndHeight.height, diff, minWidth]);
 
   return displayWidthAndHeight;
 };
 
-const getDisplayWidthAndHeight = () =>
-  window.innerWidth < MIN_INNER_WIDTH
-    ? { width: MIN_INNER_WIDTH, height: window.innerHeight }
+const getDisplayWidthAndHeight = (minWidth: number) =>
+  window.innerWidth < minWidth
+    ? { width: minWidth, height: window.innerHeight }
     : { width: window.innerWidth, height: window.innerHeight };

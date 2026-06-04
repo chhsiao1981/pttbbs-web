@@ -4,14 +4,20 @@ import {
   type ThunkModuleToFunc,
   useThunk,
 } from "@chhsiao1981/use-thunk";
-import { type SubmitEventHandler, useEffect, useState } from "react";
+import {
+  type CSSProperties,
+  type SubmitEventHandler,
+  useEffect,
+  useState,
+} from "react";
 import { useTranslation } from "react-i18next";
+import useWindowSize from "../hooks/useWindowSize";
 import * as DoHeader from "../reducers/header";
 import * as DoRegisterPage from "../reducers/registerPage";
-import Empty from "./Empty";
 import * as errors from "./errors";
 import Header from "./Header";
 import pageStyles from "./Page.module.css";
+import { validateEmail } from "./utils";
 
 type TDoHeader = ThunkModuleToFunc<typeof DoHeader>;
 type TDoRegisterPage = ThunkModuleToFunc<typeof DoRegisterPage>;
@@ -25,6 +31,7 @@ export default (_props: Props) => {
   );
   const [registerPageID, _setRegisterPageID] = useState(genUUID);
   const [registerPage, doRegisterPage] = mustGetStateByThunk(useRegisterPage);
+  const { isAttemptRegister, errmsg } = registerPage;
 
   const [_classHeader, doHeader] = useThunk<DoHeader.State, TDoHeader>(
     DoHeader,
@@ -32,13 +39,13 @@ export default (_props: Props) => {
   const [headerID, _setHeaderID] = useState(genUUID);
 
   const [email, setEmail] = useState("");
-
-  const [isSubmit, setIsSubmit] = useState(false);
+  const [isValidEmail, setIsValidEmail] = useState(false);
 
   // error message
   const [errEmail, setErrEmail] = useState("");
 
   const { t } = useTranslation();
+  const { width: innerWidth } = useWindowSize(10, 0);
 
   //init
   // biome-ignore lint/correctness/useExhaustiveDependencies: useEffect
@@ -53,56 +60,41 @@ export default (_props: Props) => {
     doRegisterPage.cleanMsg(registerPageID);
   };
 
-  // ---------- Helper functions ---------
-
-  // ---------- Input Field Handlers -------------
   const changeEmail = (text: string) => {
     setEmail(text);
-    if (!text) {
-      setErrEmail("");
-      cleanErr();
-      return;
-    }
 
-    if (
-      text.indexOf("@") === -1 ||
-      text[0] === "@" ||
-      text[text.length - 1] === "@" ||
-      text[0] === "." ||
-      text[text.length - 1] === "."
-    ) {
-      setErrEmail(errors.ERR_EMAIL_WRONGFORMAT);
-    } else {
-      setErrEmail("");
-      cleanErr();
-    }
+    setErrEmail("");
+    cleanErr();
+
+    const isValid = validateEmail(text);
+    setIsValidEmail(isValid);
   };
 
   const onSubmit: SubmitEventHandler = (e) => {
-    console.info("RegisterPage: onSubmit");
-
-    // cleanErr();
-
-    setIsSubmit(true);
-
-    // doRegisterPage.attemptRegister(email);
-
     e.preventDefault();
     e.stopPropagation();
+
+    if (!validateEmail(email)) {
+      setErrEmail(errors.ERR_EMAIL_WRONGFORMAT);
+    }
+
+    doRegisterPage.attemptRegister(registerPageID, email);
   };
 
-  // -------- Component Instance ----------
   const headerTitle = t("register.title");
 
-  if (!registerPageID) {
-    return <Empty />;
-  }
-  const isDisabled = !!errEmail || !email;
+  const isDisabledInput = isAttemptRegister;
+  const isDisabledButton = isAttemptRegister || !isValidEmail || !email;
+  const classInfo = isAttemptRegister ? "" : "hide";
 
-  const classInfo = isSubmit ? "" : "hide";
+  const allErrMsg = errEmail || errmsg;
+
+  const rootStyle: CSSProperties = {
+    width: innerWidth,
+  };
 
   return (
-    <div className={"vh-100 " + pageStyles.root}>
+    <div className={"vh-100 " + pageStyles.root} style={rootStyle}>
       <Header title={headerTitle} />
       <div className="container mt-4">
         <div className="col-12 col-md-6 mx-auto">
@@ -119,6 +111,7 @@ export default (_props: Props) => {
                   value={email}
                   onChange={(e) => changeEmail(e.target.value)}
                   required
+                  disabled={isDisabledInput}
                 />
               </div>
             </div>
@@ -126,14 +119,14 @@ export default (_props: Props) => {
               <button
                 className="btn btn-primary mt-2"
                 type="submit"
-                disabled={isDisabled}
+                disabled={isDisabledButton}
               >
                 {t("register.registerAccount")}
               </button>
             </div>
             <div className="row mt-4">
               <div className="col">
-                <span className={pageStyles.errMsg}>{errEmail}</span>
+                <span className={pageStyles.errMsg}>{allErrMsg}</span>
               </div>
             </div>
             <div className="row mt-4">
