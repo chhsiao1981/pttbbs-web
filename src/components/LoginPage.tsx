@@ -1,12 +1,12 @@
 import {
   genUUID,
-  getDefaultID,
-  getState,
+  mustGetStateByThunk,
   type ThunkModuleToFunc,
   useThunk,
 } from "@chhsiao1981/use-thunk";
 import config from "config";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import * as DoHeader from "../reducers/header";
 import * as DoLoginPage from "../reducers/loginPage";
 import Empty from "./Empty";
@@ -20,17 +20,18 @@ type TDoLoginPage = ThunkModuleToFunc<typeof DoLoginPage>;
 // biome-ignore lint/complexity/noBannedTypes: props
 type Props = {};
 export default (_props: Props) => {
-  const [classLoginPage, doLoginPage] = useThunk<
-    DoLoginPage.State,
-    TDoLoginPage
-  >(DoLoginPage);
   const [loginPageID, _setLoginPageID] = useState(genUUID);
-  const [classHeader, doHeader] = useThunk<DoHeader.State, TDoHeader>(DoHeader);
+  const useLoginPage = useThunk<DoLoginPage.State, TDoLoginPage>(DoLoginPage);
+  const [loginPage, doLoginPage] = mustGetStateByThunk(useLoginPage);
+  const { errmsg } = loginPage;
+
   const [headerID, _setHeaderID] = useState(genUUID);
+  const useHeader = useThunk<DoHeader.State, TDoHeader>(DoHeader);
+  const [_header, doHeader] = mustGetStateByThunk(useHeader);
 
   const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
   const [errMsg, setErrMsg] = useState("");
+  const { t } = useTranslation();
 
   //init
   // biome-ignore lint/correctness/useExhaustiveDependencies: useEffect
@@ -39,14 +40,9 @@ export default (_props: Props) => {
     doLoginPage.init(loginPageID);
   }, []);
 
-  //get data
-  const loginPage = getState(classLoginPage) || DoLoginPage.defaultState;
-  const myID = getDefaultID(classLoginPage);
-  const errmsg = loginPage.errmsg || "";
-
   const cleanErr = () => {
     setErrMsg("");
-    doLoginPage.cleanErr(myID);
+    doLoginPage.cleanErr(loginPageID);
   };
 
   const changeUsername = (username: string) => {
@@ -54,78 +50,52 @@ export default (_props: Props) => {
     cleanErr();
   };
 
-  const changePassword = (password: string) => {
-    setPassword(password);
-    cleanErr();
-  };
-
   // ---------- Handlers -------------
 
   const login = () => {
-    doLoginPage.login(myID, username, password);
+    // doLoginPage.login(loginPageID, username);
   };
 
   const register = () => {
     window.location.href = "/register";
   };
 
-  const forgotPassword = () => {
-    window.location.href = "/forgetPassword";
-  };
-
   const allErrMsg = errors.mergeErr(errMsg, errmsg);
 
   // -------- Component Instance ----------
-  const headerTitle = `\\歡迎登入 ${config.BRAND}～/`;
+  const title = `${t("login.titlePrefix")}${config.BRAND}${t("login.titlePostfix")}`;
 
-  if (!myID) {
+  if (!loginPageID) {
     return <Empty />;
   }
   return (
     <div className={"vh-100 " + styles.root}>
-      <Header title={headerTitle} stateHeader={classHeader} />
+      <Header title={title} />
       <div className={"container mt-5 "}>
         <div className="row">
           <div className="col-12 col-md-6 mx-auto">
             <input
               className="form-control mb-3"
               type="text"
-              placeholder="Username:"
+              placeholder="Email or Username:"
               aria-label="Username"
               value={username}
               onChange={(e) => changeUsername(e.target.value)}
             />
-            <input
-              className="form-control mb-3"
-              type="password"
-              placeholder="Password:"
-              aria-label="Password"
-              value={password}
-              onChange={(e) => changePassword(e.target.value)}
-            />
-            <div className="d-flex justify-content-between">
-              <div>
-                <button
-                  type="button"
-                  className="btn btn-primary mr-3"
-                  onClick={login}
-                >
-                  我要登入
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  onClick={register}
-                >
-                  我想註冊
-                </button>
-              </div>
+            <div className="d-flex justify-content-center">
+              <button
+                type="button"
+                className="btn btn-primary me-2"
+                onClick={login}
+              >
+                {t("login.login")}
+              </button>
               <button
                 type="button"
                 className="btn btn-primary"
-                onClick={forgotPassword}
+                onClick={register}
               >
-                我忘記密碼了 Orz
+                {t("login.register")}
               </button>
             </div>
             <span className={styles.errMsg}>{allErrMsg}</span>

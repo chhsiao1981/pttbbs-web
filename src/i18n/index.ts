@@ -15,6 +15,7 @@ const resources = {
 };
 
 i18n
+  // .use(LanguageDetector)
   .use(initReactI18next) // passes i18n down to react-i18next
   .init({
     resources,
@@ -23,6 +24,7 @@ i18n
     interpolation: {
       escapeValue: false, // react already safes from xss
     },
+    debug: true,
   });
 
 export default i18n;

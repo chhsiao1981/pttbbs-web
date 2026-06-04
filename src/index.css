@@ -1,9 +1,9 @@
 @import url(//fonts.googleapis.com/css?family=Inconsolata);
 @font-face {
-    font-family: SymMingLiu;
-    src: url(assets/symmingliu.aaa394dd81dbe129da06687a75bfe002.woff) format("woff")
+  font-family: SymMingLiu;
+  src: url(assets/symmingliu.aaa394dd81dbe129da06687a75bfe002.woff)
+    format("woff");
 }
-
 
 :root {
   color-scheme: light dark;
@@ -16,9 +16,10 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-a, a:hover {
-    color: #fff;
-    text-decoration: none;
+a,
+a:hover {
+  color: #fff;
+  text-decoration: none;
 }
 
 body {
@@ -34,8 +35,9 @@ body {
 }
 
 code {
-    font-family: source-code-pro, Menlo, Monaco, Consolas, "Inconsolata", 'Courier New',
-        monospace;
+  font-family:
+    source-code-pro, Menlo, Monaco, Consolas, "Inconsolata", "Courier New",
+    monospace;
 }
 
 h1 {
@@ -62,66 +64,69 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
-
 .public_fixedDataTable_main {
-    border-color: #000;
+  border-color: #000;
 }
 
 .public_fixedDataTable_header,
 .public_fixedDataTable_hasBottomBorder {
-    border-color: #000;
+  border-color: #000;
 }
 
 .public_fixedDataTableRow_main {
-    background-color: #000;
+  background-color: #000;
 }
 
 .public_fixedDataTableCell_main {
-    background-color: #000;
-    border-color: #000;
+  background-color: #000;
+  border-color: #000;
 }
 
 .public_fixedDataTableRow_highlighted,
 .public_fixedDataTableRow_highlighted .public_fixedDataTableCell_main {
-    background-color: #000;
+  background-color: #000;
 }
 
 .public_fixedDataTable_header,
 .public_fixedDataTable_scrollbarSpacer,
 .public_fixedDataTable_header .public_fixedDataTableCell_main {
-    background-color: #eee;
-    background-image: linear-gradient(#eee, #eee);
-    border-color: #eee;
+  background-color: #eee;
+  background-image: linear-gradient(#eee, #eee);
+  border-color: #eee;
 }
 
 .fixedDataTableCellLayout_main {
-    border-width: 0px;
+  border-width: 0px;
 }
 
 .fixedDataTableLayout_header,
 .fixedDataTableLayout_hasBottomBorder {
-    border-bottom-style: solid;
-    border-bottom-width: 0px;
+  border-bottom-style: solid;
+  border-bottom-width: 0px;
 }
 
 .fixedDataTableLayout_footer .public_fixedDataTableCell_main {
-    border-top-style: solid;
-    border-top-width: 0px;
+  border-top-style: solid;
+  border-top-width: 0px;
 }
 
 .public_fixedDataTableCell_cellContent {
-    padding: 0px;
+  padding: 0px;
 }
 
 .fixedDataTableCellLayout_wrap2 {
-    display: block;
+  display: block;
 }
 
 .fixedDataTableCellLayout_wrap3 {
-    display: block;
+  display: block;
 }
 
 .logo-github {
-    -webkit-mask: url(./assets/img/github.svg) no-repeat center;
-    mask: url(./assets/img/github.svg) no-repeat center;
+  -webkit-mask: url(./assets/img/github.svg) no-repeat center;
+  mask: url(./assets/img/github.svg) no-repeat center;
+}
+
+.hide {
+  display: none;
 }

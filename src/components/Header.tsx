@@ -17,7 +17,7 @@ type TDoHeader = ThunkModuleToFunc<typeof DoHeader>;
 type Props = {
   title: string | (() => ReactNode);
   renderHeader?: any;
-  stateHeader: ClassState<DoHeader.State>;
+  stateHeader?: ClassState<DoHeader.State>;
 };
 
 export default (props: Props) => {
@@ -31,7 +31,7 @@ export default (props: Props) => {
 
   // Links
   const renderUserHome = () => {
-    const text = username ? `hi~ ${username}` : t("login/register");
+    const text = username ? `hi~ ${username}` : t("header.loginRegister");
     const url = username ? `/user/${username}` : "/login";
 
     return (
