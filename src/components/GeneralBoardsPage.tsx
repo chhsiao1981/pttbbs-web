@@ -93,7 +93,7 @@ export default (_props: Props) => {
   if (!header) {
     return <Empty />;
   }
-  const myUserID = header.user_id;
+  const myUserID = header.userID;
 
   const width = innerWidth;
   const listHeight = innerHeight - headerHeight - funcbarHeight;

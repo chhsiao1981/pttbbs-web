@@ -40,7 +40,7 @@ export default (_props: Props) => {
   }, []);
 
   const header: Header_s = getState(classHeader) || DoHeader.defaultState;
-  const userID = header.user_id;
+  const userID = header.userID;
 
   useEffect(() => {
     if (!userID) {

@@ -5,7 +5,7 @@ import {
   type ThunkModuleToFunc,
   useThunk,
 } from "@chhsiao1981/use-thunk";
-import { type FormEvent, useEffect, useState } from "react";
+import { type SubmitEvent, useEffect, useState } from "react";
 import * as constants from "../constants";
 import * as DoHeader from "../reducers/header";
 import * as DoRegisterPage from "../reducers/registerPage";
@@ -164,7 +164,7 @@ export default (_props: Props) => {
     doRegisterPage.verifyEmail(myID, username, email);
     cleanErr();
   };
-  const onSubmitForm = (e: FormEvent) => {
+  const onSubmitForm = (e: SubmitEvent) => {
     e.preventDefault();
   };
 

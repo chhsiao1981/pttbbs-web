@@ -10,12 +10,16 @@ import * as serverUtils from "./serverUtils";
 export const myClass = "demo-pttbbs/Header";
 
 export interface State extends State_t {
-  user_id: string;
+  userID: string;
+  username: string;
+  nickname: string;
   isInit: boolean;
 }
 
 export const defaultState: State = {
-  user_id: "",
+  userID: "",
+  username: "",
+  nickname: "",
   isInit: false,
 
   errmsg: "",
@@ -45,6 +49,6 @@ const getData = (myID: string): Thunk<State> => {
       return;
     }
 
-    dispatch(_setData(myID, data));
+    dispatch(_setData(myID, { userID: data.user_id }));
   };
 };

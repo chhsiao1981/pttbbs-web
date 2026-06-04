@@ -67,8 +67,8 @@ export default (_props: Props) => {
   // const errmsg = hotBoardsPage.errmsg || "";
   const boards = hotBoardsPage.list;
 
-  const header = getState(stateHeader) || { user_id: "" };
-  const myUserID = header.user_id;
+  const header = getState(stateHeader) || { userID: "" };
+  const myUserID = header.userID;
 
   const width = innerWidth;
   //let boardListHeight = innerHeight * SCREEN_RATIO

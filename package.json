@@ -6,55 +6,46 @@
   "scripts": {
     "dev": "npm run dev:dev && vite",
     "build": "tsc -b && vite build",
-
     "dev:dev": "rm -f src/main.tsx; cd src && ln -s dev.tsx main.tsx && cd ..",
-
     "dev:all": "rm -f src/main.tsx; cd src && ln -s all.tsx main.tsx && cd ..",
     "build:all": "npm run dev:all && npm run build && cp dist/index.html dist/all.html",
-
     "dev:home": "rm -f src/main.tsx; cd src && ln -s home.tsx main.tsx && cd ..",
     "build:home": "npm run dev:home && npm run build && cp dist/index.html dist/home.html",
-
     "dev:login": "rm -f src/main.tsx; cd src && ln -s login.tsx main.tsx && cd ..",
     "build:login": "npm run dev:login && npm run build && cp dist/index.html dist/login.html",
-
     "dev:register": "rm -f src/main.tsx; cd src && ln -s register.tsx main.tsx && cd ..",
     "build:register": "npm run dev:register && npm run build && cp dist/index.html dist/register.html",
-
     "dev:user-info": "rm -f src/main.tsx; cd src && ln -s userInfo.tsx main.tsx && cd ..",
     "build:user-info": "npm run dev:user-info && npm run build && cp dist/index.html dist/user-info.html",
-
     "dev:change-passwd": "rm -f src/main.tsx; cd src && ln -s changePasswd.tsx main.tsx && cd ..",
     "build:change-passwd": "npm run dev:change-passwd && npm run build && cp dist/index.html dist/change-passwd.html",
-
     "dev:change-email": "rm -f src/main.tsx; cd src && ln -s changeEmail.tsx main.tsx && cd ..",
     "build:change-email": "npm run dev:change-email && npm run build && cp dist/index.html dist/change-email.html",
-
     "dev:set-id-email": "rm -f src/main.tsx; cd src && ln -s setIDEmail.tsx main.tsx && cd ..",
     "build:set-id-email": "npm run dev:set-id-email && npm run build && cp dist/index.html dist/set-id-email.html",
-
     "dev:attempt-change-email": "rm -f src/main.tsx; cd src && ln -s attemptChangeEmail.tsx main.tsx && cd ..",
     "build:attempt-change-email": "npm run dev:attempt-change-email && npm run build && cp dist/index.html dist/attempt-change-email.html",
-
     "dev:attempt-set-id-email": "rm -f src/main.tsx; cd src && ln -s attemptSetIDEmail.tsx main.tsx && cd ..",
     "build:attempt-set-id-email": "npm run dev:attempt-set-id-email && npm run build && cp dist/index.html dist/attempt-set-id-email.html",
-
     "fmt": "biome format --write .",
     "lint": "biome lint .",
     "test": "vitest",
     "preview": "vite preview"
   },
   "dependencies": {
-    "@chhsiao1981/use-thunk": "^10.1.2",
+    "@chhsiao1981/use-thunk": "^10.3.0",
     "bootstrap": "^5.3.8",
     "bootstrap-icons": "^1.13.1",
     "fixed-data-table-2": "^2.0.22",
+    "i18next": "^26.3.1",
+    "i18next-browser-languagedetector": "^8.2.1",
     "moment": "^2.30.1",
     "moment-timezone": "^0.6.2",
     "query-string": "^9.3.1",
     "react": "^19.2.7",
     "react-bootstrap": "^2.10.10",
     "react-dom": "^19.2.0",
+    "react-i18next": "^17.0.8",
     "react-router-dom": "^6.30.3",
     "react-use": "^17.6.0",
     "react-widgets": "^5.8.6",
