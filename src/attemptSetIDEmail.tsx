@@ -25,6 +25,7 @@ import * as DoUserFavoritesPage from "./reducers/userFavoritesPage";
 import * as DoUserInfoPage from "./reducers/userInfoPage";
 import reportWebVitals from "./reportWebVitals";
 import Routes from "./routes/AttemptSetIDEmail";
+import "./i18n";
 
 // @ts-expect-error registerThunk
 registerThunk(DoArticlePage);

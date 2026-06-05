@@ -29,10 +29,8 @@ import * as DoHeader from "../reducers/header";
 type TDoHeader = ThunkModuleToFunc<typeof DoHeader>;
 
 export default () => {
-  const [_classHeader, doHeader] = useThunk<DoHeader.State, TDoHeader>(
-    DoHeader,
-  );
-  const [headerID, _setHeaderID] = useState(genUUID);
+  const [_, doHeader] = useThunk<DoHeader.State, TDoHeader>(DoHeader);
+  const [headerID] = useState(genUUID);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: useEffect
   useEffect(() => {

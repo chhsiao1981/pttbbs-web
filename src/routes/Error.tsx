@@ -5,7 +5,7 @@ import {
 } from "@chhsiao1981/use-thunk";
 import { useEffect, useState } from "react";
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
-import AttemptSetIDEmailPage from "../components/AttemptSetIDEmailPage";
+import ErrorPage from "../components/ErrorPage";
 import * as DoHeader from "../reducers/header";
 
 type TDoHeader = ThunkModuleToFunc<typeof DoHeader>;
@@ -20,12 +20,14 @@ export default () => {
   }, []);
 
   return (
-    <Router>
+    <Router
+      future={{
+        v7_startTransition: true,
+        v7_relativeSplatPath: true,
+      }}
+    >
       <Routes>
-        <Route
-          path="/user/:userid/attemptsetidemail"
-          element={<AttemptSetIDEmailPage />}
-        />
+        <Route path="/error" element={<ErrorPage />} />
       </Routes>
     </Router>
   );
