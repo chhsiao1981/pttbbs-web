@@ -6,9 +6,11 @@ import AttemptSetIDEmailPage from "../components/AttemptSetIDEmailPage";
 import ChangeEmailPage from "../components/ChangeEmailPage";
 import ChangePasswdPage from "../components/ChangePasswdPage";
 import ClassBoardsPage from "../components/ClassBoardsPage";
+import ErrorPage from "../components/ErrorPage";
 import GeneralBoardsPage from "../components/GeneralBoardsPage";
 import HomePage from "../components/HomePage";
 import HotBoardsPage from "../components/HotBoardsPage";
+import InitPage from "../components/InitPage";
 import LoginPage from "../components/LoginPage";
 import ManualsPage from "../components/ManualsPage";
 import NewArticlePage from "../components/NewArticlePage";
@@ -30,8 +32,10 @@ export default (_props: Props) => {
     >
       <Routes>
         <Route path="/" element={<HomePage />} />
+        <Route path="/error" element={<ErrorPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/init" element={<InitPage />} />
         <Route path="/user/:userid" element={<UserInfoPage />} />
         <Route
           path="/user/:userid/resetpassword"

@@ -15,5 +15,17 @@
     "titlePrefix": "\\Welcome to Login ",
     "titlePostfix": " ～/",
     "info": "Please check email for the pass-code."
+  },
+  "init": {
+    "title": "Setup My Profile",
+    "username": "Username",
+    "realName": "My real name",
+    "birthDate": "My birthday",
+    "submit": "Setup"
+  },
+  "error": {
+    "title": "Something Unexpected",
+    "prompt": "We are sorry something unexpected happened～",
+    "backHome": "Back to"
   }
 }

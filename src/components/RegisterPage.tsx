@@ -22,10 +22,7 @@ import { validateEmail } from "./utils";
 type TDoHeader = ThunkModuleToFunc<typeof DoHeader>;
 type TDoRegisterPage = ThunkModuleToFunc<typeof DoRegisterPage>;
 
-// biome-ignore lint/complexity/noBannedTypes: props
-type Props = {};
-
-export default (_props: Props) => {
+export default () => {
   // register-page
   const useRegisterPage = useThunk<DoRegisterPage.State, TDoRegisterPage>(
     DoRegisterPage,
@@ -95,7 +92,7 @@ export default (_props: Props) => {
   };
 
   // render
-  const headerTitle = t("register.title");
+  const title = t("register.title");
 
   const isDisabledInput = isAttemptRegister;
   const isDisabledButton = isAttemptRegister || !isValidEmail || !email;
@@ -109,25 +106,21 @@ export default (_props: Props) => {
 
   return (
     <div className={"vh-100 " + pageStyles.root} style={rootStyle}>
-      <Header title={headerTitle} />
+      <Header title={title} />
       <div className="container mt-4">
         <div className="col-12 col-md-6 mx-auto">
           <form onSubmit={onSubmit}>
             <div className="form-group">
-              <label htmlFor="emailField">{t("register.emailAddress")}:</label>
-              <div className="input-group">
-                <input
-                  id="emailField"
-                  className="form-control"
-                  type="email"
-                  placeholder="Email:"
-                  aria-label="Email"
-                  value={email}
-                  onChange={(e) => onChangeEmail(e.target.value)}
-                  required
-                  disabled={isDisabledInput}
-                />
-              </div>
+              <input
+                className="form-control"
+                type="email"
+                placeholder="Email:"
+                aria-label="Email"
+                value={email}
+                onChange={(e) => onChangeEmail(e.target.value)}
+                required
+                disabled={isDisabledInput}
+              />
             </div>
             <div className="row">
               <button
