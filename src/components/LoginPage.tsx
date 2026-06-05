@@ -7,14 +7,11 @@ import {
 import config from "config";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import * as DoHeader from "../reducers/header";
 import * as DoLoginPage from "../reducers/loginPage";
-import Empty from "./Empty";
 import * as errors from "./errors";
 import Header from "./Header";
 import styles from "./Page.module.css";
 
-type TDoHeader = ThunkModuleToFunc<typeof DoHeader>;
 type TDoLoginPage = ThunkModuleToFunc<typeof DoLoginPage>;
 
 // biome-ignore lint/complexity/noBannedTypes: props
@@ -25,10 +22,6 @@ export default (_props: Props) => {
   const [loginPage, doLoginPage] = mustGetStateByThunk(useLoginPage);
   const { errmsg } = loginPage;
 
-  const [headerID, _setHeaderID] = useState(genUUID);
-  const useHeader = useThunk<DoHeader.State, TDoHeader>(DoHeader);
-  const [_header, doHeader] = mustGetStateByThunk(useHeader);
-
   const [username, setUsername] = useState("");
   const [errMsg, setErrMsg] = useState("");
   const { t } = useTranslation();
@@ -36,10 +29,10 @@ export default (_props: Props) => {
   //init
   // biome-ignore lint/correctness/useExhaustiveDependencies: useEffect
   useEffect(() => {
-    doHeader.init(headerID);
     doLoginPage.init(loginPageID);
   }, []);
 
+  // event handlers
   const cleanErr = () => {
     setErrMsg("");
     doLoginPage.cleanErr(loginPageID);
@@ -49,8 +42,6 @@ export default (_props: Props) => {
     setUsername(username);
     cleanErr();
   };
-
-  // ---------- Handlers -------------
 
   const login = () => {
     // doLoginPage.login(loginPageID, username);
@@ -62,12 +53,8 @@ export default (_props: Props) => {
 
   const allErrMsg = errors.mergeErr(errMsg, errmsg);
 
-  // -------- Component Instance ----------
   const title = `${t("login.titlePrefix")}${config.BRAND}${t("login.titlePostfix")}`;
 
-  if (!loginPageID) {
-    return <Empty />;
-  }
   return (
     <div className={"vh-100 " + styles.root}>
       <Header title={title} />

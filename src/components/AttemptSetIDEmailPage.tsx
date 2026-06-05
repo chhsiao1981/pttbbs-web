@@ -1,6 +1,6 @@
 import {
   genUUID,
-  getState,
+  mustGetStateByThunk,
   type ThunkModuleToFunc,
   useThunk,
 } from "@chhsiao1981/use-thunk";
@@ -8,7 +8,6 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import useWindowSize from "../hooks/useWindowSize";
 import * as DoAttemptSetIDEmailPage from "../reducers/attemptSetIDEmailPage";
-import * as DoHeader from "../reducers/header";
 import Empty from "./Empty";
 import * as errors from "./errors";
 import Header from "./Header";
@@ -17,20 +16,18 @@ import pageStyles from "./Page.module.css";
 type TDoAttemptSetIDEmailPage = ThunkModuleToFunc<
   typeof DoAttemptSetIDEmailPage
 >;
-type TDoHeader = ThunkModuleToFunc<typeof DoHeader>;
-
 // biome-ignore lint/complexity/noBannedTypes: props
 type Props = {};
 export default (_props: Props) => {
-  const [classAttemptSetIDEmailPage, doAttemptSetIDEmailPage] = useThunk<
+  const [attemptSetIDEmailPageID] = useState(genUUID);
+  const useAttemptSetIDEmailPage = useThunk<
     DoAttemptSetIDEmailPage.State,
     TDoAttemptSetIDEmailPage
   >(DoAttemptSetIDEmailPage);
-  const [attemptSetIDEmailPageID, _setSttemptSetIDEmailPageID] =
-    useState(genUUID);
-
-  const [classHeader, doHeader] = useThunk<DoHeader.State, TDoHeader>(DoHeader);
-  const [headerID, _setHeaderID] = useState(genUUID);
+  const [attemptSetIDEmailPage, doAttemptSetIDEmailPage] = mustGetStateByThunk(
+    useAttemptSetIDEmailPage,
+  );
+  const { userID, errmsg, isDone } = attemptSetIDEmailPage;
 
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
@@ -38,39 +35,30 @@ export default (_props: Props) => {
 
   //init
   const { userid: paramsUserID } = useParams();
-  const userid = paramsUserID || "";
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: useEffect
   useEffect(() => {
-    if (!userid) {
+    if (!paramsUserID) {
       return;
     }
 
-    doHeader.init(headerID);
-
-    doAttemptSetIDEmailPage.init(attemptSetIDEmailPageID, userid);
-  }, [userid]);
-
-  //get data
-  const attemptSetIDEmailPage =
-    getState(classAttemptSetIDEmailPage) ||
-    DoAttemptSetIDEmailPage.defaultState;
-
-  const userID = attemptSetIDEmailPage.userID;
-  const errmsg = attemptSetIDEmailPage.errmsg || "";
-  const isDone = attemptSetIDEmailPage.isDone;
+    doAttemptSetIDEmailPage.init(attemptSetIDEmailPageID, paramsUserID);
+  }, [paramsUserID]);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: useEffect
   useEffect(() => {
-    if (!userid) {
+    if (!paramsUserID) {
       return;
     }
     if (!isDone) {
       return;
     }
 
-    doAttemptSetIDEmailPage.sleepAndRedirect(attemptSetIDEmailPageID, userid);
-  }, [isDone, userid]);
+    doAttemptSetIDEmailPage.sleepAndRedirect(
+      attemptSetIDEmailPageID,
+      paramsUserID,
+    );
+  }, [isDone, paramsUserID]);
 
   //render
   const { height: innerHeight } = useWindowSize();
@@ -124,7 +112,7 @@ export default (_props: Props) => {
   return (
     <div className={pageStyles.root} style={style}>
       <div className={"container"}>
-        <Header title="我想換認證 Email" stateHeader={classHeader} />
+        <Header title="我想換認證 Email" />
         <div className="row">
           <div className="col">
             <span>我是 {userID}</span>

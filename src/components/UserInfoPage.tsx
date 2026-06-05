@@ -1,14 +1,12 @@
 import {
   genUUID,
-  getDefaultID,
-  getState,
+  mustGetStateByThunk,
   type ThunkModuleToFunc,
   useThunk,
 } from "@chhsiao1981/use-thunk";
 import config from "config";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import * as DoHeader from "../reducers/header";
 import * as DoUserPage from "../reducers/userInfoPage";
 import Empty from "./Empty";
 import * as errors from "./errors";
@@ -16,43 +14,27 @@ import Header from "./Header";
 import pageStyles from "./Page.module.css";
 import { TSToDateTimeStr } from "./utils";
 
-type TDoHeader = ThunkModuleToFunc<typeof DoHeader>;
 type TDoUserPage = ThunkModuleToFunc<typeof DoUserPage>;
 
-// biome-ignore lint/complexity/noBannedTypes: props
-type Props = {};
-
-export default (_props: Props) => {
-  const [classUserPage, doUserPage] = useThunk<DoUserPage.State, TDoUserPage>(
-    DoUserPage,
-  );
-  const [classHeader, doHeader] = useThunk<DoHeader.State, TDoHeader>(DoHeader);
+export default () => {
+  const [userPageID, _setUserPageID] = useState(genUUID);
+  const useUserPage = useThunk<DoUserPage.State, TDoUserPage>(DoUserPage);
+  const [userPage, doUserPage] = mustGetStateByThunk(useUserPage);
+  const { errmsg } = userPage;
 
   // eslint-disable-next-line
   const [errMsg, _setErrMsg] = useState("");
 
-  //init
   const { userid: paramsUserID } = useParams();
   const userid = paramsUserID || "";
 
+  //init
   // biome-ignore lint/correctness/useExhaustiveDependencies: useEffect
   useEffect(() => {
-    const headerID = genUUID();
-    doHeader.init(headerID);
-
-    const userPageID = genUUID();
     doUserPage.init(userPageID, userid);
   }, []);
 
-  //get data
-  const userPage = getState(classUserPage);
-  if (!userPage) {
-    return <Empty />;
-  }
-  const myID = getDefaultID(classUserPage);
-  const errmsg = userPage.errmsg || "";
-
-  //actions
+  // event handlers
   const changePassword = () => {
     window.location.href = "/user/" + userid + "/resetpassword";
   };
@@ -66,9 +48,6 @@ export default (_props: Props) => {
   };
 
   const renderPttEmail = () => {
-    if (!userPage) {
-      return <Empty />;
-    }
     if (!userPage.pttemail) {
       return <span>我在 {config.BRAND} 的 Email 是 (還沒有設定～)</span>;
     }
@@ -119,7 +98,7 @@ export default (_props: Props) => {
 
   const allErrMsg = errors.mergeErr(errMsg, errmsg);
 
-  const headerTitle = userid + "的資訊";
+  const title = userid + "的資訊";
 
   let email = userPage.email || "(還沒有設定～)";
   if (userPage.email && !userPage.email_set) {
@@ -134,12 +113,12 @@ export default (_props: Props) => {
   // const career = userPage.Career || "(某個角落)";
 
   //render
-  if (!myID) {
+  if (!userPageID) {
     return <Empty />;
   }
   return (
     <div className={"vh-100 " + pageStyles.root}>
-      <Header title={headerTitle} stateHeader={classHeader} />
+      <Header title={title} />
       <div className={"container"}>
         <div className="row">
           <div className="col">

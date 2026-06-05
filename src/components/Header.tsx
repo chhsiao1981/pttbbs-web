@@ -1,5 +1,4 @@
 import {
-  type ClassState,
   mustGetStateByThunk,
   type ThunkModuleToFunc,
   useThunk,
@@ -16,15 +15,14 @@ type TDoHeader = ThunkModuleToFunc<typeof DoHeader>;
 
 type Props = {
   title: string | (() => ReactNode);
-  renderHeader?: any;
-  stateHeader?: ClassState<DoHeader.State>;
+  renderHeader?: () => ReactNode;
 };
 
 export default (props: Props) => {
   const { title: paramsTitle, renderHeader: propsRenderHeader } = props;
 
   const useHeader = useThunk<DoHeader.State, TDoHeader>(DoHeader);
-  const [header, doHeader, headerID] = mustGetStateByThunk(useHeader);
+  const [header] = mustGetStateByThunk(useHeader);
   const { username } = header;
 
   const { t } = useTranslation();
@@ -46,12 +44,10 @@ export default (props: Props) => {
       return propsRenderHeader();
     }
 
-    const title = paramsTitle || "";
-    if (typeof title === "function") {
-      return <div className={`col ${styles.title}`}>{title()}</div>;
-    } else {
-      return <div className={`col ${styles.title}`}>{title}</div>;
-    }
+    const title =
+      (typeof paramsTitle === "function" ? paramsTitle() : paramsTitle) || "";
+
+    return <div className={`col ${styles.title}`}>{title}</div>;
   };
 
   const renderTerm = () => {

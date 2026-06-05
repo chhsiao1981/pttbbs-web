@@ -12,14 +12,12 @@ import {
 } from "react";
 import { useTranslation } from "react-i18next";
 import useWindowSize from "../hooks/useWindowSize";
-import * as DoHeader from "../reducers/header";
 import * as DoRegisterPage from "../reducers/registerPage";
 import * as errors from "./errors";
 import Header from "./Header";
 import pageStyles from "./Page.module.css";
 import { validateEmail } from "./utils";
 
-type TDoHeader = ThunkModuleToFunc<typeof DoHeader>;
 type TDoRegisterPage = ThunkModuleToFunc<typeof DoRegisterPage>;
 
 export default () => {
@@ -34,12 +32,6 @@ export default () => {
   );
   const { isAttemptRegister, errmsg } = registerPage;
 
-  // header
-  const [_classHeader, doHeader] = useThunk<DoHeader.State, TDoHeader>(
-    DoHeader,
-  );
-  const [headerID, _setHeaderID] = useState(genUUID);
-
   // component-states
   const [email, setEmail] = useState("");
   const [isValidEmail, setIsValidEmail] = useState(false);
@@ -53,15 +45,11 @@ export default () => {
   //init
   // biome-ignore lint/correctness/useExhaustiveDependencies: useEffect
   useEffect(() => {
-    if (!headerID) {
-      return;
-    }
     if (!registerPageID) {
       return;
     }
-    doHeader.init(headerID);
     doRegisterPage.init(registerPageID);
-  }, [headerID, registerPageID]);
+  }, [registerPageID]);
 
   // event-functions
   const cleanErr = () => {

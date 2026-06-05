@@ -1,16 +1,14 @@
 import {
   genUUID,
-  getState,
+  mustGetStateByThunk,
   type ThunkModuleToFunc,
   useThunk,
 } from "@chhsiao1981/use-thunk";
-import QueryString from "query-string";
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useKey } from "react-use";
 import useWindowSize from "../hooks/useWindowSize";
 import * as DoArticlesPage from "../reducers/articlesPage";
-import * as DoHeader from "../reducers/header";
 import type { ArticleSummary_i } from "../types";
 import ArticleList from "./ArticleList";
 import EmptyList from "./EmptyList";
@@ -18,26 +16,20 @@ import FunctionBar from "./FunctionBar";
 import Header from "./Header";
 import styles from "./Page.module.css";
 import SearchBar from "./SearchBar";
-import { GetBoardParent } from "./utils";
+import { getBoardParent } from "./utils";
 
 type TDoArticlesPage = ThunkModuleToFunc<typeof DoArticlesPage>;
-type TDoHeader = ThunkModuleToFunc<typeof DoHeader>;
 
-// biome-ignore lint/complexity/noBannedTypes: props
-type Props = {};
-
-export default (_props: Props) => {
-  const [classArticlesPage, doArticlesPage] = useThunk<
-    DoArticlesPage.State,
-    TDoArticlesPage
-  >(DoArticlesPage);
-  const [articlesPageID, _setArticlesPageID] = useState(genUUID);
-
-  const articlesPage =
-    getState(classArticlesPage) || DoArticlesPage.defaultState;
+export default () => {
+  const [articlesPageID] = useState(genUUID);
+  const useArticlesPage = useThunk<DoArticlesPage.State, TDoArticlesPage>(
+    DoArticlesPage,
+  );
+  const [articlesPage, doArticlesPage] = mustGetStateByThunk(useArticlesPage);
 
   const {
     // errmsg,
+    bid,
     brdname,
     title,
     searchTitle,
@@ -51,10 +43,6 @@ export default (_props: Props) => {
     isInit: articlesIsInit,
   } = articlesPage;
 
-  const [classHeader, doHeader] = useThunk<DoHeader.State, TDoHeader>(DoHeader);
-  const [headerID, _setHeaderID] = useState(genUUID);
-  const header = getState(classHeader, headerID) || DoHeader.defaultState;
-
   const [_errMsg, _setErrMsg] = useState("");
 
   //render
@@ -67,38 +55,40 @@ export default (_props: Props) => {
   const [searching, setSearching] = useState(false);
 
   //keys
-  const parentPage = GetBoardParent() || "/boards/popular";
+  const parentPage = getBoardParent() || "/boards/popular";
   useKey("ArrowLeft", (_e) => {
     window.location.href = parentPage;
   });
 
   //init
-  const { bid: paramsBid } = useParams();
-  const bid = paramsBid || "";
+  const {
+    bid: paramsBid,
+    start_idx: paramsStartIdx,
+    title: paramsTitle,
+  } = useParams();
+  const startIdx = paramsStartIdx || "";
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: useEffect
   useEffect(() => {
-    if (!header.isInit) {
-      doHeader.init(headerID);
+    const theBid = paramsBid || "";
+    const searchTitle = paramsTitle || "";
+    if (articlesIsInit && bid === theBid) {
+      return;
     }
-
-    const query = QueryString.parse(window.location.search);
-    const { start_idx: queryStartIdx, title: queryTitle } = query;
-    const searchTitle = (queryTitle || "") as string;
-    const startIdx = (queryStartIdx || "") as string;
 
     if (!articlesIsInit) {
-      doArticlesPage.init(articlesPageID, bid, searchTitle, startIdx);
-    } else {
-      doArticlesPage.getBoardSummary(
-        articlesPageID,
-        bid,
-        true,
-        searchTitle,
-        startIdx,
-      );
+      doArticlesPage.init(articlesPageID, theBid, searchTitle, startIdx);
+      return;
     }
-  }, [bid, window.location.search]);
+
+    doArticlesPage.getBoardSummary(
+      articlesPageID,
+      theBid,
+      true,
+      searchTitle,
+      startIdx,
+    );
+  }, [bid, articlesIsInit, paramsBid, paramsTitle, startIdx]);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: useEffect
   useEffect(() => {
@@ -110,13 +100,11 @@ export default (_props: Props) => {
     }
   }, [headerRef.current, funcbarRef.current]);
 
-  //get data
-
   const width = innerWidth;
   const listHeight = innerHeight - headerHeight - funcbarHeight;
-
   const headerTitle = brdname + " - " + title;
 
+  // event handlers
   const loadPre = (item: ArticleSummary_i) => {
     if (item.numIdx === 1 || isPreEnd) {
       return;
@@ -265,11 +253,7 @@ export default (_props: Props) => {
   return (
     <div className={styles.root}>
       <div ref={headerRef}>
-        <Header
-          title={headerTitle}
-          stateHeader={classHeader}
-          renderHeader={renderHeader}
-        />
+        <Header title={headerTitle} renderHeader={renderHeader} />
       </div>
       {renderArticles()}
       <div ref={funcbarRef}>

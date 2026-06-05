@@ -3,13 +3,7 @@ import {
   type ThunkModuleToFunc,
   useThunk,
 } from "@chhsiao1981/use-thunk";
-import {
-  type ChangeEventHandler,
-  type CSSProperties,
-  type SubmitEventHandler,
-  useEffect,
-  useState,
-} from "react";
+import { type CSSProperties, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import useWindowSize from "../hooks/useWindowSize";
 import * as DoHeader from "../reducers/header";
@@ -20,33 +14,24 @@ type TDoHeader = ThunkModuleToFunc<typeof DoHeader>;
 
 export default () => {
   const useHeader = useThunk<DoHeader.State, TDoHeader>(DoHeader);
-  const [header, doHeader, headerID] = mustGetStateByThunk(useHeader);
-  const { username, isInit } = header;
+  const [header] = mustGetStateByThunk(useHeader);
+  const { username } = header;
   const { width: innerWidth } = useWindowSize(10, 0);
   const { t } = useTranslation();
 
-  const [givenName, setGivenName] = useState("");
   const [realName, setRealName] = useState("");
   const [birthDate, setBirthDate] = useState("");
-
-  useEffect(() => {
-    if (isInit) {
-      window.location.replace("/");
-    }
-  }, [isInit]);
 
   const rootStyle: CSSProperties = {
     width: innerWidth,
   };
 
-  const onSubmit: SubmitEventHandler = () => {};
-  const onChangeUsername: ChangeEventHandler = () => {};
-
-  const title = t("init.title");
+  const onSubmit = () => {};
+  const onChangeUsername = () => {};
 
   return (
     <div className={"vh-100 " + pageStyles.root} style={rootStyle}>
-      <Header title={title} />
+      <Header title={t("init.title")} />
       <div className="container mt-4">
         <form onSubmit={onSubmit}>
           <div className="form-group">
