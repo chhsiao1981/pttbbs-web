@@ -15,7 +15,7 @@ import type {
 } from "../types";
 import { mergeIdxList } from "./utils";
 
-export const myClass = "demo-pttbbs/ManualsPage";
+export const myClass = "pttbbs-web/ManualsPage";
 
 export interface State extends State_t, BoardSummary {
   theDate?: Date;

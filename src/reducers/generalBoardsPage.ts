@@ -8,7 +8,7 @@ import type { BoardSummary_i, State as State_t } from "../types";
 import * as serverUtils from "./serverUtils";
 import { mergeList, santizeBoard } from "./utils";
 
-export const myClass = "demo-pttbbs/GeneralBoardsPage";
+export const myClass = "pttbbs-web/GeneralBoardsPage";
 
 export interface State extends State_t {
   theDate?: Date;

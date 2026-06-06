@@ -4,7 +4,7 @@ import * as errors from "./errors";
 import * as serverUtils from "./serverUtils";
 import { goUserHome } from "./utils";
 
-export const myClass = "demo-pttbbs/RegisterPage";
+export const myClass = "pttbbs-web/RegisterPage";
 
 export interface State extends State_t {
   theDate?: Date;

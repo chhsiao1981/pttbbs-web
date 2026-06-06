@@ -7,17 +7,15 @@ import type { State as State_t } from "../types";
 import * as errors from "./errors";
 import * as serverUtils from "./serverUtils";
 
-export const myClass = "demo-pttbbs/Header";
+export const myClass = "pttbbs-web/Header";
 
 export interface State extends State_t {
-  userID: string;
   username: string;
   nickname: string;
   isInit: boolean;
 }
 
 export const defaultState: State = {
-  userID: "",
   username: "",
   nickname: "",
   isInit: false,
@@ -35,7 +33,7 @@ export const init = (myID: string): Thunk<State> => {
 
 const getData = (myID: string): Thunk<State> => {
   return async (dispatch, _) => {
-    const { data, errmsg, status } = await serverUtils.getUserID();
+    const { data, errmsg, status } = await serverUtils.getUsername();
 
     if (!status) {
       dispatch(_setData(myID, { errmsg: errors.ERR_NETWORK }));

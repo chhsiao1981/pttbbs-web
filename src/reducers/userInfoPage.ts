@@ -6,7 +6,7 @@ import {
 import type { State as State_t, UserDetail } from "../types";
 import * as serverUtils from "./serverUtils";
 
-export const myClass = "demo-pttbbs/UserInfoPage";
+export const myClass = "pttbbs-web/UserInfoPage";
 
 export interface State extends State_t, UserDetail {
   theDate?: Date;

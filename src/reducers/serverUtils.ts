@@ -14,7 +14,6 @@ import type {
   ManArticleList,
   Rank,
   UserDetail,
-  UserID,
   Username,
 } from "../types";
 import api from "./api";
@@ -67,26 +66,26 @@ export const register = (
     },
   });
 
-export const getUserInfo = (userID: string) =>
+export const getUserInfo = (username: string) =>
   api<UserDetail>({
-    endpoint: "/api/user/" + userID,
+    endpoint: "/api/user/" + username,
     method: "get",
   });
 
-export const getUserID = () =>
-  api<UserID>({
-    endpoint: "/api/userid",
+export const getUsername = () =>
+  api<Username>({
+    endpoint: "/api/username",
     method: "get",
   });
 
 export const changePasswd = (
-  userID: string,
+  username: string,
   origPassword: string,
   password: string,
   passwordConfirm: string,
 ) =>
   api<AccessToken>({
-    endpoint: "/api/user/" + userID + "/updatepasswd",
+    endpoint: "/api/user/" + username + "/updatepasswd",
     method: "post",
     json: {
       client_id: config.CLIENT_ID,
@@ -99,12 +98,12 @@ export const changePasswd = (
   });
 
 export const attemptChangeEmail = (
-  userID: string,
+  username: string,
   password: string,
   email: string,
 ) =>
-  api<UserID>({
-    endpoint: "/api/user/" + userID + "/attemptchangeemail",
+  api<Username>({
+    endpoint: "/api/user/" + username + "/attemptchangeemail",
     method: "post",
     json: {
       client_id: config.CLIENT_ID,
@@ -115,9 +114,9 @@ export const attemptChangeEmail = (
     },
   });
 
-export const changeEmail = (userID: string, token: string) =>
+export const changeEmail = (username: string, token: string) =>
   api<Data>({
-    endpoint: "/api/user/" + userID + "/changeemail",
+    endpoint: "/api/user/" + username + "/changeemail",
     method: "post",
     json: {
       client_id: config.CLIENT_ID,
@@ -127,12 +126,12 @@ export const changeEmail = (userID: string, token: string) =>
   });
 
 export const attemptSetIDEmail = (
-  userID: string,
+  username: string,
   password: string,
   email: string,
 ) =>
-  api<UserID>({
-    endpoint: "/api/user/" + userID + "/attemptsetidemail",
+  api<Username>({
+    endpoint: "/api/user/" + username + "/attemptsetidemail",
     method: "post",
     json: {
       client_id: config.CLIENT_ID,
@@ -143,9 +142,9 @@ export const attemptSetIDEmail = (
     },
   });
 
-export const setIDEmail = (userID: string, token: string) =>
+export const setIDEmail = (username: string, token: string) =>
   api<Data>({
-    endpoint: "/api/user/" + userID + "/setidemail",
+    endpoint: "/api/user/" + username + "/setidemail",
     method: "post",
     json: {
       client_id: config.CLIENT_ID,
@@ -172,13 +171,13 @@ export const getBoardDetail = (bid: string, fields: string[]) => {
 };
 
 export const loadFavoriteBoards = (
-  userID: string,
+  username: string,
   level: string,
   startIdx: string,
   desc: boolean,
 ) =>
   api<BoardList>({
-    endpoint: "/api/user/" + userID + "/favorites",
+    endpoint: "/api/user/" + username + "/favorites",
     method: "get",
     query: {
       level_idx: level || "",

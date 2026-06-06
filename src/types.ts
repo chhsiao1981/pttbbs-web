@@ -54,10 +54,7 @@ export type AccessToken = {
 
 export type Username = {
   username: string;
-};
-
-export type UserID = {
-  user_id: string;
+  is_init: boolean;
 };
 
 export type AccountLoginParams = {

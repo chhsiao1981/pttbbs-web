@@ -7,7 +7,7 @@ import type { State as State_t } from "../types";
 import * as errors from "./errors";
 import * as serverUtils from "./serverUtils";
 
-export const myClass = "demo-pttbbs/LoginPage";
+export const myClass = "pttbbs-web/LoginPage";
 
 export interface State extends State_t {
   theDate?: Date;
