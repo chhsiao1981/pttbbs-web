@@ -40,7 +40,7 @@ export default () => {
   const [header] = mustGetStateByThunk(useHeader);
   const { username } = header;
 
-  const { width: innerWidth } = useWindowSize(10);
+  const { width: innerWidth } = useWindowSize(10, 0);
   const { t } = useTranslation();
 
   const [errMsg, _setErrMsg] = useState("");
@@ -78,7 +78,7 @@ export default () => {
 
   const allErrMsg = errors.mergeErr(errMsg, errmsg);
 
-  const title = username + "的資訊";
+  const title = "我的資訊";
 
   const rootStyle: CSSProperties = {
     width: innerWidth,
