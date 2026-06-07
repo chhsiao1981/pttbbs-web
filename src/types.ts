@@ -257,6 +257,12 @@ export type UserDetail = {
   username: string;
   nickname: string;
   realname: string;
+  birthdate: string;
+
+  is_government_id: boolean;
+  is_mobile_id: boolean;
+  over18: boolean;
+
   flag: number;
   perm: number;
   login_days: number;
@@ -268,7 +274,7 @@ export type UserDetail = {
   money: number;
   pttemail: string;
   justify: string;
-  over18: boolean;
+
   pager_ui: number;
   pager: number;
   invisible: boolean;

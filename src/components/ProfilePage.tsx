@@ -4,12 +4,12 @@ import {
   type ThunkModuleToFunc,
   useThunk,
 } from "@chhsiao1981/use-thunk";
-import config from "config";
 import { type CSSProperties, useEffect, useState } from "react";
+import { OverlayTrigger, Tooltip } from "react-bootstrap";
+import { useTranslation } from "react-i18next";
 import useWindowSize from "../hooks/useWindowSize";
 import * as DoHeader from "../reducers/header";
 import * as DoProfilePage from "../reducers/profilePage";
-import { changeEmail } from "../reducers/serverUtils";
 import * as errors from "./errors";
 import Header from "./Header";
 import pageStyles from "./Page.module.css";
@@ -24,15 +24,26 @@ export default () => {
     DoProfilePage,
   );
   const [profilePage, doProfilePage] = mustGetStateByThunk(useProfilePage);
-  const { errmsg } = profilePage;
+  const {
+    nickname,
+    realname,
+    birthdate,
+
+    is_government_id,
+    is_mobile_id,
+    over18,
+
+    errmsg,
+  } = profilePage;
 
   const useHeader = useThunk<DoHeader.State, TDoHeader>(DoHeader);
   const [header] = mustGetStateByThunk(useHeader);
   const { username } = header;
 
-  const [errMsg, _setErrMsg] = useState("");
-
   const { width: innerWidth } = useWindowSize(10);
+  const { t } = useTranslation();
+
+  const [errMsg, _setErrMsg] = useState("");
 
   //init
   // biome-ignore lint/correctness/useExhaustiveDependencies: useEffect
@@ -55,8 +66,8 @@ export default () => {
   };
 
   const renderOver18 = () => {
-    const isOver18Str = !profilePage.over18 ? "還沒" : "已經";
-    const isOver18Suffix = !profilePage.over18 ? "捏" : "囉";
+    const isOver18Str = !over18 ? "還沒" : "已經";
+    const isOver18Suffix = !over18 ? "捏" : "囉";
 
     return (
       <span>
@@ -73,6 +84,10 @@ export default () => {
     width: innerWidth,
   };
 
+  const classNameGovernmentID = is_government_id ? "" : "hide";
+  const classNameMobileID = is_mobile_id ? "" : "hide";
+  const classNameSpace = is_government_id || is_mobile_id ? "" : "hide";
+
   //render
   return (
     <div className={"vh-100 " + pageStyles.root} style={rootStyle}>
@@ -81,9 +96,19 @@ export default () => {
         <div className="row">
           <div className="col">
             <span>
-              我是 {profilePage.username}({profilePage.nickname}){" "}
-              {profilePage.realname} 
+              我是 {username} ({nickname})
             </span>
+            <span className={classNameSpace}> </span>
+            <OverlayTrigger
+              overlay={<Tooltip>{t("profile.withMobileID")}</Tooltip>}
+            >
+              <span className={classNameMobileID}>🙂</span>
+            </OverlayTrigger>
+            <OverlayTrigger
+              overlay={<Tooltip>{t("profile.withGovernmentID")}</Tooltip>}
+            >
+              <span className={classNameGovernmentID}>😄</span>
+            </OverlayTrigger>
           </div>
         </div>
         <div className="row">

@@ -8,7 +8,6 @@ import {
   type ChangeEventHandler,
   type CSSProperties,
   type SubmitEventHandler,
-  type SubmitEventHandler,
   useEffect,
   useState,
 } from "react";
@@ -49,8 +48,8 @@ export default () => {
   }, []);
 
   const onSubmit: SubmitEventHandler = (e) => {
-    e.preventDefault()
-    e.stopPropagation()
+    e.preventDefault();
+    e.stopPropagation();
 
     if (!username) {
       setErrMsg(t("init.errmsg.noUsername"));
@@ -77,7 +76,7 @@ export default () => {
     'username: only alphanumber characters and "." are allowed, with maximum 40 characters.';
 
   const allErrMsg = mergeErr(errMsg, errmsg);
-  const classNameErrMsg = `${styles.errMsg} mt-2`
+  const classNameErrMsg = `${styles.errMsg} mt-2`;
 
   return (
     <div className={"vh-100 " + styles.root} style={rootStyle}>

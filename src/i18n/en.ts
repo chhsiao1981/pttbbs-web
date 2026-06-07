@@ -34,6 +34,10 @@ export default {
     prompt: "We are sorry something unexpected happened～",
     backHome: "Back to",
   },
+  profile: {
+    withMobileID: "I have valid mobile number.",
+    withGovernmentID: "I have government-issued ID.",
+  },
   errmsg: {
     usernameInvalidChars: "username contains invalid characters",
     usernameStartsWithDot: 'username canoot start with "."',

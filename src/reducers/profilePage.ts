@@ -12,6 +12,12 @@ export const defaultState: State = {
   username: "",
   nickname: "",
   realname: "",
+  birthdate: "",
+
+  is_government_id: true,
+  is_mobile_id: true,
+  over18: false,
+
   flag: 0,
   perm: 0,
   login_days: 0,
@@ -23,7 +29,7 @@ export const defaultState: State = {
   money: 0,
   pttemail: "",
   justify: "",
-  over18: false,
+
   pager_ui: 0,
   pager: 0,
   invisible: false,

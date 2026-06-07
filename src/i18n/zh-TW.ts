@@ -26,13 +26,17 @@ export default {
     birthDate: "我的生日",
     submit: "設定",
     errmsg: {
-      noUsername: "請先設定 username.",
+      noUsername: "請先設定 username",
     },
   },
   error: {
     title: "預期外的情形",
     prompt: "很對不起，遇到了預期外的情形～",
     backHome: "回到",
+  },
+  profile: {
+    withMobileID: "我有通過手機認證",
+    withGovernmentID: "我有政府認證的 ID (例: 自然人憑證)",
   },
   errmsg: {
     usernameInvalidChars: "username 包含了不允許的字元",

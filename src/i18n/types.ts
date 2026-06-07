@@ -35,6 +35,11 @@ export type I18n = {
     prompt: string;
     backHome: string;
   };
+  profile: {
+    // ProfilePage
+    withMobileID: string;
+    withGovernmentID: string;
+  };
   errmsg: {
     usernameInvalidChars: string;
     usernameStartsWithDot: string;
