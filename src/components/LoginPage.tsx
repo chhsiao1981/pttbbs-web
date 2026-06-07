@@ -5,13 +5,7 @@ import {
   useThunk,
 } from "@chhsiao1981/use-thunk";
 import config from "config";
-import {
-  type CSSProperties,
-  type RefObject,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { type CSSProperties, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import useWindowSize from "../hooks/useWindowSize";
 import * as DoLoginPage from "../reducers/loginPage";
@@ -29,7 +23,7 @@ export default (_props: Props) => {
   const [loginPage, doLoginPage] = mustGetStateByThunk(useLoginPage);
   const { errmsg, isRequested } = loginPage;
 
-  const [username, setUsername] = useState("");
+  const [theInput, setTheInput] = useState("");
   const [code0, setCode0] = useState("");
   const code0Ref = useRef<HTMLInputElement>(null);
 
@@ -112,8 +106,13 @@ export default (_props: Props) => {
     nextRef.current.focus();
   };
 
+  const onAttemptLogin = () => {
+    doLoginPage.attemptLogin(loginPageID, theInput);
+  };
+
   const onLogin = () => {
-    doLoginPage.attemptLogin(loginPageID, username);
+    const verifyCode = `${code0}${code1}${code2}${code3}${code4}${code5}`;
+    doLoginPage.login(loginPageID, theInput, verifyCode);
   };
 
   const onRegister = () => {
@@ -148,14 +147,14 @@ export default (_props: Props) => {
               type="text"
               placeholder="Email or Username:"
               aria-label="Username"
-              value={username}
-              onChange={(e) => withReset(setUsername, e.target.value)}
+              value={theInput}
+              onChange={(e) => withReset(setTheInput, e.target.value)}
             />
             <div className="d-flex justify-content-center">
               <button
                 type="button"
                 className="btn btn-primary me-2"
-                onClick={onLogin}
+                onClick={onAttemptLogin}
               >
                 {t("login.login")}
               </button>

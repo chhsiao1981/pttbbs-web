@@ -21,10 +21,10 @@ export const init = (myID: string): Thunk<State> => {
   };
 };
 
-export const attemptLogin = (myID: string, username: string): Thunk<State> => {
+export const attemptLogin = (myID: string, input: string): Thunk<State> => {
   return async (dispatch, _) => {
     dispatch(setData<State>(myID, { isRequested: true }));
-    const { errmsg, status } = await serverUtils.attemptLogin(username);
+    const { errmsg, status } = await serverUtils.attemptLogin(input);
     if (errmsg) {
       dispatch(setData<State>(myID, { errmsg }));
       return;
@@ -59,14 +59,11 @@ export const cleanErr = (myID: string): Thunk<State> => {
 
 export const login = (
   myID: string,
-  username: string,
+  input: string,
   verifyCode: string,
 ): Thunk<State> => {
   return async (dispatch, _) => {
-    const { data, errmsg, status } = await serverUtils.login(
-      username,
-      verifyCode,
-    );
+    const { data, errmsg, status } = await serverUtils.login(input, verifyCode);
 
     if (errmsg) {
       dispatch(setData<State>(myID, { errmsg }));

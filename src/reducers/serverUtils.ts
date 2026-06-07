@@ -20,7 +20,7 @@ import api from "./api";
 
 const LIST_LIMIT = config.LIST_LIMIT || 50;
 
-export const attemptLogin = (username: string) =>
+export const attemptLogin = (input: string) =>
   api<AccessToken>({
     endpoint: "/api/account/attemptlogin",
     method: "post",
@@ -28,11 +28,11 @@ export const attemptLogin = (username: string) =>
       client_id: config.CLIENT_ID,
       client_secret: config.CLIENT_SECRET,
 
-      username,
+      input,
     },
   });
 
-export const login = (username: string, verifyCode: string) =>
+export const login = (input: string, verify_code: string) =>
   api<AccessToken>({
     endpoint: "/api/account/login",
     method: "post",
@@ -40,8 +40,8 @@ export const login = (username: string, verifyCode: string) =>
       client_id: config.CLIENT_ID,
       client_secret: config.CLIENT_SECRET,
 
-      username,
-      password: verifyCode,
+      input,
+      verify_code,
     },
   });
 
