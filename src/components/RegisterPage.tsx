@@ -25,7 +25,7 @@ export default () => {
   const useRegisterPage = useThunk<DoRegisterPage.State, TDoRegisterPage>(
     DoRegisterPage,
   );
-  const [registerPageID, _setRegisterPageID] = useState(genUUID);
+  const [registerPageID] = useState(genUUID);
   const [registerPage, doRegisterPage] = mustGetStateByThunk(
     useRegisterPage,
     registerPageID,

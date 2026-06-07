@@ -19,14 +19,14 @@ type TDoHomePage = ThunkModuleToFunc<typeof DoHomePage>;
 type Props = {};
 
 export default (_props: Props) => {
-  const [homePageID, _setHomePageID] = useState(genUUID);
+  const [homePageID] = useState(genUUID);
   const [_classHomePage, doHomePage] = useThunk<DoHomePage.State, TDoHomePage>(
     DoHomePage,
   );
 
   const useHeader = useThunk<DoHeader.State, TDoHeader>(DoHeader);
   const [header, _doHeader, _headerID] = mustGetStateByThunk(useHeader);
-  const { userID } = header;
+  const { username } = header;
 
   const { width: innerWidth, height: innerHeight } = useWindowSize();
 
@@ -37,16 +37,16 @@ export default (_props: Props) => {
   }, []);
 
   useEffect(() => {
-    if (!userID) {
+    if (!username) {
       return;
     }
 
-    if (userID === config.PTT_GUEST) {
+    if (username === config.PTT_GUEST) {
       window.location.href = "/boards/popular";
     } else {
-      window.location.href = "/user/" + userID + "/favorites";
+      window.location.href = "/user/" + username + "/favorites";
     }
-  }, [userID]);
+  }, [username]);
 
   //get data
 

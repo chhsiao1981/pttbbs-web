@@ -10,6 +10,7 @@ import { GITHUB_LINK } from "../constants";
 import * as DoHeader from "../reducers/header";
 import Empty from "./Empty";
 import styles from "./Header.module.css";
+import { validateUsername } from "./utils";
 
 type TDoHeader = ThunkModuleToFunc<typeof DoHeader>;
 
@@ -29,8 +30,11 @@ export default (props: Props) => {
 
   // Links
   const renderUserHome = () => {
-    const text = username ? `hi~ ${username}` : t("header.loginRegister");
-    const url = username ? `/user/${username}` : "/login";
+    const isValidUsername = validateUsername(username);
+    const text = isValidUsername
+      ? `hi~ ${username}`
+      : t("header.loginRegister");
+    const url = isValidUsername ? `/user/${username}` : "/login";
 
     return (
       <a className={"pull-right " + styles["navbar-link"]} href={url}>

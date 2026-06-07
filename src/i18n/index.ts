@@ -1,8 +1,8 @@
 import i18n from "i18next";
 import LanguageDetector from "i18next-browser-languagedetector";
 import { initReactI18next } from "react-i18next";
-import en from "./en.json";
-import zhTW from "./zh-TW.json";
+import en from "./en";
+import zhTW from "./zh-TW";
 
 // https://developers.google.com/workspace/admin/directory/v1/languages
 const resources = {

@@ -1,3 +1,4 @@
+import config from "config";
 import moment from "moment";
 
 export const TSToDateTimeStr = (ts: number) => {
@@ -132,4 +133,8 @@ export const validateEmail = (text: string) => {
     text[0] !== "." &&
     text[text.length - 1] !== "."
   );
+};
+
+export const validateUsername = (username: string) => {
+  return username && username !== config.PTT_GUEST;
 };
