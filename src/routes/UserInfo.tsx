@@ -5,7 +5,7 @@ import {
 } from "@chhsiao1981/use-thunk";
 import { useEffect, useState } from "react";
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
-import UserInfoPage from "../components/UserInfoPage";
+import UserInfoPage from "../components/ProfilePage";
 import * as DoHeader from "../reducers/header";
 
 type TDoHeader = ThunkModuleToFunc<typeof DoHeader>;

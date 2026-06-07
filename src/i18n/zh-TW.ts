@@ -25,10 +25,18 @@ export default {
     realName: "我的真實姓名",
     birthDate: "我的生日",
     submit: "設定",
+    errmsg: {
+      noUsername: "請先設定 username.",
+    },
   },
   error: {
     title: "預期外的情形",
     prompt: "很對不起，遇到了預期外的情形～",
     backHome: "回到",
+  },
+  errmsg: {
+    usernameInvalidChars: "username 包含了不允許的字元",
+    usernameStartsWithDot: 'username 不能以 "." 開始',
+    usernameEndsWithDot: 'username 不能以 "." 結尾',
   },
 } satisfies I18n;

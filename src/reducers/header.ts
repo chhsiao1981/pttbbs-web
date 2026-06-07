@@ -27,6 +27,12 @@ export const init = (myID: string): Thunk<State> => {
   };
 };
 
+export const setUsername = (myID: string, username: string): Thunk<State> => {
+  return (dispatch, _) => {
+    dispatch(setData<State>(myID, { username }));
+  };
+};
+
 const getData = (myID: string): Thunk<State> => {
   return async (dispatch, _) => {
     const { data, errmsg, status } = await serverUtils.getUsername();

@@ -1,8 +1,10 @@
 import config from "config";
-import moment from "moment";
+import moment from "moment-timezone";
+import type { Err } from "../types";
 
-export const TSToDateTimeStr = (ts: number) => {
-  return moment.unix(ts).format("YYYY-MM-DD hh:mm:ss");
+export const tsToDateTimeStr = (ts: number) => {
+  const datetimeStr = moment.unix(ts).format("YYYY-MM-DD hh:mm:ss");
+  return datetimeStr;
 };
 
 //board-list: 特殊記號+已讀+看板+類別+種類+中文敘述+人氣+板主
@@ -137,4 +139,20 @@ export const validateEmail = (text: string) => {
 
 export const validateUsername = (username: string) => {
   return username && username !== config.PTT_GUEST;
+};
+
+export const checkUsername = (username: string): Err => {
+  if (!/^[0-9A-Za-z.]+$/.test(username)) {
+    return "errmsg.usernameInvalidChars";
+  }
+
+  if (username[0] === ".") {
+    return "errmsg.usernameStartsWithDot";
+  }
+
+  if (username[username.length - 1] === ".") {
+    return "errmsg.usernameEndsWithDot";
+  }
+
+  return "";
 };

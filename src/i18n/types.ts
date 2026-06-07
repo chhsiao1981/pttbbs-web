@@ -9,6 +9,7 @@ export type I18n = {
     info: string;
   };
   login: {
+    // LoginPage
     login: string;
     register: string;
     forgotPassword: string;
@@ -18,15 +19,25 @@ export type I18n = {
     submit: string;
   };
   init: {
+    // InitPage
     title: string;
     username: string;
     realName: string;
     birthDate: string;
     submit: string;
+    errmsg: {
+      noUsername: string;
+    };
   };
   error: {
+    // ErrorPage
     title: string;
     prompt: string;
     backHome: string;
+  };
+  errmsg: {
+    usernameInvalidChars: string;
+    usernameStartsWithDot: string;
+    usernameEndsWithDot: string;
   };
 };

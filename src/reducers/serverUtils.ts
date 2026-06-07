@@ -10,6 +10,7 @@ import type {
   CommentList,
   Content,
   Data,
+  InitResult,
   ManArticle,
   ManArticleList,
   Rank,
@@ -75,6 +76,17 @@ export const register = (
       email,
       over18,
       token: veriCode,
+    },
+  });
+
+export const init = (username: string, realName: string, birthDate: string) =>
+  api<InitResult>({
+    endpoint: "/api/user/init",
+    method: "post",
+    json: {
+      username,
+      realname: realName,
+      birth_date: birthDate,
     },
   });
 

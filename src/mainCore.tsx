@@ -15,14 +15,15 @@ import * as DoGeneralBoardsPage from "./reducers/generalBoardsPage";
 import * as DoHeader from "./reducers/header";
 import * as DoHomePage from "./reducers/homePage";
 import * as DoHotBoardsPage from "./reducers/hotBoardsPage";
+import * as DoInitPage from "./reducers/initPage";
 import * as DoLoginPage from "./reducers/loginPage";
 import * as DoManualPage from "./reducers/manualPage";
 import * as DoManualsPage from "./reducers/manualsPage";
 import * as DoNewArticlePage from "./reducers/newArticlePage";
+import * as DoProfilePage from "./reducers/profilePage";
 import * as DoRegisterPage from "./reducers/registerPage";
 import * as DoSetIDEmailPage from "./reducers/setIDEmailPage";
 import * as DoUserFavoritesPage from "./reducers/userFavoritesPage";
-import * as DoUserInfoPage from "./reducers/userInfoPage";
 import reportWebVitals from "./reportWebVitals";
 import "./i18n";
 
@@ -64,7 +65,9 @@ export default (Routes: FC) => {
   // @ts-expect-error registerThunk
   registerThunk(DoUserFavoritesPage);
   // @ts-expect-error registerThunk
-  registerThunk(DoUserInfoPage);
+  registerThunk(DoProfilePage);
+  // @ts-expect-error registerThunk
+  registerThunk(DoInitPage);
 
   //title
   document.getElementsByTagName("title")[0].innerHTML = config.BRAND;

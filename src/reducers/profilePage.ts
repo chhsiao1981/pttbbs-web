@@ -1,22 +1,14 @@
-import {
-  init as _init,
-  setData as _setData,
-  type Thunk,
-} from "@chhsiao1981/use-thunk";
+import { init as _init, setData, type Thunk } from "@chhsiao1981/use-thunk";
 import type { State as State_t, UserDetail } from "../types";
 import * as serverUtils from "./serverUtils";
 
-export const myClass = "pttbbs-web/UserInfoPage";
+export const myClass = "pttbbs-web/ProfilePage";
 
 export interface State extends State_t, UserDetail {
   theDate?: Date;
-  userID: string;
 }
 
 export const defaultState: State = {
-  userID: "",
-
-  user_id: "",
   username: "",
   nickname: "",
   realname: "",
@@ -90,27 +82,26 @@ export const defaultState: State = {
 };
 
 // init
-export const init = (myID: string, userID: string): Thunk<State> => {
+export const init = (myID: string): Thunk<State> => {
   return async (dispatch, _) => {
     const theDate = new Date();
-    const state: State = Object.assign({}, defaultState, { theDate, userID });
+    const state: State = Object.assign({}, defaultState, { theDate });
     dispatch(_init({ myID, state }));
-    dispatch(_getData(myID, userID));
   };
 };
 
-const _getData = (myID: string, userID: string): Thunk<State> => {
+export const getData = (myID: string, userID: string): Thunk<State> => {
   return async (dispatch, _) => {
     const { data, errmsg, status } = await serverUtils.getUserInfo(userID);
 
     if (status !== 200) {
-      dispatch(_setData(myID, { errmsg }));
+      dispatch(setData<State>(myID, { errmsg }));
       return;
     }
     if (!data) {
       return;
     }
 
-    dispatch(_setData(myID, data));
+    dispatch(setData<State>(myID, data));
   };
 };

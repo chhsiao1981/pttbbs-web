@@ -1,36 +1,86 @@
 import {
+  genUUID,
   mustGetStateByThunk,
   type ThunkModuleToFunc,
   useThunk,
 } from "@chhsiao1981/use-thunk";
-import { type CSSProperties, useEffect, useState } from "react";
+import {
+  type ChangeEventHandler,
+  type CSSProperties,
+  type SubmitEventHandler,
+  type SubmitEventHandler,
+  useEffect,
+  useState,
+} from "react";
 import { useTranslation } from "react-i18next";
 import useWindowSize from "../hooks/useWindowSize";
 import * as DoHeader from "../reducers/header";
+import * as DoInitPage from "../reducers/initPage";
+import { mergeErr } from "./errors";
 import Header from "./Header";
-import pageStyles from "./Page.module.css";
+import styles from "./Page.module.css";
+import { checkUsername } from "./utils";
 
 type TDoHeader = ThunkModuleToFunc<typeof DoHeader>;
+type TDoInitPage = ThunkModuleToFunc<typeof DoInitPage>;
 
 export default () => {
+  const [initPageID] = useState(genUUID);
+  const useInitPage = useThunk<DoInitPage.State, TDoInitPage>(DoInitPage);
+  const [initPage, doInitPage] = mustGetStateByThunk(useInitPage);
+
   const useHeader = useThunk<DoHeader.State, TDoHeader>(DoHeader);
-  const [header] = mustGetStateByThunk(useHeader);
-  const { username } = header;
+  const [header, doHeader, headerID] = mustGetStateByThunk(useHeader);
+  const { username, errmsg } = header;
+
   const { width: innerWidth } = useWindowSize(10, 0);
   const { t } = useTranslation();
 
   const [realName, setRealName] = useState("");
   const [birthDate, setBirthDate] = useState("");
+  const [errMsg, setErrMsg] = useState("");
 
   const rootStyle: CSSProperties = {
     width: innerWidth,
   };
 
-  const onSubmit = () => {};
-  const onChangeUsername = () => {};
+  useEffect(() => {
+    doInitPage.init(initPageID);
+  }, []);
+
+  const onSubmit: SubmitEventHandler = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+
+    if (!username) {
+      setErrMsg(t("init.errmsg.noUsername"));
+      return;
+    }
+    const errmsg = checkUsername(username);
+    if (errmsg) {
+      setErrMsg(t(errmsg));
+      return;
+    }
+
+    doInitPage.submit(initPageID, username, realName, birthDate);
+  };
+
+  const onChangeUsername: ChangeEventHandler = (e) => {
+    setErrMsg("");
+    doInitPage.cleanErr(initPageID);
+
+    // @ts-expect-error value exists in e.target
+    doHeader.setUsername(headerID, e.target.value);
+  };
+
+  const usernamePlaceHolder =
+    'username: only alphanumber characters and "." are allowed, with maximum 40 characters.';
+
+  const allErrMsg = mergeErr(errMsg, errmsg);
+  const classNameErrMsg = `${styles.errMsg} mt-2`
 
   return (
-    <div className={"vh-100 " + pageStyles.root} style={rootStyle}>
+    <div className={"vh-100 " + styles.root} style={rootStyle}>
       <Header title={t("init.title")} />
       <div className="container mt-4">
         <form onSubmit={onSubmit}>
@@ -38,7 +88,7 @@ export default () => {
             <input
               className="form-control"
               type="text"
-              placeholder="Username:"
+              placeholder={usernamePlaceHolder}
               aria-label="Username"
               value={username}
               onChange={onChangeUsername}
@@ -70,6 +120,10 @@ export default () => {
               >
                 {t("init.submit")}
               </button>
+            </div>
+
+            <div className="row">
+              <span className={classNameErrMsg}>{allErrMsg}</span>
             </div>
           </div>
         </form>

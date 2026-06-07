@@ -34,7 +34,7 @@ export default (props: Props) => {
     const text = isValidUsername
       ? `hi~ ${username}`
       : t("header.loginRegister");
-    const url = isValidUsername ? `/user/${username}` : "/login";
+    const url = isValidUsername ? `/profile` : "/login";
 
     return (
       <a className={"pull-right " + styles["navbar-link"]} href={url}>

@@ -25,10 +25,18 @@ export default {
     realName: "My real name",
     birthDate: "My birthday",
     submit: "Setup",
+    errmsg: {
+      noUsername: "Please setup username first.",
+    },
   },
   error: {
     title: "Something Unexpected",
     prompt: "We are sorry something unexpected happened～",
     backHome: "Back to",
+  },
+  errmsg: {
+    usernameInvalidChars: "username contains invalid characters",
+    usernameStartsWithDot: 'username canoot start with "."',
+    usernameEndsWithDot: 'username cannot end with "."',
   },
 } satisfies I18n;
