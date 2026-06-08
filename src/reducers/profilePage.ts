@@ -1,4 +1,5 @@
 import { init as _init, setData, type Thunk } from "@chhsiao1981/use-thunk";
+import { STATUS_OK } from "../constants";
 import type { State as State_t, UserDetail } from "../types";
 import * as serverUtils from "./serverUtils";
 
@@ -14,7 +15,7 @@ export const defaultState: State = {
   realname: "",
   birthdate: "",
 
-  is_government_id: true,
+  is_government_id: false,
   is_mobile_id: true,
   over18: false,
 
@@ -96,9 +97,9 @@ export const init = (myID: string): Thunk<State> => {
   };
 };
 
-export const getData = (myID: string, userID: string): Thunk<State> => {
+export const getData = (myID: string, username: string): Thunk<State> => {
   return async (dispatch, _) => {
-    const { data, errmsg, status } = await serverUtils.getUserInfo(userID);
+    const { data, errmsg, status } = await serverUtils.getUserInfo(username);
 
     if (status !== 200) {
       dispatch(setData<State>(myID, { errmsg }));
@@ -109,5 +110,21 @@ export const getData = (myID: string, userID: string): Thunk<State> => {
     }
 
     dispatch(setData<State>(myID, data));
+  };
+};
+
+export const requestGovermentID = (myID: string): Thunk<State> => {
+  return async (dispatch) => {
+    const { errmsg, status } = await serverUtils.requestGovernmentID();
+    if (errmsg) {
+      dispatch(setData<State>(myID, { errmsg }));
+      return;
+    }
+    if (status !== STATUS_OK) {
+      dispatch(setData<State>(myID, { errmsg: `status is not ok: ${status}` }));
+      return;
+    }
+
+    return;
   };
 };

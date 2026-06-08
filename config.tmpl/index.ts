@@ -6,4 +6,5 @@ export default {
   TERM_URL: 'https://bbsdocker.github.io/PttChrome-static',
   LIST_LIMIT: 150,
   PTT_GUEST: 'guest',
+  ZK_URL: 'http://localhost:5174',
 }

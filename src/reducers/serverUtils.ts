@@ -90,6 +90,12 @@ export const init = (username: string, realName: string, birthDate: string) =>
     },
   });
 
+export const requestGovernmentID = () =>
+  api<null>({
+    endpoint: "/api/user/government-id",
+    method: "post",
+  });
+
 export const getUserInfo = (username: string) =>
   api<UserDetail>({
     endpoint: "/api/user/" + username,

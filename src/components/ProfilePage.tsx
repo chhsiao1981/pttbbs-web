@@ -4,6 +4,7 @@ import {
   type ThunkModuleToFunc,
   useThunk,
 } from "@chhsiao1981/use-thunk";
+import config from "config";
 import { type CSSProperties, useEffect, useState } from "react";
 import { OverlayTrigger, Tooltip } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
@@ -30,8 +31,10 @@ export default () => {
     birthdate,
 
     is_government_id,
-    is_mobile_id,
     over18,
+
+    posts,
+    bad_post,
 
     errmsg,
   } = profilePage;
@@ -51,16 +54,26 @@ export default () => {
     doProfilePage.init(profilePageID);
   }, []);
 
-  // event handlers
+  // biome-ignore lint/correctness/useExhaustiveDependencies: useEffect
+  useEffect(() => {
+    if (!username) {
+      return;
+    }
+    doProfilePage.getData(profilePageID, username);
+  }, [username]);
 
+  // event handlers
+  const onClickGovernmentID = () => {
+    window.location.href = config.ZK_URL;
+  };
+
+  // renderers
   const renderPost = () => {
-    const badposts = !profilePage.bad_post
-      ? ""
-      : " (被退 " + profilePage.bad_post + " 篇)";
+    const badposts = !bad_post ? "" : " (被退 " + bad_post + " 篇)";
 
     return (
       <span>
-        我已經 po 了 {profilePage.posts} 篇文章{badposts}
+        我已經 po 了 {posts} 篇文章{badposts}
       </span>
     );
   };
@@ -85,8 +98,9 @@ export default () => {
   };
 
   const classNameGovernmentID = is_government_id ? "" : "hide";
-  const classNameMobileID = is_mobile_id ? "" : "hide";
-  const classNameSpace = is_government_id || is_mobile_id ? "" : "hide";
+  const classNameBtnGovernmentID = is_government_id
+    ? "hide"
+    : "btn btn-primary";
 
   //render
   return (
@@ -98,17 +112,19 @@ export default () => {
             <span>
               我是 {username} ({nickname})
             </span>
-            <span className={classNameSpace}> </span>
-            <OverlayTrigger
-              overlay={<Tooltip>{t("profile.withMobileID")}</Tooltip>}
-            >
-              <span className={classNameMobileID}>🙂</span>
-            </OverlayTrigger>
+            <span> </span>
             <OverlayTrigger
               overlay={<Tooltip>{t("profile.withGovernmentID")}</Tooltip>}
             >
               <span className={classNameGovernmentID}>😄</span>
             </OverlayTrigger>
+            <button
+              className={classNameBtnGovernmentID}
+              type="button"
+              onClick={onClickGovernmentID}
+            >
+              我想通過政府認證的 ID
+            </button>
           </div>
         </div>
         <div className="row">
