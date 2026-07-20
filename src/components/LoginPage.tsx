@@ -7,6 +7,8 @@ import {
 import config from "config";
 import { type CSSProperties, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useSearchParams } from "react-router-dom";
+import { OIDC_AUTH_REQUEST_ID } from "../constants";
 import useWindowSize from "../hooks/useWindowSize";
 import * as DoLoginPage from "../reducers/loginPage";
 import * as errors from "./errors";
@@ -22,6 +24,9 @@ export default (_props: Props) => {
   const useLoginPage = useThunk<DoLoginPage.State, TDoLoginPage>(DoLoginPage);
   const [loginPage, doLoginPage] = mustGetStateByThunk(useLoginPage);
   const { errmsg, isRequested } = loginPage;
+
+  const [searchParams, _setSearchParams] = useSearchParams();
+  const authRequestID = searchParams.get(OIDC_AUTH_REQUEST_ID) || "";
 
   const [theInput, setTheInput] = useState("");
   const [code0, setCode0] = useState("");
@@ -107,7 +112,7 @@ export default (_props: Props) => {
   };
 
   const onAttemptLogin = () => {
-    doLoginPage.attemptLogin(loginPageID, theInput);
+    doLoginPage.attemptLogin(loginPageID, theInput, authRequestID);
   };
 
   const onLogin = () => {

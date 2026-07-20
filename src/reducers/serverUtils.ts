@@ -21,7 +21,7 @@ import api from "./api";
 
 const LIST_LIMIT = config.LIST_LIMIT || 50;
 
-export const attemptLogin = (input: string) =>
+export const attemptLogin = (input: string, oidc_id: string) =>
   api<AccessToken>({
     endpoint: "/api/account/attemptlogin",
     method: "post",
@@ -30,6 +30,7 @@ export const attemptLogin = (input: string) =>
       client_secret: config.CLIENT_SECRET,
 
       input,
+      oidc_id,
     },
   });
 
