@@ -45,3 +45,5 @@ export const COMMENT_TYPE_EDIT = 6;
 export const COMMENT_TYPE_DELETED = 7;
 
 export const STATUS_OK = 200;
+
+export const OIDC_AUTH_REQUEST_ID = "authRequestID";

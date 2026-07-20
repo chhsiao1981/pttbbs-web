@@ -21,10 +21,17 @@ export const init = (myID: string): Thunk<State> => {
   };
 };
 
-export const attemptLogin = (myID: string, input: string): Thunk<State> => {
+export const attemptLogin = (
+  myID: string,
+  input: string,
+  authRequestID: string,
+): Thunk<State> => {
   return async (dispatch, _) => {
     dispatch(setData<State>(myID, { isRequested: true }));
-    const { errmsg, status } = await serverUtils.attemptLogin(input);
+    const { errmsg, status } = await serverUtils.attemptLogin(
+      input,
+      authRequestID,
+    );
     if (errmsg) {
       dispatch(setData<State>(myID, { errmsg }));
       return;
