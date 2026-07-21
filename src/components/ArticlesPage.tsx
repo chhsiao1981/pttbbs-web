@@ -1,14 +1,9 @@
-import {
-  genUUID,
-  mustGetStateByThunk,
-  type ThunkModuleToFunc,
-  useThunk,
-} from "@chhsiao1981/use-thunk";
+import { useThunk } from "@chhsiao1981/use-thunk";
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useKey } from "react-use";
 import useWindowSize from "../hooks/useWindowSize";
-import * as DoArticlesPage from "../reducers/articlesPage";
+import * as DoArticlesPage from "../thunks/articlesPage";
 import type { ArticleSummary_i } from "../types";
 import ArticleList from "./ArticleList";
 import EmptyList from "./EmptyList";
@@ -18,14 +13,11 @@ import styles from "./Page.module.css";
 import SearchBar from "./SearchBar";
 import { getBoardParent } from "./utils";
 
-type TDoArticlesPage = ThunkModuleToFunc<typeof DoArticlesPage>;
-
 export default () => {
-  const [articlesPageID] = useState(genUUID);
-  const useArticlesPage = useThunk<DoArticlesPage.State, TDoArticlesPage>(
-    DoArticlesPage,
-  );
-  const [articlesPage, doArticlesPage] = mustGetStateByThunk(useArticlesPage);
+  const [articlesPage, doArticlesPage, articlesPageID] = useThunk<
+    DoArticlesPage.State,
+    typeof DoArticlesPage
+  >(DoArticlesPage);
 
   const {
     // errmsg,
@@ -42,8 +34,6 @@ export default () => {
     isBusyLoadingBottom,
     isInit: articlesIsInit,
   } = articlesPage;
-
-  const [_errMsg, _setErrMsg] = useState("");
 
   //render
   const [headerHeight, setHeaderHeight] = useState(0);

@@ -1,15 +1,10 @@
-import {
-  init as _init,
-  setData as _setData,
-  getState,
-  type Thunk,
-} from "@chhsiao1981/use-thunk";
+import type { Thunk } from "@chhsiao1981/use-thunk";
 import * as serverUtils from "./serverUtils";
 //import * as errors from './errors'
 
 import type { Content, Line, State as State_t } from "../types";
 
-export const myClass = "pttbbs-web/ManualPage";
+export const name = "pttbbs-web/ManualPage";
 
 export interface State extends State_t {
   theDate?: Date;
@@ -33,17 +28,16 @@ export const init = (
   path: string,
   startIdx: string,
 ): Thunk<State> => {
-  return async (dispatch, _) => {
+  return async (set) => {
     const theDate = new Date();
-    const state: State = Object.assign({}, defaultState, { theDate });
-    dispatch(_init({ myID, state }));
-    dispatch(getManualContent(myID, bid, path, startIdx));
+    set(myID, { theDate });
+    set(getManualContent(myID, bid, path, startIdx));
   };
 };
 
 export const setData = (myID: string, data: Partial<State>): Thunk<State> => {
-  return async (dispatch, _) => {
-    dispatch(_setData(myID, data));
+  return async (set) => {
+    set(myID, data);
   };
 };
 
@@ -58,7 +52,7 @@ export const getManualContent = (
   path: string,
   startIdx: string,
 ): Thunk<State> => {
-  return async (dispatch, getClassState) => {
+  return async (set, get) => {
     const { data, errmsg, status } = await serverUtils.getManual(
       bid,
       path,
@@ -75,20 +69,20 @@ export const getManualContent = (
     );
 
     if (status !== 200) {
-      dispatch(_setData(myID, { errmsg }));
+      set(myID, { errmsg });
       return;
     }
     if (!data) {
       return;
     }
 
-    dispatch(_setData(myID, data));
+    // @ts-expect-error ManArticle is Partial<State>
+    set(myID, data);
 
     const content = data.content;
     const lines = parseLines(content);
 
-    const classState = getClassState();
-    const me = getState(classState, myID);
+    const me = get(myID);
     if (!me) {
       return;
     }
@@ -97,7 +91,7 @@ export const getManualContent = (
     const comments = me.comments || [];
     const contentComments = isPreEnd ? lines.concat(comments) : comments;
 
-    dispatch(_setData(myID, { content: lines, contentComments }));
+    set(myID, { content: lines, contentComments });
   };
 };
 

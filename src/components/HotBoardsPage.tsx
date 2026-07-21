@@ -1,33 +1,22 @@
-import {
-  genUUID,
-  mustGetStateByThunk,
-  type ThunkModuleToFunc,
-  useThunk,
-} from "@chhsiao1981/use-thunk";
+import { useThunk } from "@chhsiao1981/use-thunk";
 import config from "config";
 import { type CSSProperties, useEffect, useRef, useState } from "react";
 import useWindowSize from "../hooks/useWindowSize";
-import * as DoHeader from "../reducers/header";
-import * as DoHotBoardsPage from "../reducers/hotBoardsPage";
+import * as DoHeader from "../thunks/header";
+import * as DoHotBoardsPage from "../thunks/hotBoardsPage";
 import BoardList from "./BoardList";
 import FunctionBar from "./FunctionBar";
 import Header from "./Header";
 import pageStyles from "./Page.module.css";
 
-type TDoHotBoardsPage = ThunkModuleToFunc<typeof DoHotBoardsPage>;
-type TDoHeader = ThunkModuleToFunc<typeof DoHeader>;
-
 export default () => {
-  const [hotBoardsPageID] = useState(genUUID);
-  const useHotBoardsPage = useThunk<DoHotBoardsPage.State, TDoHotBoardsPage>(
-    DoHotBoardsPage,
-  );
-  const [hotBoardsPage, doHotBoardsPage] =
-    mustGetStateByThunk(useHotBoardsPage);
+  const [hotBoardsPage, doHotBoardsPage, hotBoardsPageID] = useThunk<
+    DoHotBoardsPage.State,
+    typeof DoHotBoardsPage
+  >(DoHotBoardsPage);
   const { list: boards } = hotBoardsPage;
 
-  const useHeader = useThunk<DoHeader.State, TDoHeader>(DoHeader);
-  const [header] = mustGetStateByThunk(useHeader);
+  const [header] = useThunk<DoHeader.State, typeof DoHeader>(DoHeader);
   const { userID } = header;
 
   // eslint-disable-next-line

@@ -1,9 +1,4 @@
-import {
-  genUUID,
-  mustGetStateByThunk,
-  type ThunkModuleToFunc,
-  useThunk,
-} from "@chhsiao1981/use-thunk";
+import { useThunk } from "@chhsiao1981/use-thunk";
 import {
   type FocusEvent,
   type MouseEvent,
@@ -15,7 +10,7 @@ import {
 import { useParams } from "react-router-dom";
 import { DropdownList } from "react-widgets";
 import useWindowSize from "../hooks/useWindowSize";
-import * as DoNewArticlePage from "../reducers/newArticlePage";
+import * as DoNewArticlePage from "../thunks/newArticlePage";
 import type { EditLine } from "../types";
 import Editor from "./Editor";
 import FunctionBar from "./FunctionBar";
@@ -24,17 +19,11 @@ import InitConsts from "./InitConsts";
 import styles from "./NewArticlePage.module.css";
 import pageStyles from "./Page.module.css";
 
-type TDoNewArticlePage = ThunkModuleToFunc<typeof DoNewArticlePage>;
-
-// biome-ignore lint/complexity/noBannedTypes: props
-type Props = {};
-export default (_props: Props) => {
-  const [newArticlePageID] = useState(genUUID);
-  const useNewArticlePage = useThunk<DoNewArticlePage.State, TDoNewArticlePage>(
-    DoNewArticlePage,
-  );
-  const [newArticlePage, doNewArticlePage] =
-    mustGetStateByThunk(useNewArticlePage);
+export default () => {
+  const [newArticlePage, doNewArticlePage, newArticlePageID] = useThunk<
+    DoNewArticlePage.State,
+    typeof DoNewArticlePage
+  >(DoNewArticlePage);
   const { errmsg, brdname, post_type, theClass } = newArticlePage;
   const postTypes = post_type.map((each) => ({
     value: each,

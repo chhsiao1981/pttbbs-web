@@ -1,18 +1,12 @@
-import {
-  init as _init,
-  setData as _setData,
-  getState,
-  type Thunk,
-} from "@chhsiao1981/use-thunk";
+import type { Thunk } from "@chhsiao1981/use-thunk";
 import type { BoardSummary_i, State as State_t } from "../types";
 import * as serverUtils from "./serverUtils";
 import { mergeList, santizeBoard } from "./utils";
 
-export const myClass = "pttbbs-web/ClassBoardsPage";
+export const name = "pttbbs-web/GeneralBoardsPage";
 
 export interface State extends State_t {
   theDate?: Date;
-  clsID: number;
   startIdx: string;
   scrollTo?: any;
   list: BoardSummary_i[];
@@ -21,77 +15,78 @@ export interface State extends State_t {
   isBusyLoading: boolean;
   nextIdx: string;
   scrollToRow: number;
-  isPreEnd: boolean;
   isNextEnd: boolean;
+  isPreEnd: boolean;
+  searchKeyword: string;
+  lastSearchKeyword: string;
 }
 
 export const defaultState: State = {
-  clsID: 0,
   startIdx: "",
   list: [],
   lastPre: "",
   lastNext: "",
   isBusyLoading: false,
   nextIdx: "",
+  scrollTo: null,
   scrollToRow: 0,
-  isPreEnd: false,
   isNextEnd: false,
+  isPreEnd: false,
+  searchKeyword: "",
+  lastSearchKeyword: "",
 
   errmsg: "",
 };
 
+export interface State_m extends Partial<State> {}
+
 export const init = (
   myID: string,
-  clsID: number,
+  searchKeyword: string,
   startIdx: string,
+  isByClass: boolean,
 ): Thunk<State> => {
   const theDate = new Date();
-  return async (dispatch, _) => {
-    const state: State = Object.assign({}, defaultState, {
-      theDate,
-      clsID,
-      startIdx,
-      scrollTo: null,
-      list: [],
-      lastPre: "",
-      lastNext: "",
-      isBusyLoading: false,
-      nextIdx: "",
-      scrollToRow: 0,
-      isPreEnd: false,
-      isNextEnd: false,
-    });
-    dispatch(_init({ myID, state }));
-    dispatch(getBoards(myID, clsID, startIdx, false, false));
+  return async (set) => {
+    set(myID, { theDate, startIdx, searchKeyword });
+    set(getBoards(myID, searchKeyword, startIdx, false, false, isByClass));
   };
 };
 
 export const setData = (myID: string, data: Partial<State>): Thunk<State> => {
-  return async (dispatch, _) => {
-    dispatch(_setData(myID, data));
+  return async (set) => {
+    set(myID, data);
   };
 };
 
 export const getBoards = (
   myID: string,
-  clsID: number,
+  searchKeyword: string,
   startIdx: string,
   desc: boolean,
   isExclude: boolean,
+  isByClass: boolean,
 ): Thunk<State> => {
-  clsID = clsID || 1; //clsID default by 1. (no clsID == 0)
-  return async (dispatch, getClassState) => {
-    const classState = getClassState();
-    const me = getState(classState, myID);
+  return async (set, get) => {
+    const me = get(myID);
     if (!me) {
       return;
     }
-    const myList = me.list;
+
+    let myList = me.list;
 
     //check busy
-    const lastPre = me.lastPre;
-    const lastNext = me.lastNext;
+    let lastPre = me.lastPre;
+    let lastNext = me.lastNext;
     const isBusyLoading = me.isBusyLoading;
+
+    const myLastSearchKeyword = me.lastSearchKeyword;
+    if (searchKeyword !== myLastSearchKeyword) {
+      myList = [];
+      lastPre = "";
+      lastNext = "";
+    }
+
     if (isBusyLoading) {
       return;
     }
@@ -106,31 +101,33 @@ export const getBoards = (
       }
     }
 
-    dispatch(_setData(myID, { isBusyLoading: true }));
+    set(myID, { isBusyLoading: true });
 
-    // api
-    const { data, errmsg, status } = await serverUtils.loadClassBoards(
-      clsID,
+    const loadBoards = isByClass
+      ? serverUtils.loadGeneralBoardsByClass
+      : serverUtils.loadGeneralBoards;
+
+    const { data, errmsg, status } = await loadBoards(
+      searchKeyword,
       startIdx,
       desc,
     );
-
     if (status !== 200) {
-      dispatch(_setData(myID, { errmsg, isBusyLoading: false }));
+      set(myID, { errmsg, isBusyLoading: false });
       return;
     }
     if (!data) {
+      set(myID, { errmsg: "no data", isBusyLoading: false });
       return;
     }
 
-    // integrate list
-    let dataList = data.list;
+    let dataList = data.list || [];
     dataList = dataList.map((each) => santizeBoard(each));
 
     const newList = mergeList(myList, dataList, desc, isExclude);
 
-    // to update
     const toUpdate: Partial<State> = {
+      lastSearchKeyword: searchKeyword,
       list: newList,
     };
     if (!desc) {
@@ -149,6 +146,6 @@ export const getBoards = (
       }
     }
 
-    dispatch(_setData(myID, toUpdate));
+    set(myID, toUpdate);
   };
 };

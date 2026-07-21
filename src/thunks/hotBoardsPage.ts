@@ -1,13 +1,9 @@
-import {
-  init as _init,
-  setData as _setData,
-  type Thunk,
-} from "@chhsiao1981/use-thunk";
+import type { Thunk } from "@chhsiao1981/use-thunk";
 import type { BoardSummary_i, State as State_t } from "../types";
 import * as serverUtils from "./serverUtils";
 import { mergeIdxList, santizeBoard } from "./utils";
 
-export const myClass = "pttbbs-web/HotBoardsPage";
+export const name = "pttbbs-web/HotBoardsPage";
 
 export interface State extends State_t {
   theDate?: Date;
@@ -24,24 +20,23 @@ export const defaultState: State = {
 
 export const init = (myID: string): Thunk<State> => {
   const theDate = new Date();
-  return async (dispatch, _) => {
-    const state: State = Object.assign({}, defaultState, { theDate });
-    dispatch(_init({ myID, state }));
-    dispatch(getData(myID));
+  return async (set) => {
+    set(myID, { theDate });
+    set(getData(myID));
   };
 };
 
 const getData = (myID: string): Thunk<State> => {
-  return async (dispatch, _) => {
-    dispatch(_setData(myID, { isBusyLoading: true }));
+  return async (set) => {
+    set(myID, { isBusyLoading: true });
     const { data, errmsg, status } = await serverUtils.loadPopularBoards();
 
     if (status !== 200) {
-      dispatch(_setData(myID, { errmsg, isBusyLoading: false }));
+      set(myID, { errmsg, isBusyLoading: false });
       return;
     }
     if (!data) {
-      dispatch(_setData(myID, { errmsg: "no data", isBusyLoading: false }));
+      set(myID, { errmsg: "no data", isBusyLoading: false });
       return;
     }
 
@@ -55,6 +50,6 @@ const getData = (myID: string): Thunk<State> => {
       isBusyLoading: false,
     };
 
-    dispatch(_setData(myID, toUpdate));
+    set(myID, toUpdate);
   };
 };

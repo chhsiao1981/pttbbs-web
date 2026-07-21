@@ -1,30 +1,20 @@
-import {
-  genUUID,
-  mustGetStateByThunk,
-  type ThunkModuleToFunc,
-  useThunk,
-} from "@chhsiao1981/use-thunk";
+import { useThunk } from "@chhsiao1981/use-thunk";
 import QueryString from "query-string";
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import useWindowSize from "../hooks/useWindowSize";
-import * as DoUserFavoritesPage from "../reducers/userFavoritesPage";
+import * as DoUserFavoritesPage from "../thunks/userFavoritesPage";
 import type { BoardSummary_i } from "../types";
 import BoardList from "./BoardList";
 import FunctionBar from "./FunctionBar";
 import Header from "./Header";
 import pageStyles from "./Page.module.css";
 
-type TDoUserFavoritesPage = ThunkModuleToFunc<typeof DoUserFavoritesPage>;
-
 export default () => {
-  const [userFavoritesPageID, _setUserFavoritesPageID] = useState(genUUID);
-  const useUserFavoritesPage = useThunk<
-    DoUserFavoritesPage.State,
-    TDoUserFavoritesPage
-  >(DoUserFavoritesPage);
-  const [userFavoritesPage, doUserFavoritesPage] =
-    mustGetStateByThunk(useUserFavoritesPage);
+  const [userFavoritesPage, doUserFavoritesPage, userFavoritesPageID] =
+    useThunk<DoUserFavoritesPage.State, typeof DoUserFavoritesPage>(
+      DoUserFavoritesPage,
+    );
   const {
     list: boards,
     isPreEnd,

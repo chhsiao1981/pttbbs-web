@@ -1,14 +1,10 @@
-import {
-  init as _init,
-  setData as _setData,
-  type Thunk,
-} from "@chhsiao1981/use-thunk";
+import type { Thunk } from "@chhsiao1981/use-thunk";
 import type { State as State_t } from "../types";
 import * as errors from "./errors";
 import * as serverUtils from "./serverUtils";
 import { goUserHome } from "./utils";
 
-export const myClass = "pttbbs-web/attemptChangeEmailPage";
+export const name = "pttbbs-web/attemptSetIDEmailPage";
 
 export interface State extends State_t {
   theDate?: Date;
@@ -25,30 +21,26 @@ export const defaultState: State = {
 // init
 export const init = (myID: string, userID: string): Thunk<State> => {
   const theDate = new Date();
-  return async (dispatch, _) => {
-    const state: State = Object.assign({}, defaultState, {
-      theDate,
-      userID,
-    });
-    dispatch(_init({ myID, state }));
+  return async (set) => {
+    set(myID, { theDate, userID });
   };
 };
 
-export const changeEmail = (
+export const SetIDEmail = (
   myID: string,
   userID: string,
   password: string,
   email: string,
 ): Thunk<State> => {
-  return async (dispatch, _) => {
-    const { errmsg, status } = await serverUtils.attemptChangeEmail(
+  return async (set) => {
+    const { errmsg, status } = await serverUtils.attemptSetIDEmail(
       userID,
       password,
       email,
     );
 
     if (!status) {
-      dispatch(_setData(myID, { errmsg: errors.ERR_NETWORK }));
+      set(myID, { errmsg: errors.ERR_NETWORK });
       return;
     }
 
@@ -57,24 +49,21 @@ export const changeEmail = (
       if (errmsg === "already exists") {
         theErrMsg = errors.ERR_EMAIL_ALREADY_EXISTS;
       }
-      dispatch(_setData(myID, { errmsg: theErrMsg }));
+      set(myID, { errmsg: theErrMsg });
       return;
     }
 
     if (status !== 200) {
-      dispatch(_setData(myID, { errmsg }));
+      set(myID, { errmsg });
       return;
     }
 
-    dispatch(_setData(myID, { isDone: true }));
+    set(myID, { isDone: true });
   };
 };
 
-export const sleepAndRedirect = (
-  _myID: string,
-  userID: string,
-): Thunk<State> => {
-  return async (_, _1) => {
+export const sleepAndRedirect = (_: string, userID: string): Thunk<State> => {
+  return async () => {
     setTimeout(() => {
       goUserHome(userID);
     }, 5000);
@@ -82,7 +71,7 @@ export const sleepAndRedirect = (
 };
 
 export const cleanErr = (myID: string): Thunk<State> => {
-  return async (dispatch, _) => {
-    dispatch(_setData(myID, { errmsg: "" }));
+  return async (set) => {
+    set(myID, { errmsg: "" });
   };
 };

@@ -1,14 +1,9 @@
-import {
-  genUUID,
-  mustGetStateByThunk,
-  type ThunkModuleToFunc,
-  useThunk,
-} from "@chhsiao1981/use-thunk";
+import { useThunk } from "@chhsiao1981/use-thunk";
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useKey } from "react-use";
 import useWindowSize from "../hooks/useWindowSize";
-import * as DoManualsPage from "../reducers/manualsPage";
+import * as DoManualsPage from "../thunks/manualsPage";
 import type { ManArticleSummary_i, PttOption } from "../types";
 import EmptyList from "./EmptyList";
 import FunctionBar from "./FunctionBar";
@@ -16,14 +11,11 @@ import Header from "./Header";
 import ManualList from "./ManualList";
 import styles from "./Page.module.css";
 
-type TDoManualsPage = ThunkModuleToFunc<typeof DoManualsPage>;
-
 export default () => {
-  const [manualsPageID] = useState(genUUID);
-  const useManualsPage = useThunk<DoManualsPage.State, TDoManualsPage>(
-    DoManualsPage,
-  );
-  const [manualsPage, doManualsPage] = mustGetStateByThunk(useManualsPage);
+  const [manualsPage, doManualsPage, manualsPageID] = useThunk<
+    DoManualsPage.State,
+    typeof DoManualsPage
+  >(DoManualsPage);
   const { brdname, title, scrollToRow, allManuals: manuals } = manualsPage;
 
   const {

@@ -1,103 +1,77 @@
-import {
-  init as _init,
-  setData as _setData,
-  getState,
-  type Thunk,
-} from "@chhsiao1981/use-thunk";
+import type { Thunk } from "@chhsiao1981/use-thunk";
 import type { BoardSummary_i, State as State_t } from "../types";
 import * as serverUtils from "./serverUtils";
 import { mergeList, santizeBoard } from "./utils";
 
-export const myClass = "pttbbs-web/GeneralBoardsPage";
+export const name = "pttbbs-web/UserFavoritesPage";
 
 export interface State extends State_t {
   theDate?: Date;
+  level: string;
   startIdx: string;
   scrollTo?: any;
-  list: BoardSummary_i[];
+  scrollToRow?: number;
   lastPre: string;
   lastNext: string;
   isBusyLoading: boolean;
+  list: BoardSummary_i[];
   nextIdx: string;
-  scrollToRow: number;
-  isNextEnd: boolean;
   isPreEnd: boolean;
-  searchKeyword: string;
-  lastSearchKeyword: string;
+  isNextEnd: boolean;
 }
 
 export const defaultState: State = {
+  level: "",
   startIdx: "",
-  list: [],
   lastPre: "",
   lastNext: "",
   isBusyLoading: false,
+  list: [],
   nextIdx: "",
-  scrollTo: null,
-  scrollToRow: 0,
-  isNextEnd: false,
   isPreEnd: false,
-  searchKeyword: "",
-  lastSearchKeyword: "",
+  isNextEnd: false,
 
   errmsg: "",
 };
 
-export interface State_m extends Partial<State> {}
-
 export const init = (
   myID: string,
-  searchKeyword: string,
+  userID: string,
+  level: string,
   startIdx: string,
-  isByClass: boolean,
 ): Thunk<State> => {
-  const theDate = new Date();
-  return async (dispatch, _) => {
-    const state: State = Object.assign({}, defaultState, {
-      theDate,
-      startIdx,
-      searchKeyword,
-    });
-    dispatch(_init({ myID, state }));
-    dispatch(getBoards(myID, searchKeyword, startIdx, false, false, isByClass));
+  return async (set) => {
+    const theDate = new Date();
+    set(myID, { theDate, level, startIdx });
+    set(getBoards(myID, userID, level, startIdx, false, false));
   };
 };
 
 export const setData = (myID: string, data: Partial<State>): Thunk<State> => {
-  return async (dispatch, _) => {
-    dispatch(_setData(myID, data));
+  return async (set) => {
+    set(myID, data);
   };
 };
 
 export const getBoards = (
   myID: string,
-  searchKeyword: string,
+  userID: string,
+  level: string,
   startIdx: string,
   desc: boolean,
   isExclude: boolean,
-  isByClass: boolean,
 ): Thunk<State> => {
-  return async (dispatch, getClassState) => {
-    const state = getClassState();
-    const me = getState(state, myID);
+  return async (set, get) => {
+    const me = get(myID);
     if (!me) {
       return;
     }
-
-    let myList = me.list;
+    const myList = me.list || [];
 
     //check busy
-    let lastPre = me.lastPre;
-    let lastNext = me.lastNext;
-    const isBusyLoading = me.isBusyLoading;
-
-    const myLastSearchKeyword = me.lastSearchKeyword;
-    if (searchKeyword !== myLastSearchKeyword) {
-      myList = [];
-      lastPre = "";
-      lastNext = "";
-    }
-
+    const lastPre = me.lastPre || "";
+    const lastNext = me.lastNext || "";
+    const isBusyLoading = me.isBusyLoading || false;
     if (isBusyLoading) {
       return;
     }
@@ -112,23 +86,20 @@ export const getBoards = (
       }
     }
 
-    dispatch(_setData(myID, { isBusyLoading: true }));
+    set(myID, { isBusyLoading: true });
 
-    const loadBoards = isByClass
-      ? serverUtils.loadGeneralBoardsByClass
-      : serverUtils.loadGeneralBoards;
-
-    const { data, errmsg, status } = await loadBoards(
-      searchKeyword,
+    const { data, errmsg, status } = await serverUtils.loadFavoriteBoards(
+      userID,
+      level,
       startIdx,
       desc,
     );
     if (status !== 200) {
-      dispatch(_setData(myID, { errmsg, isBusyLoading: false }));
+      set(myID, { errmsg, isBusyLoading: false });
       return;
     }
     if (!data) {
-      dispatch(_setData(myID, { errmsg: "no data", isBusyLoading: false }));
+      set(myID, { errmsg: "no data", isBusyLoading: false });
       return;
     }
 
@@ -138,7 +109,6 @@ export const getBoards = (
     const newList = mergeList(myList, dataList, desc, isExclude);
 
     const toUpdate: Partial<State> = {
-      lastSearchKeyword: searchKeyword,
       list: newList,
     };
     if (!desc) {
@@ -157,6 +127,7 @@ export const getBoards = (
       }
     }
 
-    dispatch(_setData(myID, toUpdate));
+    console.log("doUserFavoritesPage.GetBoards: to update:", toUpdate);
+    set(myID, toUpdate);
   };
 };

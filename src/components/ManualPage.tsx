@@ -1,30 +1,20 @@
-import {
-  genUUID,
-  mustGetStateByThunk,
-  type ThunkModuleToFunc,
-  useThunk,
-} from "@chhsiao1981/use-thunk";
+import { useThunk } from "@chhsiao1981/use-thunk";
 import { useEffect, useRef, useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { useKey } from "react-use";
 import useWindowSize from "../hooks/useWindowSize";
-import * as DoManualPage from "../reducers/manualPage";
+import * as DoManualPage from "../thunks/manualPage";
 import type { Line, PttOption } from "../types";
 import Article from "./Article";
 import FunctionBar from "./FunctionBar";
 import Header from "./Header";
 import styles from "./Page.module.css";
 
-type TDoManualPage = ThunkModuleToFunc<typeof DoManualPage>;
-
-// biome-ignore lint/complexity/noBannedTypes: props
-type Props = {};
-export default (_props: Props) => {
-  const [manualPageID] = useState(genUUID);
-  const useManualPage = useThunk<DoManualPage.State, TDoManualPage>(
-    DoManualPage,
-  );
-  const [manualPage, doManualPage] = mustGetStateByThunk(useManualPage);
+export default () => {
+  const [manualPage, doManualPage, manualPageID] = useThunk<
+    DoManualPage.State,
+    typeof DoManualPage
+  >(DoManualPage);
   const { brdname, title, content, scrollToRow } = manualPage;
 
   const { bid: paramsBid, path: paramsPath } = useParams();

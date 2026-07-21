@@ -1,18 +1,13 @@
-import {
-  genUUID,
-  type ThunkModuleToFunc,
-  useThunk,
-} from "@chhsiao1981/use-thunk";
-import { useEffect, useState } from "react";
+import { useThunk } from "@chhsiao1981/use-thunk";
+import { useEffect } from "react";
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import LoginPage from "../components/LoginPage";
-import * as DoHeader from "../reducers/header";
-
-type TDoHeader = ThunkModuleToFunc<typeof DoHeader>;
+import * as DoHeader from "../thunks/header";
 
 export default () => {
-  const [_, doHeader] = useThunk<DoHeader.State, TDoHeader>(DoHeader);
-  const [headerID] = useState(genUUID);
+  const [_, doHeader, headerID] = useThunk<DoHeader.State, typeof DoHeader>(
+    DoHeader,
+  );
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: useEffect
   useEffect(() => {

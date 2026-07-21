@@ -1,27 +1,17 @@
-import {
-  genUUID,
-  mustGetStateByThunk,
-  type ThunkModuleToFunc,
-  useThunk,
-} from "@chhsiao1981/use-thunk";
+import { useThunk } from "@chhsiao1981/use-thunk";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import useWindowSize from "../hooks/useWindowSize";
-import * as DoChangePasswdPage from "../reducers/changePasswdPage";
+import * as DoChangePasswdPage from "../thunks/changePasswdPage";
 import * as errors from "./errors";
 import Header from "./Header";
 import styles from "./Page.module.css";
 
-type TDoChangePasswdPage = ThunkModuleToFunc<typeof DoChangePasswdPage>;
-
 export default () => {
-  const [changePasswdPageID, _setChangePasswdPageID] = useState(genUUID);
-  const useChangePasswdPage = useThunk<
+  const [changePasswdPage, doChangePasswdPage, changePasswdPageID] = useThunk<
     DoChangePasswdPage.State,
-    TDoChangePasswdPage
+    typeof DoChangePasswdPage
   >(DoChangePasswdPage);
-  const [changePasswdPage, doChangePasswdPage] =
-    mustGetStateByThunk(useChangePasswdPage);
   const { userID, errmsg } = changePasswdPage;
 
   const [origPasswd, setOrigPasswd] = useState("");

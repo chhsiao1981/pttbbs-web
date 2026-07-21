@@ -1,31 +1,20 @@
-import {
-  genUUID,
-  mustGetStateByThunk,
-  type ThunkModuleToFunc,
-  useThunk,
-} from "@chhsiao1981/use-thunk";
+import { useThunk } from "@chhsiao1981/use-thunk";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import useWindowSize from "../hooks/useWindowSize";
-import * as DoAttemptSetIDEmailPage from "../reducers/attemptSetIDEmailPage";
+import * as DoAttemptSetIDEmailPage from "../thunks/attemptSetIDEmailPage";
 import Empty from "./Empty";
 import * as errors from "./errors";
 import Header from "./Header";
 import pageStyles from "./Page.module.css";
 
-type TDoAttemptSetIDEmailPage = ThunkModuleToFunc<
-  typeof DoAttemptSetIDEmailPage
->;
-// biome-ignore lint/complexity/noBannedTypes: props
-type Props = {};
-export default (_props: Props) => {
-  const [attemptSetIDEmailPageID] = useState(genUUID);
-  const useAttemptSetIDEmailPage = useThunk<
-    DoAttemptSetIDEmailPage.State,
-    TDoAttemptSetIDEmailPage
-  >(DoAttemptSetIDEmailPage);
-  const [attemptSetIDEmailPage, doAttemptSetIDEmailPage] = mustGetStateByThunk(
-    useAttemptSetIDEmailPage,
+export default () => {
+  const [
+    attemptSetIDEmailPage,
+    doAttemptSetIDEmailPage,
+    attemptSetIDEmailPageID,
+  ] = useThunk<DoAttemptSetIDEmailPage.State, typeof DoAttemptSetIDEmailPage>(
+    DoAttemptSetIDEmailPage,
   );
   const { userID, errmsg, isDone } = attemptSetIDEmailPage;
 

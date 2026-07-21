@@ -1,38 +1,34 @@
-import {
-  init as _init,
-  setData as _setData,
-  getState,
-  type Thunk,
-} from "@chhsiao1981/use-thunk";
+import type { Thunk } from "@chhsiao1981/use-thunk";
 import type { BoardSummary_i, State as State_t } from "../types";
 import * as serverUtils from "./serverUtils";
 import { mergeList, santizeBoard } from "./utils";
 
-export const myClass = "pttbbs-web/UserFavoritesPage";
+export const name = "pttbbs-web/ClassBoardsPage";
 
 export interface State extends State_t {
   theDate?: Date;
-  level: string;
+  clsID: number;
   startIdx: string;
   scrollTo?: any;
-  scrollToRow?: number;
+  list: BoardSummary_i[];
   lastPre: string;
   lastNext: string;
   isBusyLoading: boolean;
-  list: BoardSummary_i[];
   nextIdx: string;
+  scrollToRow: number;
   isPreEnd: boolean;
   isNextEnd: boolean;
 }
 
 export const defaultState: State = {
-  level: "",
+  clsID: 0,
   startIdx: "",
+  list: [],
   lastPre: "",
   lastNext: "",
   isBusyLoading: false,
-  list: [],
   nextIdx: "",
+  scrollToRow: 0,
   isPreEnd: false,
   isNextEnd: false,
 
@@ -41,48 +37,55 @@ export const defaultState: State = {
 
 export const init = (
   myID: string,
-  userID: string,
-  level: string,
+  clsID: number,
   startIdx: string,
 ): Thunk<State> => {
-  return async (dispatch, _) => {
-    const theDate = new Date();
-    const state: State = Object.assign({}, defaultState, {
+  const theDate = new Date();
+  return async (set) => {
+    const toUpdate: Partial<State> = {
       theDate,
-      level,
+      clsID,
       startIdx,
-    });
-    dispatch(_init({ myID, state }));
-    dispatch(getBoards(myID, userID, level, startIdx, false, false));
+      scrollTo: null,
+      list: [],
+      lastPre: "",
+      lastNext: "",
+      isBusyLoading: false,
+      nextIdx: "",
+      scrollToRow: 0,
+      isPreEnd: false,
+      isNextEnd: false,
+    };
+    set(myID, toUpdate);
+    set(getBoards(myID, clsID, startIdx, false, false));
   };
 };
 
 export const setData = (myID: string, data: Partial<State>): Thunk<State> => {
-  return async (dispatch, _) => {
-    dispatch(_setData(myID, data));
+  return async (set) => {
+    set(myID, data);
   };
 };
 
 export const getBoards = (
   myID: string,
-  userID: string,
-  level: string,
+  clsID: number,
   startIdx: string,
   desc: boolean,
   isExclude: boolean,
 ): Thunk<State> => {
-  return async (dispatch, getClassState) => {
-    const state = getClassState();
-    const me = getState(state, myID);
+  clsID = clsID || 1; //clsID default by 1. (no clsID == 0)
+  return async (set, get) => {
+    const me = get(myID);
     if (!me) {
       return;
     }
-    const myList = me.list || [];
+    const myList = me.list;
 
     //check busy
-    const lastPre = me.lastPre || "";
-    const lastNext = me.lastNext || "";
-    const isBusyLoading = me.isBusyLoading || false;
+    const lastPre = me.lastPre;
+    const lastNext = me.lastNext;
+    const isBusyLoading = me.isBusyLoading;
     if (isBusyLoading) {
       return;
     }
@@ -97,28 +100,30 @@ export const getBoards = (
       }
     }
 
-    dispatch(_setData(myID, { isBusyLoading: true }));
+    set(myID, { isBusyLoading: true });
 
-    const { data, errmsg, status } = await serverUtils.loadFavoriteBoards(
-      userID,
-      level,
+    // api
+    const { data, errmsg, status } = await serverUtils.loadClassBoards(
+      clsID,
       startIdx,
       desc,
     );
+
     if (status !== 200) {
-      dispatch(_setData(myID, { errmsg, isBusyLoading: false }));
+      set(myID, { errmsg, isBusyLoading: false });
       return;
     }
     if (!data) {
-      dispatch(_setData(myID, { errmsg: "no data", isBusyLoading: false }));
       return;
     }
 
-    let dataList = data.list || [];
+    // integrate list
+    let dataList = data.list;
     dataList = dataList.map((each) => santizeBoard(each));
 
     const newList = mergeList(myList, dataList, desc, isExclude);
 
+    // to update
     const toUpdate: Partial<State> = {
       list: newList,
     };
@@ -138,7 +143,6 @@ export const getBoards = (
       }
     }
 
-    console.log("doUserFavoritesPage.GetBoards: to update:", toUpdate);
-    dispatch(_setData(myID, toUpdate));
+    set(myID, toUpdate);
   };
 };

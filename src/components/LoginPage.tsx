@@ -1,28 +1,20 @@
-import {
-  genUUID,
-  mustGetStateByThunk,
-  type ThunkModuleToFunc,
-  useThunk,
-} from "@chhsiao1981/use-thunk";
+import { useThunk } from "@chhsiao1981/use-thunk";
 import config from "config";
 import { type CSSProperties, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
 import { OIDC_AUTH_REQUEST_ID } from "../constants";
 import useWindowSize from "../hooks/useWindowSize";
-import * as DoLoginPage from "../reducers/loginPage";
+import * as DoLoginPage from "../thunks/loginPage";
 import * as errors from "./errors";
 import Header from "./Header";
 import styles from "./Page.module.css";
 
-type TDoLoginPage = ThunkModuleToFunc<typeof DoLoginPage>;
-
-// biome-ignore lint/complexity/noBannedTypes: props
-type Props = {};
-export default (_props: Props) => {
-  const [loginPageID] = useState(genUUID);
-  const useLoginPage = useThunk<DoLoginPage.State, TDoLoginPage>(DoLoginPage);
-  const [loginPage, doLoginPage] = mustGetStateByThunk(useLoginPage);
+export default () => {
+  const [loginPage, doLoginPage, loginPageID] = useThunk<
+    DoLoginPage.State,
+    typeof DoLoginPage
+  >(DoLoginPage);
   const { errmsg, isRequested } = loginPage;
 
   const [searchParams, _setSearchParams] = useSearchParams();

@@ -1,9 +1,4 @@
-import {
-  init as _init,
-  setData as _setData,
-  getState,
-  type Thunk,
-} from "@chhsiao1981/use-thunk";
+import type { Thunk } from "@chhsiao1981/use-thunk";
 import type {
   ArticleSummary_i,
   BoardSummary,
@@ -12,7 +7,7 @@ import type {
 import * as serverUtils from "./serverUtils";
 import { mergeIdxList } from "./utils";
 
-export const myClass = "pttbbs-web/ArticlesPage";
+export const name = "pttbbs-web/ArticlesPage";
 
 export interface State extends State_t, BoardSummary {
   theDate?: Date;
@@ -84,17 +79,11 @@ export const init = (
   title: string,
   startIdx: string,
 ): Thunk<State> => {
-  return async (dispatch, _) => {
+  return async (set) => {
     const theDate = new Date();
-    const state: State = Object.assign({}, defaultState, {
-      theDate,
-      title,
-      startIdx,
-      isInit: true,
-    });
-    dispatch(_init({ myID, state }));
+    set(myID, { theDate, title, startIdx, isInit: true });
     const isDesc = !startIdx;
-    dispatch(getBoardSummary(myID, bid, isDesc, title, startIdx));
+    set(getBoardSummary(myID, bid, isDesc, title, startIdx));
   };
 };
 
@@ -105,38 +94,36 @@ export const getBoardSummary = (
   title: string,
   startIdx: string,
 ): Thunk<State> => {
-  return async (dispatch, _) => {
+  return async (set) => {
     // Get board information
-    dispatch(_setData<State>(myID, { isBusyLoadingBoardSummary: true }));
+    set(myID, { isBusyLoadingBoardSummary: true });
     const { data, errmsg, status } = await serverUtils.getBoardSummary(bid);
-    dispatch(
-      _setData<State>(myID, { errmsg, isBusyLoadingBoardSummary: false }),
-    );
+    set(myID, { errmsg, isBusyLoadingBoardSummary: false });
     if (status !== 200) {
       return;
     }
     if (!data) {
       return;
     }
-    await dispatch(_setData<State>(myID, data as Partial<State>));
-    dispatch(getBottomArticles(myID, bid));
-    dispatch(getArticles(myID, bid, title, startIdx, desc, false));
+    set(myID, data as Partial<State>);
+    set(getBottomArticles(myID, bid));
+    set(getArticles(myID, bid, title, startIdx, desc, false));
   };
 };
 
 export const setData = (myID: string, data: Partial<State>): Thunk<State> => {
-  return async (dispatch, _) => {
-    dispatch(_setData(myID, data));
+  return async (set) => {
+    set(myID, data);
   };
 };
 
 const getBottomArticles = (myID: string, bid: string): Thunk<State> => {
-  return async (dispatch, getClassState) => {
-    dispatch(_setData<State>(myID, { isBusyLoadingBottom: true }));
+  return async (set, get) => {
+    set(myID, { isBusyLoadingBottom: true });
     const { data, errmsg, status } = await serverUtils.loadBottomArticles(bid);
-    dispatch(_setData<State>(myID, { isBusyLoadingBottom: false }));
+    set(myID, { isBusyLoadingBottom: false });
     if (status !== 200) {
-      dispatch(_setData(myID, { errmsg }));
+      set(myID, { errmsg });
       return;
     }
     if (!data) {
@@ -150,8 +137,7 @@ const getBottomArticles = (myID: string, bid: string): Thunk<State> => {
       (each) => (each.url = `/board/${bid}/article/${each.aid}`),
     );
 
-    const classState = getClassState();
-    const me = getState(classState, myID);
+    const me = get(myID);
     if (!me) {
       return;
     }
@@ -170,7 +156,7 @@ const getBottomArticles = (myID: string, bid: string): Thunk<State> => {
       toUpdate.scrollToRow = me.scrollToRow + bottomArticles.length;
     }
 
-    dispatch(_setData(myID, toUpdate));
+    set(myID, toUpdate);
   };
 };
 
@@ -182,9 +168,8 @@ export const getArticles = (
   desc: boolean,
   isExclude: boolean,
 ): Thunk<State> => {
-  return async (dispatch, getClassState) => {
-    let classState = getClassState();
-    let me = getState(classState, myID);
+  return async (set, get) => {
+    let me = get(myID);
     if (!me) {
       return;
     }
@@ -234,7 +219,7 @@ export const getArticles = (
     }
 
     console.info("articlesPage: getArticles: to set isBusyLoading");
-    await dispatch(_setData(myID, { isBusyLoading: true }));
+    set(myID, { isBusyLoading: true });
 
     const { data, errmsg, status } = await serverUtils.loadArticles(
       bid,
@@ -243,15 +228,14 @@ export const getArticles = (
       desc,
     );
     if (status !== 200) {
-      dispatch(_setData(myID, { errmsg, isBusyLoading: false }));
+      set(myID, { errmsg, isBusyLoading: false });
       return;
     }
     if (!data) {
       return;
     }
 
-    classState = getClassState();
-    me = getState(classState, myID);
+    me = get(myID);
     if (!me) {
       return;
     }
@@ -310,6 +294,6 @@ export const getArticles = (
       isNextEnd && !searchTitle ? newList.concat(bottomArticles) : newList;
     toUpdate.allArticles = allArticles;
 
-    dispatch(_setData(myID, toUpdate));
+    set(myID, toUpdate);
   };
 };

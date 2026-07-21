@@ -1,9 +1,4 @@
-import {
-  genUUID,
-  mustGetStateByThunk,
-  type ThunkModuleToFunc,
-  useThunk,
-} from "@chhsiao1981/use-thunk";
+import { useThunk } from "@chhsiao1981/use-thunk";
 import {
   type ChangeEventHandler,
   type CSSProperties,
@@ -13,23 +8,23 @@ import {
 } from "react";
 import { useTranslation } from "react-i18next";
 import useWindowSize from "../hooks/useWindowSize";
-import * as DoHeader from "../reducers/header";
-import * as DoInitPage from "../reducers/initPage";
+import * as DoHeader from "../thunks/header";
+import * as DoInitPage from "../thunks/initPage";
 import { mergeErr } from "./errors";
 import Header from "./Header";
 import styles from "./Page.module.css";
 import { checkUsername } from "./utils";
 
-type TDoHeader = ThunkModuleToFunc<typeof DoHeader>;
-type TDoInitPage = ThunkModuleToFunc<typeof DoInitPage>;
-
 export default () => {
-  const [initPageID] = useState(genUUID);
-  const useInitPage = useThunk<DoInitPage.State, TDoInitPage>(DoInitPage);
-  const [initPage, doInitPage] = mustGetStateByThunk(useInitPage);
+  const [_initPage, doInitPage, initPageID] = useThunk<
+    DoInitPage.State,
+    typeof DoInitPage
+  >(DoInitPage);
 
-  const useHeader = useThunk<DoHeader.State, TDoHeader>(DoHeader);
-  const [header, doHeader, headerID] = mustGetStateByThunk(useHeader);
+  const [header, doHeader, headerID] = useThunk<
+    DoHeader.State,
+    typeof DoHeader
+  >(DoHeader);
   const { username, errmsg } = header;
 
   const { width: innerWidth } = useWindowSize(10, 0);
@@ -43,6 +38,7 @@ export default () => {
     width: innerWidth,
   };
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: useEffect
   useEffect(() => {
     doInitPage.init(initPageID);
   }, []);

@@ -1,9 +1,9 @@
-import { init as _init, setData, type Thunk } from "@chhsiao1981/use-thunk";
+import type { Thunk } from "@chhsiao1981/use-thunk";
 import type { State as State_t } from "../types";
 import * as errors from "./errors";
 import * as serverUtils from "./serverUtils";
 
-export const myClass = "pttbbs-web/Header";
+export const name = "pttbbs-web/Header";
 
 export interface State extends State_t {
   username: string;
@@ -20,36 +20,35 @@ export const defaultState: State = {
 };
 
 export const init = (myID: string): Thunk<State> => {
-  return async (dispatch, _) => {
-    const state = Object.assign({}, defaultState, { isInit: true });
-    dispatch(_init({ myID, state }));
-    dispatch(getData(myID));
+  return async (set) => {
+    set(myID, { isInit: true });
+    set(getData(myID));
   };
 };
 
 export const setUsername = (myID: string, username: string): Thunk<State> => {
-  return (dispatch, _) => {
-    dispatch(setData<State>(myID, { username }));
+  return (set) => {
+    set(myID, { username });
   };
 };
 
 const getData = (myID: string): Thunk<State> => {
-  return async (dispatch, _) => {
+  return async (set) => {
     const { data, errmsg, status } = await serverUtils.getUsername();
     console.info("header: after getData: data:", data);
 
     if (!status) {
-      dispatch(setData(myID, { errmsg: errors.ERR_NETWORK }));
+      set(myID, { errmsg: errors.ERR_NETWORK });
       return;
     }
     if (status !== 200) {
-      dispatch(setData(myID, { errmsg }));
+      set(myID, { errmsg });
       return;
     }
     if (!data) {
       return;
     }
 
-    dispatch(setData<State>(myID, { username: data.username }));
+    set(myID, { username: data.username });
   };
 };
