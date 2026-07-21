@@ -9,6 +9,7 @@ import HomePage from "../components/HomePage";
 import HotBoardsPage from "../components/HotBoardsPage";
 import ManualsPage from "../components/ManualsPage";
 import NewArticlePage from "../components/NewArticlePage";
+import ProfilePage from "../components/ProfilePage";
 import UserFavoritesPage from "../components/UserFavoritesPage";
 import * as DoHeader from "../thunks/header";
 
@@ -31,11 +32,13 @@ export default () => {
     >
       <Routes>
         <Route path="/" element={<HomePage />} />
+        <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/user/:userid" element={<ProfilePage />} />
+        <Route path="/user/:userid/favorites" element={<UserFavoritesPage />} />
         <Route path="/cls/:clsID" element={<ClassBoardsPage />} />
         <Route path="/boards" element={<GeneralBoardsPage />} />
         <Route path="/boards/popular" element={<HotBoardsPage />} />
         <Route path="/board/:bid/articles" element={<ArticlesPage />} />
-        <Route path="/user/:userid/favorites" element={<UserFavoritesPage />} />
         <Route path="/board/:bid/article/:aid" element={<ArticlePage />} />
         <Route path="/board/:bid/post" element={<NewArticlePage />} />
         <Route path="/board/:bid/manual" element={<ManualsPage />} />
