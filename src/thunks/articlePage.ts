@@ -1,9 +1,4 @@
-import {
-  init as _init,
-  setData as _setData,
-  getState,
-  type Thunk,
-} from "@chhsiao1981/use-thunk";
+import { type Thunk, update } from "@chhsiao1981/use-thunk";
 import * as serverUtils from "./serverUtils";
 
 //import * as errors from './errors'
@@ -38,7 +33,7 @@ import type {
 } from "../types";
 import { dateMdHM, dateYYYYMdHMS, mergeList } from "./utils";
 
-export const myClass = "pttbbs-web/ArticlePage";
+export const name = "pttbbs-web/ArticlePage";
 
 export interface State extends State_t, ArticleDetail {
   theDate?: Date;
@@ -140,19 +135,15 @@ export const init = (
   startIdx: string,
 ): Thunk<State> => {
   const theDate = new Date();
-  return async (dispatch, _) => {
-    const state: State = Object.assign({}, defaultState, {
-      theDate,
-      isInit: true,
-    });
-    dispatch(_init({ myID, state }));
-    dispatch(getArticleContent(myID, bid, aid, startIdx));
+  return async (set) => {
+    set(myID, { theDate, isInit: true });
+    set(getArticleContent(myID, bid, aid, startIdx));
   };
 };
 
 export const setData = (myID: string, data: any): Thunk<State> => {
-  return async (dispatch, _) => {
-    dispatch(_setData(myID, data));
+  return async (set) => {
+    set(myID, data);
   };
 };
 
@@ -163,7 +154,7 @@ export const addRecommend = (
   recommendType: string,
   recommend: Content,
 ): Thunk<State> => {
-  return async (dispatch, _) => {
+  return async (set) => {
     const { data, errmsg, status } = await serverUtils.addRecommend(
       bid,
       aid,
@@ -188,11 +179,11 @@ export const addRecommend = (
       status,
     );
     if (status !== 200) {
-      dispatch(_setData(myID, { errmsg }));
+      set(myID, { errmsg });
       return;
     }
 
-    dispatch(getComments(myID, bid, aid, "", true, false));
+    set(getComments(myID, bid, aid, "", true, false));
   };
 };
 
@@ -202,17 +193,17 @@ export const rank = (
   aid: string,
   rank: number,
 ): Thunk<State> => {
-  return async (dispatch, _) => {
+  return async (set) => {
     const { data, errmsg, status } = await serverUtils.rank(bid, aid, rank);
     if (status !== 200) {
-      dispatch(_setData(myID, { errmsg }));
+      set(myID, { errmsg });
       return;
     }
     if (!data) {
       return;
     }
 
-    dispatch(_setData(myID, data));
+    set(myID, data);
   };
 };
 
@@ -231,9 +222,8 @@ export const getComments = (
   desc: boolean,
   isExclude: boolean,
 ): Thunk<State> => {
-  return async (dispatch, getClassState) => {
-    let state = getClassState();
-    let me = getState(state, myID);
+  return async (set, get) => {
+    let me = get(myID);
     if (!me) {
       return;
     }
@@ -257,7 +247,7 @@ export const getComments = (
       }
     }
 
-    dispatch(_setData(myID, { isBusyLoading: true }));
+    set(update(myID, { isBusyLoading: true }));
 
     const { data, errmsg, status } = await serverUtils.getComments(
       bid,
@@ -267,7 +257,7 @@ export const getComments = (
     );
 
     if (status !== 200) {
-      dispatch(_setData(myID, { isBusyLoading: false, errmsg }));
+      set(update(myID, { isBusyLoading: false, errmsg }));
       return;
     }
     if (!data) {
@@ -284,8 +274,7 @@ export const getComments = (
     }
 
     //5. 整合 toUpdate
-    state = getClassState();
-    me = getState(state, myID);
+    me = get(myID);
     if (!me) {
       return;
     }
@@ -338,7 +327,7 @@ export const getComments = (
       : newComments;
     toUpdate.contentComments = contentComments;
 
-    dispatch(_setData(myID, toUpdate));
+    set(myID, toUpdate);
   };
 };
 
@@ -354,12 +343,12 @@ export const getArticleContent = (
   startIdx: string,
 ): Thunk<State> => {
   console.log("articlePage.GetArticleContent: start");
-  return async (dispatch, getClassState) => {
+  return async (set, get) => {
     console.log("articlePage.GetArticleContent: to api");
 
-    dispatch(_setData<State>(myID, { isBusyLoading: true }));
+    set(myID, { isBusyLoading: true });
     const { data, errmsg, status } = await serverUtils.getArticle(bid, aid);
-    dispatch(_setData<State>(myID, { isBusyLoading: false }));
+    set(myID, { isBusyLoading: false });
 
     console.log(
       "articlePage.GetArticleContent: after api: data:",
@@ -371,14 +360,14 @@ export const getArticleContent = (
     );
 
     if (status !== 200) {
-      dispatch(_setData(myID, { errmsg }));
+      set(myID, { errmsg });
       return;
     }
     if (!data) {
       return;
     }
 
-    dispatch(_setData(myID, data));
+    set(myID, data);
 
     const bbsLines = parseBBSLines(data.bbs, data.ip, data.host, bid, aid);
     let content: Content = data.content || [];
@@ -394,8 +383,7 @@ export const getArticleContent = (
       lines[2].background = COLOR_BACKGROUND_BLUE;
     }
 
-    const state = getClassState();
-    const me = getState(state, myID);
+    const me = get(myID);
     if (!me) {
       return;
     }
@@ -403,9 +391,9 @@ export const getArticleContent = (
     const comments = me.comments || [];
     const contentComments = isPreEnd ? lines.concat(comments) : comments;
 
-    dispatch(_setData(myID, { contentLines: lines, contentComments }));
+    set(myID, { contentLines: lines, contentComments });
 
-    dispatch(getComments(myID, bid, aid, startIdx, false, false));
+    set(getComments(myID, bid, aid, startIdx, false, false));
   };
 };
 

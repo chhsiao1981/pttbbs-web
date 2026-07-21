@@ -1,9 +1,4 @@
-import {
-  init as _init,
-  setData as _setData,
-  getState,
-  type Thunk,
-} from "@chhsiao1981/use-thunk";
+import type { Thunk } from "@chhsiao1981/use-thunk";
 import * as serverUtils from "./serverUtils";
 
 //import * as errors from './errors'
@@ -15,7 +10,7 @@ import type {
 } from "../types";
 import { mergeIdxList } from "./utils";
 
-export const myClass = "pttbbs-web/ManualsPage";
+export const name = "pttbbs-web/ManualsPage";
 
 export interface State extends State_t, BoardSummary {
   theDate?: Date;
@@ -76,14 +71,9 @@ export const init = (
   startIdx: string,
 ): Thunk<State> => {
   const theDate = new Date();
-  return async (dispatch, _) => {
-    const state: State = Object.assign({}, defaultState, {
-      theDate,
-      title,
-      startIdx,
-    });
-    dispatch(_init({ myID, state: state }));
-    dispatch(getBoardSummary(myID, bid, path, false, title, startIdx));
+  return async (set) => {
+    set(myID, { theDate, title, startIdx });
+    set(getBoardSummary(myID, bid, path, false, title, startIdx));
   };
 };
 
@@ -95,24 +85,24 @@ const getBoardSummary = (
   title: string,
   startIdx: string,
 ): Thunk<State> => {
-  return async (dispatch, _) => {
+  return async (set) => {
     // Get board information
     const { data, errmsg, status } = await serverUtils.getBoardSummary(bid);
     if (status !== 200) {
-      dispatch(_setData(myID, { errmsg }));
+      set(myID, { errmsg });
       return;
     }
     if (!data) {
       return;
     }
-    dispatch(_setData(myID, data as Partial<State>));
-    dispatch(getManuals(myID, bid, path, title, startIdx, desc, false));
+    set(myID, data as Partial<State>);
+    set(getManuals(myID, bid, path, title, startIdx, desc, false));
   };
 };
 
 export const setData = (myID: string, data: Partial<State>): Thunk<State> => {
-  return async (dispatch, _) => {
-    dispatch(_setData(myID, data));
+  return (set) => {
+    set(myID, data);
   };
 };
 
@@ -125,9 +115,8 @@ export const getManuals = (
   desc: boolean,
   isExclude: boolean,
 ): Thunk<State> => {
-  return async (dispatch, getClassState) => {
-    let classState = getClassState();
-    let me = getState(classState, myID);
+  return async (set, get) => {
+    let me = get(myID);
     if (!me) {
       return;
     }
@@ -163,7 +152,7 @@ export const getManuals = (
       }
     }
 
-    dispatch(_setData(myID, { isBusyLoading: true }));
+    set(myID, { isBusyLoading: true });
 
     const { data, errmsg, status } = await serverUtils.loadManuals(
       bid,
@@ -171,18 +160,17 @@ export const getManuals = (
       desc,
     );
     if (status !== 200) {
-      dispatch(_setData(myID, { errmsg, isBusyLoading: false }));
+      set(myID, { errmsg, isBusyLoading: false });
       return;
     }
     if (!data) {
-      dispatch(_setData(myID, { errmsg: "no data", isBusyLoading: false }));
+      set(myID, { errmsg: "no data", isBusyLoading: false });
       return;
     }
 
-    classState = getClassState();
-    me = getState(classState, myID);
+    me = get(myID);
     if (!me) {
-      dispatch(_setData(myID, { errmsg: "no me", isBusyLoading: false }));
+      set(myID, { errmsg: "no me", isBusyLoading: false });
       return;
     }
 
@@ -238,6 +226,6 @@ export const getManuals = (
     const allManuals = newList;
     toUpdate.allManuals = allManuals;
 
-    dispatch(_setData(myID, toUpdate));
+    set(myID, toUpdate);
   };
 };

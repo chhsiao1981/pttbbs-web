@@ -1,15 +1,9 @@
-import {
-  genUUID,
-  getState,
-  mustGetStateByThunk,
-  type ThunkModuleToFunc,
-  useThunk,
-} from "@chhsiao1981/use-thunk";
+import { useThunk } from "@chhsiao1981/use-thunk";
 import { type CSSProperties, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useKey } from "react-use";
 import useWindowSize from "../hooks/useWindowSize";
-import * as DoArticlePage from "../reducers/articlePage";
+import * as DoArticlePage from "../thunks/articlePage";
 import type { CharMap, Line } from "../types";
 import Article from "./Article";
 import FunctionBar from "./FunctionBar";
@@ -17,14 +11,12 @@ import Header from "./Header";
 import InitConsts from "./InitConsts";
 import styles from "./Page.module.css";
 
-type TDoArticlePage = ThunkModuleToFunc<typeof DoArticlePage>;
-
 export default () => {
-  const [articlePageID] = useState(genUUID);
-  const useArticlePage = useThunk<DoArticlePage.State, TDoArticlePage>(
-    DoArticlePage,
-  );
-  const [articlePage, doArticlePage] = mustGetStateByThunk(useArticlePage);
+  const [articlePage, doArticlePage, articlePageID] = useThunk<
+    DoArticlePage.State,
+    typeof DoArticlePage
+  >(DoArticlePage);
+
   const {
     isInit,
     isBusyLoading,

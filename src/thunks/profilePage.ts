@@ -1,9 +1,9 @@
-import { init as _init, setData, type Thunk } from "@chhsiao1981/use-thunk";
+import type { Thunk } from "@chhsiao1981/use-thunk";
 import { STATUS_OK } from "../constants";
 import type { State as State_t, UserDetail } from "../types";
 import * as serverUtils from "./serverUtils";
 
-export const myClass = "pttbbs-web/ProfilePage";
+export const name = "pttbbs-web/ProfilePage";
 
 export interface State extends State_t, UserDetail {
   theDate?: Date;
@@ -90,38 +90,37 @@ export const defaultState: State = {
 
 // init
 export const init = (myID: string): Thunk<State> => {
-  return async (dispatch, _) => {
+  return async (set) => {
     const theDate = new Date();
-    const state: State = Object.assign({}, defaultState, { theDate });
-    dispatch(_init({ myID, state }));
+    set(myID, { theDate });
   };
 };
 
 export const getData = (myID: string, username: string): Thunk<State> => {
-  return async (dispatch, _) => {
+  return async (set) => {
     const { data, errmsg, status } = await serverUtils.getUserInfo(username);
 
     if (status !== 200) {
-      dispatch(setData<State>(myID, { errmsg }));
+      set(myID, { errmsg });
       return;
     }
     if (!data) {
       return;
     }
 
-    dispatch(setData<State>(myID, data));
+    set(myID, data);
   };
 };
 
 export const requestGovermentID = (myID: string): Thunk<State> => {
-  return async (dispatch) => {
+  return async (set) => {
     const { errmsg, status } = await serverUtils.requestGovernmentID();
     if (errmsg) {
-      dispatch(setData<State>(myID, { errmsg }));
+      set(myID, { errmsg });
       return;
     }
     if (status !== STATUS_OK) {
-      dispatch(setData<State>(myID, { errmsg: `status is not ok: ${status}` }));
+      set(myID, { errmsg: `status is not ok: ${status}` });
       return;
     }
 

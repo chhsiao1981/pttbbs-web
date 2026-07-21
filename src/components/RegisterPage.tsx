@@ -1,9 +1,4 @@
-import {
-  genUUID,
-  mustGetStateByThunk,
-  type ThunkModuleToFunc,
-  useThunk,
-} from "@chhsiao1981/use-thunk";
+import { useThunk } from "@chhsiao1981/use-thunk";
 import {
   type CSSProperties,
   type SubmitEventHandler,
@@ -12,24 +7,17 @@ import {
 } from "react";
 import { useTranslation } from "react-i18next";
 import useWindowSize from "../hooks/useWindowSize";
-import * as DoRegisterPage from "../reducers/registerPage";
+import * as DoRegisterPage from "../thunks/registerPage";
 import * as errors from "./errors";
 import Header from "./Header";
 import pageStyles from "./Page.module.css";
 import { validateEmail } from "./utils";
 
-type TDoRegisterPage = ThunkModuleToFunc<typeof DoRegisterPage>;
-
 export default () => {
-  // register-page
-  const useRegisterPage = useThunk<DoRegisterPage.State, TDoRegisterPage>(
-    DoRegisterPage,
-  );
-  const [registerPageID] = useState(genUUID);
-  const [registerPage, doRegisterPage] = mustGetStateByThunk(
-    useRegisterPage,
-    registerPageID,
-  );
+  const [registerPage, doRegisterPage, registerPageID] = useThunk<
+    DoRegisterPage.State,
+    typeof DoRegisterPage
+  >(DoRegisterPage);
   const { isAttemptRegister, errmsg } = registerPage;
 
   // component-states

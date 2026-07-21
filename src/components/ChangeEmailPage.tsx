@@ -1,27 +1,17 @@
-import {
-  genUUID,
-  mustGetStateByThunk,
-  type ThunkModuleToFunc,
-  useThunk,
-} from "@chhsiao1981/use-thunk";
-import { useEffect, useState } from "react";
+import { useThunk } from "@chhsiao1981/use-thunk";
+import { useEffect } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import useWindowSize from "../hooks/useWindowSize";
-import * as DoChangeEmailPage from "../reducers/changeEmailPage";
+import * as DoChangeEmailPage from "../thunks/changeEmailPage";
 import Empty from "./Empty";
 import Header from "./Header";
 import pageStyles from "./Page.module.css";
 
-type TDoChangeEmailPage = ThunkModuleToFunc<typeof DoChangeEmailPage>;
-
 export default () => {
-  const [changeEmailPageID] = useState(genUUID);
-  const useChangeEmailPage = useThunk<
+  const [changeEmailPage, doChangeEmailPage, changeEmailPageID] = useThunk<
     DoChangeEmailPage.State,
-    TDoChangeEmailPage
+    typeof DoChangeEmailPage
   >(DoChangeEmailPage);
-  const [changeEmailPage, doChangeEmailPage] =
-    mustGetStateByThunk(useChangeEmailPage);
   const { errmsg, isDone, data } = changeEmailPage;
 
   //init

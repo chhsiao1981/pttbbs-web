@@ -1,9 +1,9 @@
-import { init as _init, setData, type Thunk } from "@chhsiao1981/use-thunk";
+import type { Thunk } from "@chhsiao1981/use-thunk";
 import { STATUS_OK } from "../constants";
 import type { State as State_t } from "../types";
 import * as serverUtils from "./serverUtils";
 
-export const myClass = "pttbbs-web/InitPage";
+export const name = "pttbbs-web/InitPage";
 
 export interface State extends State_t {}
 
@@ -12,10 +12,9 @@ export const defaultState: State = {
 };
 
 export const init = (myID: string): Thunk<State> => {
-  return async (dispatch, _) => {
+  return async (set) => {
     const theDate = new Date();
-    const state: State = Object.assign({}, defaultState, { theDate });
-    dispatch(_init({ myID, state }));
+    set(myID, { theDate });
   };
 };
 
@@ -25,18 +24,18 @@ export const submit = (
   realName: string,
   birthDate: string,
 ): Thunk<State> => {
-  return async (dispatch, _) => {
+  return async (set) => {
     const { status, errmsg } = await serverUtils.init(
       username,
       realName,
       birthDate,
     );
     if (errmsg) {
-      dispatch(setData<State>(myID, { errmsg }));
+      set(myID, { errmsg });
       return;
     }
     if (status !== STATUS_OK) {
-      dispatch(setData<State>(myID, { errmsg: `status is not ok: ${status}` }));
+      set(myID, { errmsg: `status is not ok: ${status}` });
       return;
     }
 
@@ -45,7 +44,7 @@ export const submit = (
 };
 
 export const cleanErr = (myID: string): Thunk<State> => {
-  return (dispatch, _) => {
-    dispatch(setData<State>(myID, { errmsg: "" }));
+  return (set) => {
+    set(myID, { errmsg: "" });
   };
 };

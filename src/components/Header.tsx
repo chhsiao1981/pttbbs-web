@@ -1,18 +1,12 @@
-import {
-  mustGetStateByThunk,
-  type ThunkModuleToFunc,
-  useThunk,
-} from "@chhsiao1981/use-thunk";
+import { useThunk } from "@chhsiao1981/use-thunk";
 import config from "config";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { GITHUB_LINK } from "../constants";
-import * as DoHeader from "../reducers/header";
+import * as DoHeader from "../thunks/header";
 import Empty from "./Empty";
 import styles from "./Header.module.css";
 import { validateUsername } from "./utils";
-
-type TDoHeader = ThunkModuleToFunc<typeof DoHeader>;
 
 type Props = {
   title: string | (() => ReactNode);
@@ -22,8 +16,7 @@ type Props = {
 export default (props: Props) => {
   const { title: paramsTitle, renderHeader: propsRenderHeader } = props;
 
-  const useHeader = useThunk<DoHeader.State, TDoHeader>(DoHeader);
-  const [header] = mustGetStateByThunk(useHeader);
+  const [header] = useThunk<DoHeader.State, typeof DoHeader>(DoHeader);
   const { username } = header;
 
   const { t } = useTranslation();

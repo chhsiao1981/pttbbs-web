@@ -1,12 +1,8 @@
-import {
-  init as _init,
-  setData as _setData,
-  type Thunk,
-} from "@chhsiao1981/use-thunk";
+import type { Thunk } from "@chhsiao1981/use-thunk";
 import type { EditLine, State as State_t } from "../types";
 import * as serverUtils from "./serverUtils";
 
-export const myClass = "pttbbs-web/NewArticlePage";
+export const name = "pttbbs-web/NewArticlePage";
 
 const _DEFAULT_POST_TYPES = [
   "問題",
@@ -41,15 +37,14 @@ export const defaultState: State = {
 
 export const init = (myID: string, bid: string): Thunk<State> => {
   const theDate = new Date();
-  return async (dispatch, _) => {
-    const state: State = Object.assign({}, defaultState, { theDate });
-    dispatch(_init({ myID, state }));
-    dispatch(getBoardSummary(myID, bid));
+  return async (set) => {
+    set(myID, { theDate });
+    set(getBoardSummary(myID, bid));
   };
 };
 
 const getBoardSummary = (myID: string, bid: string): Thunk<State> => {
-  return async (dispatch, _) => {
+  return async (set) => {
     // Get board information
     const fields = ["brdname", "post_type"];
     const { data, errmsg, status } = await serverUtils.getBoardDetail(
@@ -57,7 +52,7 @@ const getBoardSummary = (myID: string, bid: string): Thunk<State> => {
       fields,
     );
     if (status !== 200) {
-      dispatch(_setData(myID, { errmsg }));
+      set(myID, { errmsg });
       return;
     }
     if (!data) {
@@ -73,7 +68,7 @@ const getBoardSummary = (myID: string, bid: string): Thunk<State> => {
       toUpdate.theClass = "";
     }
 
-    dispatch(_setData(myID, toUpdate));
+    set(myID, toUpdate);
   };
 };
 
@@ -81,14 +76,14 @@ export const updateContent = (
   myID: string,
   content: EditLine[],
 ): Thunk<State> => {
-  return async (dispatch, _) => {
-    dispatch(_setData(myID, { content }));
+  return (set) => {
+    set(myID, { content });
   };
 };
 
 export const setData = (myID: string, data: Partial<State>): Thunk<State> => {
-  return async (dispatch, _) => {
-    return dispatch(_setData(myID, data));
+  return (set) => {
+    return set(myID, data);
   };
 };
 
@@ -99,7 +94,7 @@ export const submit = (
   title: string,
   content: EditLine[],
 ): Thunk<State> => {
-  return async (dispatch, _) => {
+  return async (set) => {
     const uploadContent = content.map((each) => each.runes);
     const { errmsg, status } = await serverUtils.createArticle(
       bid,
@@ -108,7 +103,7 @@ export const submit = (
       uploadContent,
     );
     if (status !== 200) {
-      dispatch(_setData(myID, { errmsg }));
+      set(myID, { errmsg });
       return;
     }
 

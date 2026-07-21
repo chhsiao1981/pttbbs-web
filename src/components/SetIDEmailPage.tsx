@@ -1,32 +1,18 @@
-import {
-  genUUID,
-  getState,
-  mustGetStateByThunk,
-  type ThunkModuleToFunc,
-  useThunk,
-} from "@chhsiao1981/use-thunk";
+import { useThunk } from "@chhsiao1981/use-thunk";
 import QueryString from "query-string";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { useSet } from "react-use";
 import useWindowSize from "../hooks/useWindowSize";
-import * as DoSetIDEmailPage from "../reducers/setIDEmailPage";
+import * as DoSetIDEmailPage from "../thunks/setIDEmailPage";
 import Empty from "./Empty";
 import Header from "./Header";
 import pageStyles from "./Page.module.css";
 
-type TDoSetIDEmailPage = ThunkModuleToFunc<typeof DoSetIDEmailPage>;
-
-// biome-ignore lint/complexity/noBannedTypes: props
-type Props = {};
-
-export default (_props: Props) => {
-  const [setIDEmailPageID] = useState(genUUID);
-  const useSetIDEmailPage = useThunk<DoSetIDEmailPage.State, TDoSetIDEmailPage>(
-    DoSetIDEmailPage,
-  );
-  const [setIDEmailPage, doSetIDEmailPage] =
-    mustGetStateByThunk(useSetIDEmailPage);
+export default () => {
+  const [setIDEmailPage, doSetIDEmailPage, setIDEmailPageID] = useThunk<
+    DoSetIDEmailPage.State,
+    typeof DoSetIDEmailPage
+  >(DoSetIDEmailPage);
   const { errmsg, isDone, data } = setIDEmailPage;
 
   //init

@@ -1,72 +1,52 @@
 import "./vendors";
 import "./index.css";
-import { registerThunk, ThunkContext } from "@chhsiao1981/use-thunk";
+import { registerThunk } from "@chhsiao1981/use-thunk";
 import config from "config";
 import { type FC, StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import * as DoArticlePage from "./reducers/articlePage";
-import * as DoArticlesPage from "./reducers/articlesPage";
-import * as DoAttemptChangeEmailPage from "./reducers/attemptChangeEmailPage";
-import * as DoAttemptSetIDEmailPage from "./reducers/attemptSetIDEmailPage";
-import * as DoChangeEmailPage from "./reducers/changeEmailPage";
-import * as DoChangePasswdPage from "./reducers/changePasswdPage";
-import * as DoClassBoardsPage from "./reducers/classBoardsPage";
-import * as DoGeneralBoardsPage from "./reducers/generalBoardsPage";
-import * as DoHeader from "./reducers/header";
-import * as DoHomePage from "./reducers/homePage";
-import * as DoHotBoardsPage from "./reducers/hotBoardsPage";
-import * as DoInitPage from "./reducers/initPage";
-import * as DoLoginPage from "./reducers/loginPage";
-import * as DoManualPage from "./reducers/manualPage";
-import * as DoManualsPage from "./reducers/manualsPage";
-import * as DoNewArticlePage from "./reducers/newArticlePage";
-import * as DoProfilePage from "./reducers/profilePage";
-import * as DoRegisterPage from "./reducers/registerPage";
-import * as DoSetIDEmailPage from "./reducers/setIDEmailPage";
-import * as DoUserFavoritesPage from "./reducers/userFavoritesPage";
 import reportWebVitals from "./reportWebVitals";
+import * as DoArticlePage from "./thunks/articlePage";
+import * as DoArticlesPage from "./thunks/articlesPage";
+import * as DoAttemptChangeEmailPage from "./thunks/attemptChangeEmailPage";
+import * as DoAttemptSetIDEmailPage from "./thunks/attemptSetIDEmailPage";
+import * as DoChangeEmailPage from "./thunks/changeEmailPage";
+import * as DoChangePasswdPage from "./thunks/changePasswdPage";
+import * as DoClassBoardsPage from "./thunks/classBoardsPage";
+import * as DoGeneralBoardsPage from "./thunks/generalBoardsPage";
+import * as DoHeader from "./thunks/header";
+import * as DoHomePage from "./thunks/homePage";
+import * as DoHotBoardsPage from "./thunks/hotBoardsPage";
+import * as DoInitPage from "./thunks/initPage";
+import * as DoLoginPage from "./thunks/loginPage";
+import * as DoManualPage from "./thunks/manualPage";
+import * as DoManualsPage from "./thunks/manualsPage";
+import * as DoNewArticlePage from "./thunks/newArticlePage";
+import * as DoProfilePage from "./thunks/profilePage";
+import * as DoRegisterPage from "./thunks/registerPage";
+import * as DoSetIDEmailPage from "./thunks/setIDEmailPage";
+import * as DoUserFavoritesPage from "./thunks/userFavoritesPage";
 import "./i18n";
 
 export default (Routes: FC) => {
-  // @ts-expect-error registerThunk
   registerThunk(DoArticlePage);
-  // @ts-expect-error registerThunk
   registerThunk(DoArticlesPage);
-  // @ts-expect-error registerThunk
   registerThunk(DoAttemptChangeEmailPage);
-  // @ts-expect-error registerThunk
   registerThunk(DoAttemptSetIDEmailPage);
-  // @ts-expect-error registerThunk
   registerThunk(DoChangeEmailPage);
-  // @ts-expect-error registerThunk
   registerThunk(DoChangePasswdPage);
-  // @ts-expect-error registerThunk
   registerThunk(DoClassBoardsPage);
-  // @ts-expect-error registerThunk
   registerThunk(DoGeneralBoardsPage);
-  // @ts-expect-error registerThunk
   registerThunk(DoHeader);
-  // @ts-expect-error registerThunk
   registerThunk(DoHomePage);
-  // @ts-expect-error registerThunk
   registerThunk(DoHotBoardsPage);
-  // @ts-expect-error registerThunk
   registerThunk(DoLoginPage);
-  // @ts-expect-error registerThunk
   registerThunk(DoManualPage);
-  // @ts-expect-error registerThunk
   registerThunk(DoManualsPage);
-  // @ts-expect-error registerThunk
   registerThunk(DoNewArticlePage);
-  // @ts-expect-error registerThunk
   registerThunk(DoRegisterPage);
-  // @ts-expect-error registerThunk
   registerThunk(DoSetIDEmailPage);
-  // @ts-expect-error registerThunk
   registerThunk(DoUserFavoritesPage);
-  // @ts-expect-error registerThunk
   registerThunk(DoProfilePage);
-  // @ts-expect-error registerThunk
   registerThunk(DoInitPage);
 
   //title
@@ -75,9 +55,7 @@ export default (Routes: FC) => {
   //react
   createRoot(document.getElementById("root")!).render(
     <StrictMode>
-      <ThunkContext>
-        <Routes />
-      </ThunkContext>
+      <Routes />
     </StrictMode>,
   );
 

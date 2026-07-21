@@ -1,4 +1,4 @@
-import type { FormEvent, MouseEventHandler } from "react";
+import type { MouseEventHandler, SubmitEventHandler } from "react";
 import clearIcon from "../assets/img/clear_white_24dp.svg";
 import searchIcon from "../assets/img/search_white_24dp.svg";
 import styles from "./SearchBar.module.css";
@@ -18,7 +18,7 @@ type Props = {
 export default (props: Props) => {
   const { text, setText, searching, onSearch, onClear, prompt } = props;
 
-  const onSubmit = (e: FormEvent) => {
+  const onSubmit: SubmitEventHandler<HTMLFormElement> = (e) => {
     e.preventDefault();
     onSearch();
   };

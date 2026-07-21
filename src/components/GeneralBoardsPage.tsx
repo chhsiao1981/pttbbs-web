@@ -1,15 +1,10 @@
-import {
-  genUUID,
-  mustGetStateByThunk,
-  type ThunkModuleToFunc,
-  useThunk,
-} from "@chhsiao1981/use-thunk";
+import { useThunk } from "@chhsiao1981/use-thunk";
 import config from "config";
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import useWindowSize from "../hooks/useWindowSize";
-import * as DoGeneralBoardsPage from "../reducers/generalBoardsPage";
-import * as DoHeader from "../reducers/header";
+import * as DoGeneralBoardsPage from "../thunks/generalBoardsPage";
+import * as DoHeader from "../thunks/header";
 import type { BoardSummary_i } from "../types";
 import BoardList from "./BoardList";
 import FunctionBar from "./FunctionBar";
@@ -17,17 +12,12 @@ import Header from "./Header";
 import pageStyles from "./Page.module.css";
 import SearchBar from "./SearchBar";
 
-type TDoGeneralBoardsPage = ThunkModuleToFunc<typeof DoGeneralBoardsPage>;
-type TDoHeader = ThunkModuleToFunc<typeof DoHeader>;
-
 export default () => {
-  const [generalBoardsPageID] = useState(genUUID);
-  const useGeneralBoardsPage = useThunk<
-    DoGeneralBoardsPage.State,
-    TDoGeneralBoardsPage
-  >(DoGeneralBoardsPage);
-  const [generalBoardsPage, doGeneralBoardsPage] =
-    mustGetStateByThunk(useGeneralBoardsPage);
+  const [generalBoardsPage, doGeneralBoardsPage, generalBoardsPageID] =
+    useThunk<DoGeneralBoardsPage.State, typeof DoGeneralBoardsPage>(
+      DoGeneralBoardsPage,
+    );
+
   const {
     list: boards,
     isNextEnd,
@@ -36,8 +26,7 @@ export default () => {
     searchKeyword,
   } = generalBoardsPage;
 
-  const useHeader = useThunk<DoHeader.State, TDoHeader>(DoHeader);
-  const [header] = mustGetStateByThunk(useHeader);
+  const [header] = useThunk<DoHeader.State, typeof DoHeader>(DoHeader);
   const { userID } = header;
 
   // eslint-disable-next-line

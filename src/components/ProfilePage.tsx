@@ -1,34 +1,23 @@
-import {
-  genUUID,
-  mustGetStateByThunk,
-  type ThunkModuleToFunc,
-  useThunk,
-} from "@chhsiao1981/use-thunk";
+import { useThunk } from "@chhsiao1981/use-thunk";
 import config from "config";
 import { type CSSProperties, useEffect, useState } from "react";
 import { OverlayTrigger, Tooltip } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import useWindowSize from "../hooks/useWindowSize";
-import * as DoHeader from "../reducers/header";
-import * as DoProfilePage from "../reducers/profilePage";
+import * as DoHeader from "../thunks/header";
+import * as DoProfilePage from "../thunks/profilePage";
 import * as errors from "./errors";
 import Header from "./Header";
 import pageStyles from "./Page.module.css";
 import { tsToDateTimeStr } from "./utils";
 
-type TDoProfilePage = ThunkModuleToFunc<typeof DoProfilePage>;
-type TDoHeader = ThunkModuleToFunc<typeof DoHeader>;
-
 export default () => {
-  const [profilePageID] = useState(genUUID);
-  const useProfilePage = useThunk<DoProfilePage.State, TDoProfilePage>(
-    DoProfilePage,
-  );
-  const [profilePage, doProfilePage] = mustGetStateByThunk(useProfilePage);
+  const [profilePage, doProfilePage, profilePageID] = useThunk<
+    DoProfilePage.State,
+    typeof DoProfilePage
+  >(DoProfilePage);
   const {
     nickname,
-    realname,
-    birthdate,
 
     is_government_id,
     over18,
@@ -39,8 +28,7 @@ export default () => {
     errmsg,
   } = profilePage;
 
-  const useHeader = useThunk<DoHeader.State, TDoHeader>(DoHeader);
-  const [header] = mustGetStateByThunk(useHeader);
+  const [header] = useThunk<DoHeader.State, typeof DoHeader>(DoHeader);
   const { username } = header;
 
   const { width: innerWidth } = useWindowSize(10, 0);

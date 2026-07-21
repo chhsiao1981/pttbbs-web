@@ -1,39 +1,24 @@
-import {
-  genUUID,
-  mustGetStateByThunk,
-  type ThunkModuleToFunc,
-  useThunk,
-} from "@chhsiao1981/use-thunk";
+import { useThunk } from "@chhsiao1981/use-thunk";
 import config from "config";
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import useWindowSize from "../hooks/useWindowSize";
-import * as DoClassBoardsPage from "../reducers/classBoardsPage";
-import * as DoHeader from "../reducers/header";
+import * as DoClassBoardsPage from "../thunks/classBoardsPage";
+import * as DoHeader from "../thunks/header";
 import type { BoardSummary_i } from "../types";
 import BoardList from "./BoardList";
 import FunctionBar from "./FunctionBar";
 import Header from "./Header";
 import pageStyles from "./Page.module.css";
 
-type TDoClassBoardsPage = ThunkModuleToFunc<typeof DoClassBoardsPage>;
-type TDoHeader = ThunkModuleToFunc<typeof DoHeader>;
-
-// biome-ignore lint/complexity/noBannedTypes: props
-type Props = {};
-
-export default (_props: Props) => {
-  const [classBoardsPageID] = useState(genUUID);
-  const useClassBoardsPage = useThunk<
+export default () => {
+  const [classBoardsPage, doClassBoardsPage, classBoardsPageID] = useThunk<
     DoClassBoardsPage.State,
-    TDoClassBoardsPage
+    typeof DoClassBoardsPage
   >(DoClassBoardsPage);
-  const [classBoardsPage, doClassBoardsPage] =
-    mustGetStateByThunk(useClassBoardsPage);
   const { list: boards, isNextEnd, isPreEnd, scrollToRow } = classBoardsPage;
 
-  const useHeader = useThunk<DoHeader.State, TDoHeader>(DoHeader);
-  const [header] = mustGetStateByThunk(useHeader);
+  const [header] = useThunk<DoHeader.State, typeof DoHeader>(DoHeader);
   const { userID } = header;
 
   // eslint-disable-next-line

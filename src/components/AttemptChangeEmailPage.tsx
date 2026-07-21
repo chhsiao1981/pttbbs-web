@@ -1,31 +1,21 @@
-import {
-  genUUID,
-  mustGetStateByThunk,
-  type ThunkModuleToFunc,
-  useThunk,
-} from "@chhsiao1981/use-thunk";
+import { useThunk } from "@chhsiao1981/use-thunk";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import useWindowSize from "../hooks/useWindowSize";
-import * as DoAttemptChangeEmailPage from "../reducers/attemptChangeEmailPage";
+import * as DoAttemptChangeEmailPage from "../thunks/attemptChangeEmailPage";
 import Empty from "./Empty";
 import * as errors from "./errors";
 import Header from "./Header";
 import styles from "./Page.module.css";
 
-type TDoAttemptChangeEmailPage = ThunkModuleToFunc<
-  typeof DoAttemptChangeEmailPage
->;
-
 export default () => {
-  const [attemptChangeEmailPageID, _setAttemptChangeEmailPageID] =
-    useState(genUUID);
-  const useAttemptChangeEmailPage = useThunk<
-    DoAttemptChangeEmailPage.State,
-    TDoAttemptChangeEmailPage
-  >(DoAttemptChangeEmailPage);
-  const [attemptChangeEmailPage, doAttemptChangeEmailPage] =
-    mustGetStateByThunk(useAttemptChangeEmailPage);
+  const [
+    attemptChangeEmailPage,
+    doAttemptChangeEmailPage,
+    attemptChangeEmailPageID,
+  ] = useThunk<DoAttemptChangeEmailPage.State, typeof DoAttemptChangeEmailPage>(
+    DoAttemptChangeEmailPage,
+  );
   const { userID, errmsg, isDone } = attemptChangeEmailPage;
 
   const [password, setPassword] = useState("");
