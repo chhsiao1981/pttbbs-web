@@ -81,7 +81,7 @@ export const register = (
       return;
     }
 
-    const { user_id } = data;
+    const { username: user_id } = data;
 
     goUserHome(user_id);
   };

@@ -95,6 +95,9 @@ export const login = (
       return;
     }
 
-    window.location.href = "/user/" + data.user_id + "/favorites";
+    const redirectURI =
+      data.redirect_uri || "/user/" + data.username + "/favorites";
+
+    window.location.href = redirectURI;
   };
 };

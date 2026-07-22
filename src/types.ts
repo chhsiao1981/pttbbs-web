@@ -49,9 +49,10 @@ export interface EditRune_t extends Rune_t {
 export type EditRunes_t = EditRune_t[];
 
 export type AccessToken = {
-  user_id: string;
+  username: string;
   access_token: string;
   token_type: string;
+  redirect_uri: string;
 };
 
 export type Username = {
