@@ -1,10 +1,4 @@
-import {
-  genUUID,
-  getDefaultID,
-  getState,
-  type ThunkModuleToFunc,
-  useThunk,
-} from "@chhsiao1981/use-thunk";
+import { useThunk } from "@chhsiao1981/use-thunk";
 import {
   type FocusEvent,
   type MouseEvent,
@@ -16,28 +10,25 @@ import {
 import { useParams } from "react-router-dom";
 import { DropdownList } from "react-widgets";
 import useWindowSize from "../hooks/useWindowSize";
-import * as DoHeader from "../reducers/header";
-import * as DoNewArticlePage from "../reducers/newArticlePage";
+import * as DoNewArticlePage from "../thunks/newArticlePage";
 import type { EditLine } from "../types";
 import Editor from "./Editor";
-import Empty from "./Empty";
 import FunctionBar from "./FunctionBar";
 import Header from "./Header";
 import InitConsts from "./InitConsts";
 import styles from "./NewArticlePage.module.css";
 import pageStyles from "./Page.module.css";
 
-type TDoHeader = ThunkModuleToFunc<typeof DoHeader>;
-type TDoNewArticlePage = ThunkModuleToFunc<typeof DoNewArticlePage>;
-
-// biome-ignore lint/complexity/noBannedTypes: props
-type Props = {};
-export default (_props: Props) => {
-  const [classNewArticlePage, doNewArticlePage] = useThunk<
+export default () => {
+  const [newArticlePage, doNewArticlePage, newArticlePageID] = useThunk<
     DoNewArticlePage.State,
-    TDoNewArticlePage
+    typeof DoNewArticlePage
   >(DoNewArticlePage);
-  const [classHeader, doHeader] = useThunk<DoHeader.State, TDoHeader>(DoHeader);
+  const { errmsg, brdname, post_type, theClass } = newArticlePage;
+  const postTypes = post_type.map((each) => ({
+    value: each,
+    label: "[" + each + "]",
+  }));
 
   const [headerHeight, setHeaderHeight] = useState(0);
   const [funcbarHeight, setFuncbarHeight] = useState(0);
@@ -51,16 +42,12 @@ export default (_props: Props) => {
 
   const [isInitConsts, setIsInitConsts] = useState(false);
 
-  //init
   const { bid: paramsBid } = useParams();
   const bid = paramsBid || "";
+
+  //init
   // biome-ignore lint/correctness/useExhaustiveDependencies: useEffect
   useEffect(() => {
-    const headerID = genUUID();
-    doHeader.init(headerID);
-
-    const newArticlePageID = genUUID();
-
     doNewArticlePage.init(newArticlePageID, bid);
 
     const interval = setInterval(() => {
@@ -68,12 +55,6 @@ export default (_props: Props) => {
     }, 500);
     return () => clearInterval(interval);
   }, []);
-
-  useEffect(() => {
-    if (!isInitConsts) {
-      return;
-    }
-  }, [isInitConsts]);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: useEffect
   useEffect(() => {
@@ -96,22 +77,8 @@ export default (_props: Props) => {
 
   const [content, setContent] = useState<EditLine[]>([]);
 
-  //get data
-  const newArticlePage = getState(classNewArticlePage);
-  if (!newArticlePage) {
-    return <Empty />;
-  }
-  const myID = getDefaultID(classNewArticlePage);
-  const errmsg = newArticlePage.errmsg || "";
-  const brdname = newArticlePage.brdname;
-  const postTypes = newArticlePage.post_type.map((each) => ({
-    value: each,
-    label: "[" + each + "]",
-  }));
-
-  const theClass = newArticlePage.theClass;
   const setTheClass = (newClass: string) => {
-    doNewArticlePage.setData(myID, { theClass: newClass });
+    doNewArticlePage.setData(newArticlePageID, { theClass: newClass });
   };
 
   const submit = (_e: SubmitEvent) => {
@@ -123,7 +90,7 @@ export default (_props: Props) => {
       showErrMsg("您忘記標題囉～");
       return;
     }
-    doNewArticlePage.submit(myID, bid, theClass, title, content);
+    doNewArticlePage.submit(newArticlePageID, bid, theClass, title, content);
   };
 
   const allErrMsg: string[] = [];
@@ -163,7 +130,7 @@ export default (_props: Props) => {
 
   const cleanErrMsg = () => {
     setErrMsg("");
-    doNewArticlePage.setData(myID, { errmsg: "" });
+    doNewArticlePage.setData(newArticlePageID, { errmsg: "" });
   };
 
   const onMouseDownHeader = (_e: MouseEvent) => {
@@ -206,11 +173,7 @@ export default (_props: Props) => {
       {/* biome-ignore lint/a11y/noStaticElementInteractions: onFocus and onBlur on the whole page */}
       <div className={pageStyles.root} onFocus={onFocus} onBlur={onBlur}>
         <div ref={headerRef}>
-          <Header
-            title={""}
-            renderHeader={renderHeader}
-            stateHeader={classHeader}
-          />
+          <Header title={""} renderHeader={renderHeader} />
         </div>
 
         <Editor

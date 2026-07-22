@@ -4,40 +4,45 @@
   "version": "0.15.5",
   "type": "module",
   "scripts": {
-    "dev": "npm run dev:dev && vite",
+    "start": "npm run dev:dev && vite",
     "build": "tsc -b && vite build",
+    "dev:dev": "cd src/main && rm -f index.tsx && ln -s dev.tsx index.tsx && cd ../..",
 
-    "dev:dev": "rm -f src/main.tsx; cd src && ln -s dev.tsx main.tsx && cd ..",
-
-    "dev:all": "rm -f src/main.tsx; cd src && ln -s all.tsx main.tsx && cd ..",
+    "dev:all": "cd src/main && rm -f index.tsx && ln -s all.tsx index.tsx && cd ../..",
     "build:all": "npm run dev:all && npm run build && cp dist/index.html dist/all.html",
 
-    "dev:home": "rm -f src/main.tsx; cd src && ln -s home.tsx main.tsx && cd ..",
+    "dev:home": "cd src/main && rm -f index.tsx && ln -s home.tsx index.tsx && cd ../..",
     "build:home": "npm run dev:home && npm run build && cp dist/index.html dist/home.html",
 
-    "dev:login": "rm -f src/main.tsx; cd src && ln -s login.tsx main.tsx && cd ..",
+    "dev:login": "cd src/main && rm -f index.tsx && ln -s login.tsx index.tsx && cd ../..",
     "build:login": "npm run dev:login && npm run build && cp dist/index.html dist/login.html",
 
-    "dev:register": "rm -f src/main.tsx; cd src && ln -s register.tsx main.tsx && cd ..",
+    "dev:register": "cd src/main && rm -f index.tsx && ln -s register.tsx index.tsx && cd ../..",
     "build:register": "npm run dev:register && npm run build && cp dist/index.html dist/register.html",
 
-    "dev:user-info": "rm -f src/main.tsx; cd src && ln -s userInfo.tsx main.tsx && cd ..",
+    "dev:user-info": "cd src/main && rm -f index.tsx && ln -s userInfo.tsx index.tsx && cd ../..",
     "build:user-info": "npm run dev:user-info && npm run build && cp dist/index.html dist/user-info.html",
 
-    "dev:change-passwd": "rm -f src/main.tsx; cd src && ln -s changePasswd.tsx main.tsx && cd ..",
+    "dev:change-passwd": "cd src/main && rm -f index.tsx && ln -s changePasswd.tsx index.tsx && cd ../..",
     "build:change-passwd": "npm run dev:change-passwd && npm run build && cp dist/index.html dist/change-passwd.html",
 
-    "dev:change-email": "rm -f src/main.tsx; cd src && ln -s changeEmail.tsx main.tsx && cd ..",
+    "dev:change-email": "cd src/main && rm -f index.tsx && ln -s changeEmail.tsx index.tsx && cd ../..",
     "build:change-email": "npm run dev:change-email && npm run build && cp dist/index.html dist/change-email.html",
 
-    "dev:set-id-email": "rm -f src/main.tsx; cd src && ln -s setIDEmail.tsx main.tsx && cd ..",
+    "dev:set-id-email": "cd src/main && rm -f index.tsx && ln -s setIDEmail.tsx index.tsx && cd ../..",
     "build:set-id-email": "npm run dev:set-id-email && npm run build && cp dist/index.html dist/set-id-email.html",
 
-    "dev:attempt-change-email": "rm -f src/main.tsx; cd src && ln -s attemptChangeEmail.tsx main.tsx && cd ..",
+    "dev:attempt-change-email": "cd src/main && rm -f index.tsx && ln -s attemptChangeEmail.tsx index.tsx && cd ../..",
     "build:attempt-change-email": "npm run dev:attempt-change-email && npm run build && cp dist/index.html dist/attempt-change-email.html",
 
-    "dev:attempt-set-id-email": "rm -f src/main.tsx; cd src && ln -s attemptSetIDEmail.tsx main.tsx && cd ..",
+    "dev:attempt-set-id-email": "cd src/main && rm -f index.tsx && ln -s attemptSetIDEmail.tsx index.tsx && cd ../..",
     "build:attempt-set-id-email": "npm run dev:attempt-set-id-email && npm run build && cp dist/index.html dist/attempt-set-id-email.html",
+
+    "dev:init": "cd src/main && rm -f index.tsx && ln -s init.tsx index.tsx && cd ../..",
+    "build:init": "npm run dev:init && npm run build && cp dist/index.html dist/init.html",
+
+    "dev:error": "cd src/main && rm -f index.tsx && ln -s error.tsx index.tsx && cd ../..",
+    "build:error": "npm run dev:error && npm run build && cp dist/index.html dist/error.html",
 
     "fmt": "biome format --write .",
     "lint": "biome lint .",
@@ -45,16 +50,19 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@chhsiao1981/use-thunk": "^10.1.2",
+    "@chhsiao1981/use-thunk": "^16.1.1",
     "bootstrap": "^5.3.8",
     "bootstrap-icons": "^1.13.1",
     "fixed-data-table-2": "^2.0.22",
+    "i18next": "^26.3.1",
+    "i18next-browser-languagedetector": "^8.2.1",
     "moment": "^2.30.1",
     "moment-timezone": "^0.6.2",
     "query-string": "^9.3.1",
     "react": "^19.2.7",
     "react-bootstrap": "^2.10.10",
     "react-dom": "^19.2.0",
+    "react-i18next": "^17.0.8",
     "react-router-dom": "^6.30.3",
     "react-use": "^17.6.0",
     "react-widgets": "^5.8.6",

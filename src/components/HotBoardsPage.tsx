@@ -1,32 +1,23 @@
-import {
-  genUUID,
-  getState,
-  type ThunkModuleToFunc,
-  useThunk,
-} from "@chhsiao1981/use-thunk";
+import { useThunk } from "@chhsiao1981/use-thunk";
 import config from "config";
 import { type CSSProperties, useEffect, useRef, useState } from "react";
 import useWindowSize from "../hooks/useWindowSize";
-import * as DoHeader from "../reducers/header";
-import * as DoHotBoardsPage from "../reducers/hotBoardsPage";
+import * as DoHeader from "../thunks/header";
+import * as DoHotBoardsPage from "../thunks/hotBoardsPage";
 import BoardList from "./BoardList";
-import Empty from "./Empty";
 import FunctionBar from "./FunctionBar";
 import Header from "./Header";
 import pageStyles from "./Page.module.css";
 
-type TDoHotBoardsPage = ThunkModuleToFunc<typeof DoHotBoardsPage>;
-type TDoHeader = ThunkModuleToFunc<typeof DoHeader>;
-
-// biome-ignore lint/complexity/noBannedTypes: props
-type Props = {};
-
-export default (_props: Props) => {
-  const [classHotBoardsPage, doHotBoardsPage] = useThunk<
+export default () => {
+  const [hotBoardsPage, doHotBoardsPage, hotBoardsPageID] = useThunk<
     DoHotBoardsPage.State,
-    TDoHotBoardsPage
+    typeof DoHotBoardsPage
   >(DoHotBoardsPage);
-  const [stateHeader, doHeader] = useThunk<DoHeader.State, TDoHeader>(DoHeader);
+  const { list: boards } = hotBoardsPage;
+
+  const [header] = useThunk<DoHeader.State, typeof DoHeader>(DoHeader);
+  const { userID } = header;
 
   // eslint-disable-next-line
   const [_errMsg, _setErrMsg] = useState("");
@@ -41,10 +32,6 @@ export default (_props: Props) => {
   //init
   // biome-ignore lint/correctness/useExhaustiveDependencies: useEffect
   useEffect(() => {
-    const headerID = genUUID();
-    doHeader.init(headerID);
-
-    const hotBoardsPageID = genUUID();
     doHotBoardsPage.init(hotBoardsPageID);
   }, []);
 
@@ -60,21 +47,12 @@ export default (_props: Props) => {
   }, [headerRef.current, funcbarRef.current]);
 
   //get data
-  const hotBoardsPage = getState(classHotBoardsPage);
-  if (!hotBoardsPage) {
-    return <Empty />;
-  }
   // const errmsg = hotBoardsPage.errmsg || "";
-  const boards = hotBoardsPage.list;
-
-  const header = getState(stateHeader) || { user_id: "" };
-  const myUserID = header.user_id;
 
   const width = innerWidth;
-  //let boardListHeight = innerHeight * SCREEN_RATIO
   const listHeight = innerHeight - headerHeight - funcbarHeight;
 
-  const headerTitle = "熱門看板";
+  const title = "熱門看板";
 
   // const allErrMsg = errors.mergeErr(errMsg, errmsg);
 
@@ -97,11 +75,11 @@ export default (_props: Props) => {
 
   // const loptions = [{ text: "搜尋看板", action: () => {} }];
   const roptions = [];
-  if (myUserID && myUserID !== config.PTT_GUEST) {
+  if (userID && userID !== config.PTT_GUEST) {
     roptions.push({
       text: "我的最愛",
       action: () => {
-        window.location.href = "/user/" + myUserID + "/favorites";
+        window.location.href = "/user/" + userID + "/favorites";
       },
     });
   }
@@ -124,7 +102,7 @@ export default (_props: Props) => {
   return (
     <div className={pageStyles.root}>
       <div ref={headerRef}>
-        <Header title={headerTitle} stateHeader={stateHeader} />
+        <Header title={title} />
       </div>
       {renderBoardList()}
       <div ref={funcbarRef}>

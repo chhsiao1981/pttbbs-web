@@ -1,3 +1,5 @@
+import { useThunk } from "@chhsiao1981/use-thunk";
+import { useEffect } from "react";
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import ArticlePage from "../components/ArticlePage";
 import ArticlesPage from "../components/ArticlesPage";
@@ -7,12 +9,20 @@ import HomePage from "../components/HomePage";
 import HotBoardsPage from "../components/HotBoardsPage";
 import ManualsPage from "../components/ManualsPage";
 import NewArticlePage from "../components/NewArticlePage";
+import ProfilePage from "../components/ProfilePage";
 import UserFavoritesPage from "../components/UserFavoritesPage";
+import * as DoHeader from "../thunks/header";
 
-// biome-ignore lint/complexity/noBannedTypes: props
-type Props = {};
+export default () => {
+  const [_, doHeader, headerID] = useThunk<DoHeader.State, typeof DoHeader>(
+    DoHeader,
+  );
 
-export default (_props: Props) => {
+  // biome-ignore lint/correctness/useExhaustiveDependencies: useEffect
+  useEffect(() => {
+    doHeader.init(headerID);
+  }, []);
+
   return (
     <Router
       future={{
@@ -22,11 +32,13 @@ export default (_props: Props) => {
     >
       <Routes>
         <Route path="/" element={<HomePage />} />
+        <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/user/:userid" element={<ProfilePage />} />
+        <Route path="/user/:userid/favorites" element={<UserFavoritesPage />} />
         <Route path="/cls/:clsID" element={<ClassBoardsPage />} />
         <Route path="/boards" element={<GeneralBoardsPage />} />
         <Route path="/boards/popular" element={<HotBoardsPage />} />
         <Route path="/board/:bid/articles" element={<ArticlesPage />} />
-        <Route path="/user/:userid/favorites" element={<UserFavoritesPage />} />
         <Route path="/board/:bid/article/:aid" element={<ArticlePage />} />
         <Route path="/board/:bid/post" element={<NewArticlePage />} />
         <Route path="/board/:bid/manual" element={<ManualsPage />} />

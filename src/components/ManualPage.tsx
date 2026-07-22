@@ -1,52 +1,33 @@
-import {
-  genUUID,
-  getDefaultID,
-  getState,
-  type ThunkModuleToFunc,
-  useThunk,
-} from "@chhsiao1981/use-thunk";
-import QueryString from "query-string";
+import { useThunk } from "@chhsiao1981/use-thunk";
 import { useEffect, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { useKey } from "react-use";
 import useWindowSize from "../hooks/useWindowSize";
-import * as DoHeader from "../reducers/header";
-import * as DoManualPage from "../reducers/manualPage";
+import * as DoManualPage from "../thunks/manualPage";
 import type { Line, PttOption } from "../types";
 import Article from "./Article";
 import FunctionBar from "./FunctionBar";
 import Header from "./Header";
 import styles from "./Page.module.css";
 
-type TDoHeader = ThunkModuleToFunc<typeof DoHeader>;
-type TDoManualPage = ThunkModuleToFunc<typeof DoManualPage>;
-
-// biome-ignore lint/complexity/noBannedTypes: props
-type Props = {};
-export default (_props: Props) => {
-  const [classManualPage, doManualPage] = useThunk<
+export default () => {
+  const [manualPage, doManualPage, manualPageID] = useThunk<
     DoManualPage.State,
-    TDoManualPage
+    typeof DoManualPage
   >(DoManualPage);
-  const [manualPageID, _setManualPageID] = useState(genUUID);
+  const { brdname, title, content, scrollToRow } = manualPage;
 
-  const [classHeader, doHeader] = useThunk<DoHeader.State, TDoHeader>(DoHeader);
-  const [headerID, _setHeaderID] = useState(genUUID);
-
-  // eslint-disable-next-line
-  const [_errMsg, _setErrMsg] = useState("");
-
-  //init
   const { bid: paramsBid, path: paramsPath } = useParams();
   const bid = paramsBid || "";
   const path = paramsPath || "";
-
   const pathList = path.split("/");
   const dirname = pathList.slice(0, pathList.length - 1).join("/");
   let parentUrl = `/board/${bid}/manual`;
   if (dirname !== "") {
     parentUrl += "/" + dirname;
   }
+
+  const [searchParams] = useSearchParams();
 
   const [headerHeight, setHeaderHeight] = useState(0);
   const [funcbarHeight, setFuncbarHeight] = useState(0);
@@ -57,10 +38,7 @@ export default (_props: Props) => {
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: useEffect
   useEffect(() => {
-    doHeader.init(headerID);
-
-    const query = QueryString.parse(window.location.search);
-    const startIdx = (query.start_idx || "") as string;
+    const startIdx = searchParams.get("start_idx") || "";
 
     doManualPage.init(manualPageID, bid, path, startIdx);
   }, []);
@@ -75,22 +53,9 @@ export default (_props: Props) => {
     }
   }, [headerRef.current, funcbarRef.current]);
 
-  //render
-
   useKey("ArrowLeft", (_e) => {
     window.location.href = parentUrl;
   });
-
-  //get data
-  const manualPage = getState(classManualPage) || DoManualPage.defaultState;
-  const myID = getDefaultID(classManualPage);
-  // const errmsg = manualPage.errmsg || "";
-  const brdname = manualPage.brdname;
-  const title = manualPage.title;
-  const content = manualPage.content;
-  const scrollToRow = manualPage.scrollToRow;
-
-  //keys
 
   const width = innerWidth;
   const listHeight = innerHeight - headerHeight - funcbarHeight;
@@ -108,7 +73,7 @@ export default (_props: Props) => {
       return false;
     }
 
-    doManualPage.setData(myID, { scrollToRow: undefined });
+    doManualPage.setData(manualPageID, { scrollToRow: undefined });
 
     return true;
   };
@@ -136,7 +101,7 @@ export default (_props: Props) => {
   return (
     <div className={styles.root}>
       <div ref={headerRef}>
-        <Header title={headerTitle} stateHeader={classHeader} />
+        <Header title={headerTitle} />
       </div>
       {renderManual()}
       <div ref={funcbarRef}>

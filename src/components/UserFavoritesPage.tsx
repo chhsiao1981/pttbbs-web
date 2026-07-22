@@ -1,37 +1,27 @@
-import {
-  genUUID,
-  getDefaultID,
-  getState,
-  type ThunkModuleToFunc,
-  useThunk,
-} from "@chhsiao1981/use-thunk";
+import { useThunk } from "@chhsiao1981/use-thunk";
 import QueryString from "query-string";
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import useWindowSize from "../hooks/useWindowSize";
-import * as DoHeader from "../reducers/header";
-import * as DoUserFavoritesPage from "../reducers/userFavoritesPage";
+import * as DoUserFavoritesPage from "../thunks/userFavoritesPage";
 import type { BoardSummary_i } from "../types";
 import BoardList from "./BoardList";
-import Empty from "./Empty";
 import FunctionBar from "./FunctionBar";
 import Header from "./Header";
 import pageStyles from "./Page.module.css";
 
-type TDoHeader = ThunkModuleToFunc<typeof DoHeader>;
-type TDoUserFavoritesPage = ThunkModuleToFunc<typeof DoUserFavoritesPage>;
-
-// biome-ignore lint/complexity/noBannedTypes: props
-type Props = {};
-
-export default (_props: Props) => {
-  const [classUserFavoritesPage, doUserFavoritesPage] = useThunk<
-    DoUserFavoritesPage.State,
-    TDoUserFavoritesPage
-  >(DoUserFavoritesPage);
-  const [userFavoritesPageID, _setUserFavoritesPageID] = useState(genUUID);
-  const [classHeader, doHeader] = useThunk<DoHeader.State, TDoHeader>(DoHeader);
-  const [headerID, _setHeaderID] = useState(genUUID);
+export default () => {
+  const [userFavoritesPage, doUserFavoritesPage, userFavoritesPageID] =
+    useThunk<DoUserFavoritesPage.State, typeof DoUserFavoritesPage>(
+      DoUserFavoritesPage,
+    );
+  const {
+    list: boards,
+    isPreEnd,
+    isNextEnd,
+    scrollToRow,
+    level,
+  } = userFavoritesPage;
 
   // eslint-disable-next-line
   const [_errMsg, _setErrMsg] = useState("");
@@ -50,8 +40,6 @@ export default (_props: Props) => {
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: useEffect
   useEffect(() => {
-    doHeader.init(headerID);
-
     const query = QueryString.parse(window.location.search);
     const { start_idx: queryStartIdx, level: queryLevel } = query;
     const startIdx = (queryStartIdx || "") as string;
@@ -71,22 +59,12 @@ export default (_props: Props) => {
   }, [headerRef.current, funcbarRef.current]);
 
   //get data
-  const boardsPage = getState(classUserFavoritesPage);
-  if (!boardsPage) {
-    return <Empty />;
-  }
-  const myID = getDefaultID(classUserFavoritesPage);
   // const errmsg = boardsPage.errmsg || "";
-  const boards = boardsPage.list;
-  const isPreEnd = boardsPage.isPreEnd;
-  const isNextEnd = boardsPage.isNextEnd;
-  const scrollToRow = boardsPage.scrollToRow;
-  const level = boardsPage.level;
 
   const width = innerWidth;
   const listHeight = innerHeight - headerHeight - funcbarHeight;
 
-  const headerTitle = "我的最愛";
+  const title = "我的最愛";
 
   const loadPre = (item: BoardSummary_i) => {
     if (item.numIdx === 1 || isPreEnd) {
@@ -97,7 +75,14 @@ export default (_props: Props) => {
     if (!idx) {
       return;
     }
-    doUserFavoritesPage.getBoards(myID, userid, level, idx, true, true);
+    doUserFavoritesPage.getBoards(
+      userFavoritesPageID,
+      userid,
+      level,
+      idx,
+      true,
+      true,
+    );
   };
 
   const loadNext = (item: BoardSummary_i) => {
@@ -110,7 +95,14 @@ export default (_props: Props) => {
       return;
     }
 
-    doUserFavoritesPage.getBoards(myID, userid, level, idx, false, true);
+    doUserFavoritesPage.getBoards(
+      userFavoritesPageID,
+      userid,
+      level,
+      idx,
+      false,
+      true,
+    );
   };
 
   const onVerticalScroll = (scrollTop: number): boolean => {
@@ -119,7 +111,9 @@ export default (_props: Props) => {
       return false;
     }
 
-    doUserFavoritesPage.setData(myID, { scrollToRow: undefined });
+    doUserFavoritesPage.setData(userFavoritesPageID, {
+      scrollToRow: undefined,
+    });
     return true;
   };
 
@@ -177,7 +171,7 @@ export default (_props: Props) => {
   return (
     <div className={pageStyles.root}>
       <div ref={headerRef}>
-        <Header title={headerTitle} stateHeader={classHeader} />
+        <Header title={title} />
       </div>
       {renderBoards()}
       <div ref={funcbarRef}>

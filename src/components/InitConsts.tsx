@@ -1,7 +1,7 @@
 import type CSS from "csstype";
 import { useEffect, useRef, useState } from "react";
 import styles from "./InitConsts.module.css";
-import { CalcFontSizeScaleScreenWidth, CONSTS, InitCONSTS } from "./utils";
+import { CONSTS, calcFontSizeScaleScreenWidth, initCONSTS } from "./utils";
 
 type Props = {
   windowWidth: number;
@@ -15,7 +15,7 @@ type Props = {
 export default (props: Props) => {
   const { windowWidth, isMobile, isInitConsts, setIsInitConsts } = props;
   const ref = useRef<HTMLSpanElement>(null);
-  const { fontSize, scale, screenWidth } = CalcFontSizeScaleScreenWidth(
+  const { fontSize, scale, screenWidth } = calcFontSizeScaleScreenWidth(
     windowWidth,
     isMobile,
   );
@@ -63,7 +63,7 @@ export default (props: Props) => {
       "fontFamily:",
       theStyle.fontFamily,
     );
-    InitCONSTS(windowWidth, lineHeight, isMobile, fontSize, scale, screenWidth);
+    initCONSTS(windowWidth, lineHeight, isMobile, fontSize, scale, screenWidth);
     setIsInitConsts(true);
   }, [ref.current, isInitConsts]);
 

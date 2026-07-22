@@ -1,134 +1,255 @@
-import {
-  genUUID,
-  getDefaultID,
-  getState,
-  type ThunkModuleToFunc,
-  useThunk,
-} from "@chhsiao1981/use-thunk";
+import { useThunk } from "@chhsiao1981/use-thunk";
 import config from "config";
-import { useEffect, useState } from "react";
-import * as DoHeader from "../reducers/header";
-import * as DoLoginPage from "../reducers/loginPage";
-import Empty from "./Empty";
+import { type CSSProperties, useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useSearchParams } from "react-router-dom";
+import { OIDC_AUTH_REQUEST_ID } from "../constants";
+import useWindowSize from "../hooks/useWindowSize";
+import * as DoLoginPage from "../thunks/loginPage";
 import * as errors from "./errors";
 import Header from "./Header";
 import styles from "./Page.module.css";
 
-type TDoHeader = ThunkModuleToFunc<typeof DoHeader>;
-type TDoLoginPage = ThunkModuleToFunc<typeof DoLoginPage>;
-
-// biome-ignore lint/complexity/noBannedTypes: props
-type Props = {};
-export default (_props: Props) => {
-  const [classLoginPage, doLoginPage] = useThunk<
+export default () => {
+  const [loginPage, doLoginPage, loginPageID] = useThunk<
     DoLoginPage.State,
-    TDoLoginPage
+    typeof DoLoginPage
   >(DoLoginPage);
-  const [loginPageID, _setLoginPageID] = useState(genUUID);
-  const [classHeader, doHeader] = useThunk<DoHeader.State, TDoHeader>(DoHeader);
-  const [headerID, _setHeaderID] = useState(genUUID);
+  const { errmsg, isRequested } = loginPage;
 
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+  const [searchParams, _setSearchParams] = useSearchParams();
+  const authRequestID = searchParams.get(OIDC_AUTH_REQUEST_ID) || "";
+
+  const [theInput, setTheInput] = useState("");
+  const [code0, setCode0] = useState("");
+  const code0Ref = useRef<HTMLInputElement>(null);
+
+  const [code1, setCode1] = useState("");
+  const code1Ref = useRef<HTMLInputElement>(null);
+
+  const [code2, setCode2] = useState("");
+  const code2Ref = useRef<HTMLInputElement>(null);
+
+  const [code3, setCode3] = useState("");
+  const code3Ref = useRef<HTMLInputElement>(null);
+
+  const [code4, setCode4] = useState("");
+  const code4Ref = useRef<HTMLInputElement>(null);
+
+  const [code5, setCode5] = useState("");
+  const code5Ref = useRef<HTMLInputElement>(null);
+
+  const loginBtnRef = useRef<HTMLButtonElement>(null);
+
   const [errMsg, setErrMsg] = useState("");
+  const { t } = useTranslation();
+  const { width: innerWidth } = useWindowSize(10, 0);
+
+  const setList = [setCode0, setCode1, setCode2, setCode3, setCode4, setCode5];
+  const nextRefList = [
+    code1Ref,
+    code2Ref,
+    code3Ref,
+    code4Ref,
+    code5Ref,
+    loginBtnRef,
+  ];
 
   //init
   // biome-ignore lint/correctness/useExhaustiveDependencies: useEffect
   useEffect(() => {
-    doHeader.init(headerID);
     doLoginPage.init(loginPageID);
   }, []);
 
-  //get data
-  const loginPage = getState(classLoginPage) || DoLoginPage.defaultState;
-  const myID = getDefaultID(classLoginPage);
-  const errmsg = loginPage.errmsg || "";
+  const withReset = (setFunc: (theStr: string) => void, theStr: string) => {
+    setFunc(theStr);
 
-  const cleanErr = () => {
     setErrMsg("");
-    doLoginPage.cleanErr(myID);
+    doLoginPage.reset(loginPageID);
   };
 
-  const changeUsername = (username: string) => {
-    setUsername(username);
-    cleanErr();
+  const onChangeCode = (theStr: string, idx: number) => {
+    if (!theStr) {
+      const setFunc = setList[idx];
+      setFunc(theStr);
+      return;
+    }
+
+    const theStrList = theStr.split("");
+    // biome-ignore lint/suspicious/useIterableCallbackReturn: no need the ret.
+    theStrList.map((eachStr, eachIdx) => {
+      const theIdx = eachIdx + idx;
+      if (theIdx >= setList.length) {
+        return;
+      }
+
+      const setFunc = setList[theIdx];
+      setFunc(eachStr);
+    });
+
+    setErrMsg("");
+    doLoginPage.cleanErr(loginPageID);
+
+    const nextRefIdx = theStrList.length - 1 + idx;
+    const nextRef =
+      nextRefIdx >= nextRefList.length
+        ? nextRefList[nextRefList.length - 1]
+        : nextRefList[nextRefIdx];
+
+    if (!nextRef.current) {
+      return;
+    }
+
+    nextRef.current.focus();
   };
 
-  const changePassword = (password: string) => {
-    setPassword(password);
-    cleanErr();
+  const onAttemptLogin = () => {
+    doLoginPage.attemptLogin(loginPageID, theInput, authRequestID);
   };
 
-  // ---------- Handlers -------------
-
-  const login = () => {
-    doLoginPage.login(myID, username, password);
+  const onLogin = () => {
+    const verifyCode = `${code0}${code1}${code2}${code3}${code4}${code5}`;
+    doLoginPage.login(loginPageID, theInput, verifyCode);
   };
 
-  const register = () => {
+  const onRegister = () => {
     window.location.href = "/register";
-  };
-
-  const forgotPassword = () => {
-    window.location.href = "/forgetPassword";
   };
 
   const allErrMsg = errors.mergeErr(errMsg, errmsg);
 
-  // -------- Component Instance ----------
-  const headerTitle = `\\歡迎登入 ${config.BRAND}～/`;
+  const title = `${t("login.titlePrefix")}${config.BRAND}${t("login.titlePostfix")}`;
 
-  if (!myID) {
-    return <Empty />;
-  }
+  const rootStyle: CSSProperties = {
+    width: innerWidth,
+  };
+
+  const classNameVerifyCode = isRequested ? "" : "hide";
+
+  const isDisabledLogin2 =
+    !code0 || !code1 || !code2 || !code3 || !code4 || !code5;
+
+  const classNameCode = "col";
+  const classNameCodeSide =
+    "col-3 d-none d-sm-none d-md-block d-lg-block d-xl-block";
+
   return (
-    <div className={"vh-100 " + styles.root}>
-      <Header title={headerTitle} stateHeader={classHeader} />
+    <div className={"vh-100 " + styles.root} style={rootStyle}>
+      <Header title={title} />
       <div className={"container mt-5 "}>
         <div className="row">
           <div className="col-12 col-md-6 mx-auto">
             <input
               className="form-control mb-3"
               type="text"
-              placeholder="Username:"
+              placeholder="Email or Username:"
               aria-label="Username"
-              value={username}
-              onChange={(e) => changeUsername(e.target.value)}
+              value={theInput}
+              onChange={(e) => withReset(setTheInput, e.target.value)}
             />
-            <input
-              className="form-control mb-3"
-              type="password"
-              placeholder="Password:"
-              aria-label="Password"
-              value={password}
-              onChange={(e) => changePassword(e.target.value)}
-            />
-            <div className="d-flex justify-content-between">
-              <div>
-                <button
-                  type="button"
-                  className="btn btn-primary mr-3"
-                  onClick={login}
-                >
-                  我要登入
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  onClick={register}
-                >
-                  我想註冊
-                </button>
-              </div>
+            <div className="d-flex justify-content-center">
               <button
                 type="button"
-                className="btn btn-primary"
-                onClick={forgotPassword}
+                className="btn btn-primary me-2"
+                onClick={onAttemptLogin}
               >
-                我忘記密碼了 Orz
+                {t("login.login")}
+              </button>
+              <button
+                type="button"
+                className="btn btn-outline-primary"
+                onClick={onRegister}
+              >
+                {t("login.register")}
               </button>
             </div>
             <span className={styles.errMsg}>{allErrMsg}</span>
+          </div>
+        </div>
+        <div className={classNameVerifyCode}>
+          <div className="row">
+            <div className="col-12 col-md-6 mx-auto">{t("login.info")}</div>
+          </div>
+          <div className="row">
+            <div className={classNameCodeSide}></div>
+            <div className={classNameCode}>
+              <input
+                className={`form-control ${styles["center-input"]}`}
+                type="text"
+                placeholder=""
+                aria-label="code0"
+                value={code0}
+                ref={code0Ref}
+                onChange={(e) => onChangeCode(e.target.value, 0)}
+              />
+            </div>
+            <div className={classNameCode}>
+              <input
+                className={`form-control ${styles["center-input"]}`}
+                type="text"
+                placeholder=""
+                aria-label="code1"
+                value={code1}
+                ref={code1Ref}
+                onChange={(e) => onChangeCode(e.target.value, 1)}
+              />
+            </div>
+            <div className={classNameCode}>
+              <input
+                className={`form-control ${styles["center-input"]}`}
+                type="text"
+                placeholder=""
+                aria-label="code2"
+                value={code2}
+                ref={code2Ref}
+                onChange={(e) => onChangeCode(e.target.value, 2)}
+              />
+            </div>
+            <div className={classNameCode}>
+              <input
+                className={`form-control ${styles["center-input"]}`}
+                type="text"
+                placeholder=""
+                aria-label="code3"
+                value={code3}
+                ref={code3Ref}
+                onChange={(e) => onChangeCode(e.target.value, 3)}
+              />
+            </div>
+            <div className={classNameCode}>
+              <input
+                className={`form-control ${styles["center-input"]}`}
+                type="text"
+                placeholder=""
+                aria-label="code4"
+                value={code4}
+                ref={code4Ref}
+                onChange={(e) => onChangeCode(e.target.value, 4)}
+              />
+            </div>
+            <div className={classNameCode}>
+              <input
+                className={`form-control ${styles["center-input"]}`}
+                type="text"
+                placeholder=""
+                aria-label="code5"
+                value={code5}
+                ref={code5Ref}
+                onChange={(e) => onChangeCode(e.target.value, 5)}
+              />
+            </div>
+            <div className={classNameCodeSide}></div>
+          </div>
+          <div className="d-flex justify-content-center mt-2">
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={onLogin}
+              ref={loginBtnRef}
+              disabled={isDisabledLogin2}
+            >
+              {t("login.submit")}
+            </button>
           </div>
         </div>
       </div>

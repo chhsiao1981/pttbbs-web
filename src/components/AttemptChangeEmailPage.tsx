@@ -1,58 +1,35 @@
-import {
-  genUUID,
-  getState,
-  type ThunkModuleToFunc,
-  useThunk,
-} from "@chhsiao1981/use-thunk";
+import { useThunk } from "@chhsiao1981/use-thunk";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import useWindowSize from "../hooks/useWindowSize";
-import * as DoAttemptChangeEmailPage from "../reducers/attemptChangeEmailPage";
-import * as DoHeader from "../reducers/header";
+import * as DoAttemptChangeEmailPage from "../thunks/attemptChangeEmailPage";
 import Empty from "./Empty";
 import * as errors from "./errors";
 import Header from "./Header";
 import styles from "./Page.module.css";
 
-type TDoAttemptChangeEmailPage = ThunkModuleToFunc<
-  typeof DoAttemptChangeEmailPage
->;
-type TDoHeader = ThunkModuleToFunc<typeof DoHeader>;
-
-// biome-ignore lint/complexity/noBannedTypes: props
-type Props = {};
-
-export default (_props: Props) => {
-  const [classAttemptChangeEmailPage, doAttemptChangeEmailPage] = useThunk<
-    DoAttemptChangeEmailPage.State,
-    TDoAttemptChangeEmailPage
-  >(DoAttemptChangeEmailPage);
-  const [attemptChangeEmailPageID, _setAttemptChangeEmailPageID] =
-    useState(genUUID);
-  const [classHeader, doHeader] = useThunk<DoHeader.State, TDoHeader>(DoHeader);
-  const [headerID, _setHeaderID] = useState(genUUID);
+export default () => {
+  const [
+    attemptChangeEmailPage,
+    doAttemptChangeEmailPage,
+    attemptChangeEmailPageID,
+  ] = useThunk<DoAttemptChangeEmailPage.State, typeof DoAttemptChangeEmailPage>(
+    DoAttemptChangeEmailPage,
+  );
+  const { userID, errmsg, isDone } = attemptChangeEmailPage;
 
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
   const [errMsg, setErrMsg] = useState("");
 
-  //init
   const { userid: paramsUserID } = useParams();
   const userid = paramsUserID || "";
 
+  //init
   // biome-ignore lint/correctness/useExhaustiveDependencies: useEffect
   useEffect(() => {
-    doHeader.init(headerID);
     doAttemptChangeEmailPage.init(attemptChangeEmailPageID, userid);
   }, []);
-
-  //get data
-  const attemptChangeEmailPage =
-    getState(classAttemptChangeEmailPage) ||
-    DoAttemptChangeEmailPage.defaultState;
-  const userID = attemptChangeEmailPage.userID;
-  const errmsg = attemptChangeEmailPage.errmsg || "";
-  const isDone = attemptChangeEmailPage.isDone;
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: useEffect
   useEffect(() => {
@@ -117,7 +94,7 @@ export default (_props: Props) => {
   return (
     <div className={styles.root} style={style}>
       <div className={"container"}>
-        <Header title="我想換聯絡 Email" stateHeader={classHeader} />
+        <Header title="我想換聯絡 Email" />
         <div className="row">
           <div className="col">
             <span>我是 {userID}</span>

@@ -1,35 +1,33 @@
-import {
-  genUUID,
-  getDefaultID,
-  getState,
-  type ThunkModuleToFunc,
-  useThunk,
-} from "@chhsiao1981/use-thunk";
+import { useThunk } from "@chhsiao1981/use-thunk";
 import config from "config";
-import QueryString from "query-string";
 import { useEffect, useRef, useState } from "react";
+import { useParams } from "react-router-dom";
 import useWindowSize from "../hooks/useWindowSize";
-import * as DoGeneralBoardsPage from "../reducers/generalBoardsPage";
-import * as DoHeader from "../reducers/header";
+import * as DoGeneralBoardsPage from "../thunks/generalBoardsPage";
+import * as DoHeader from "../thunks/header";
 import type { BoardSummary_i } from "../types";
 import BoardList from "./BoardList";
-import Empty from "./Empty";
 import FunctionBar from "./FunctionBar";
 import Header from "./Header";
 import pageStyles from "./Page.module.css";
 import SearchBar from "./SearchBar";
 
-type TDoGeneralBoardsPage = ThunkModuleToFunc<typeof DoGeneralBoardsPage>;
-type TDoHeader = ThunkModuleToFunc<typeof DoHeader>;
+export default () => {
+  const [generalBoardsPage, doGeneralBoardsPage, generalBoardsPageID] =
+    useThunk<DoGeneralBoardsPage.State, typeof DoGeneralBoardsPage>(
+      DoGeneralBoardsPage,
+    );
 
-// biome-ignore lint/complexity/noBannedTypes: props
-type Props = {};
-export default (_props: Props) => {
-  const [classGeneralBoardsPage, doGeneralBoardsPage] = useThunk<
-    DoGeneralBoardsPage.State,
-    TDoGeneralBoardsPage
-  >(DoGeneralBoardsPage);
-  const [classHeader, doHeader] = useThunk<DoHeader.State, TDoHeader>(DoHeader);
+  const {
+    list: boards,
+    isNextEnd,
+    isPreEnd,
+    scrollToRow,
+    searchKeyword,
+  } = generalBoardsPage;
+
+  const [header] = useThunk<DoHeader.State, typeof DoHeader>(DoHeader);
+  const { userID } = header;
 
   // eslint-disable-next-line
   const [_errMsg, _setErrMsg] = useState("");
@@ -46,17 +44,13 @@ export default (_props: Props) => {
   const [scrollTop, setScrollTop] = useState(0);
   const [searching, setSearching] = useState(false);
 
+  const { start_idx: paramsStartIdx, title: paramsTitle } = useParams();
+  const startIdx = paramsStartIdx || "";
+
   //init
   // biome-ignore lint/correctness/useExhaustiveDependencies: useEffect
   useEffect(() => {
-    const headerID = genUUID();
-    doHeader.init(headerID);
-
-    const generalBoardsPageID = genUUID();
-    const query = QueryString.parse(window.location.search);
-    const { start_idx: queryStartIdx, title: queryTitle } = query;
-    const searchKeyword = (queryTitle || "") as string;
-    const startIdx = (queryStartIdx || "") as string;
+    const searchKeyword = paramsTitle || "";
 
     doGeneralBoardsPage.init(
       generalBoardsPageID,
@@ -77,28 +71,11 @@ export default (_props: Props) => {
   }, [headerRef.current, funcbarRef.current]);
 
   //get data
-  const boardsPage = getState(classGeneralBoardsPage);
-  if (!boardsPage) {
-    return <Empty />;
-  }
-  const myID = getDefaultID(classGeneralBoardsPage);
-  // const errmsg = boardsPage.errmsg || "";
-  const boards = boardsPage.list;
-  let searchKeyword = boardsPage.searchKeyword;
-  const isNextEnd = boardsPage.isNextEnd;
-  const isPreEnd = boardsPage.isPreEnd;
-  const scrollToRow = boardsPage.scrollToRow;
-
-  const header = getState(classHeader);
-  if (!header) {
-    return <Empty />;
-  }
-  const myUserID = header.user_id;
 
   const width = innerWidth;
   const listHeight = innerHeight - headerHeight - funcbarHeight;
 
-  const headerTitle = "所有看板";
+  const title = "所有看板";
 
   const loadPre = (item: BoardSummary_i) => {
     if (item.numIdx === 1 || isPreEnd) {
@@ -110,7 +87,7 @@ export default (_props: Props) => {
       return;
     }
     doGeneralBoardsPage.getBoards(
-      myID,
+      generalBoardsPageID,
       searchKeyword,
       idx,
       true,
@@ -130,7 +107,7 @@ export default (_props: Props) => {
     }
 
     doGeneralBoardsPage.getBoards(
-      myID,
+      generalBoardsPageID,
       searchKeyword,
       idx,
       false,
@@ -145,7 +122,9 @@ export default (_props: Props) => {
       return false;
     }
 
-    doGeneralBoardsPage.setData(myID, { scrollToRow: undefined });
+    doGeneralBoardsPage.setData(generalBoardsPageID, {
+      scrollToRow: undefined,
+    });
     return true;
   };
 
@@ -179,11 +158,11 @@ export default (_props: Props) => {
   const loptions = [{ text: "搜尋看板", action: () => {} }];
 
   const roptions = [];
-  if (myUserID && myUserID !== config.PTT_GUEST) {
+  if (userID && userID !== config.PTT_GUEST) {
     roptions.push({
       text: "我的最愛",
       action: () => {
-        window.location.href = "/user/" + myUserID + "/favorites";
+        window.location.href = "/user/" + userID + "/favorites";
       },
     });
   }
@@ -205,7 +184,7 @@ export default (_props: Props) => {
     // clear articles
     // load more
     doGeneralBoardsPage.getBoards(
-      myID,
+      generalBoardsPageID,
       searchKeyword,
       "",
       false,
@@ -216,11 +195,10 @@ export default (_props: Props) => {
 
   const onSearchClear = () => {
     setSearching(false);
-    searchKeyword = "";
-    doGeneralBoardsPage.setData(myID, { searchKeyword });
+    doGeneralBoardsPage.setData(generalBoardsPageID, { searchKeyword: "" });
     doGeneralBoardsPage.getBoards(
-      myID,
-      searchKeyword,
+      generalBoardsPageID,
+      "",
       "",
       false,
       false,
@@ -235,13 +213,15 @@ export default (_props: Props) => {
       >
         <div className="w-25 "></div>
         <span className="p-0" style={{ fontSize: "x-large" }}>
-          {headerTitle}
+          {title}
         </span>
         <div className="w-25">
           <SearchBar
             text={searchKeyword}
             setText={(text: string) => {
-              doGeneralBoardsPage.setData(myID, { searchKeyword: text });
+              doGeneralBoardsPage.setData(generalBoardsPageID, {
+                searchKeyword: text,
+              });
             }}
             onSearch={onSearchSubmit}
             searching={searching}
@@ -256,11 +236,7 @@ export default (_props: Props) => {
   return (
     <div className={pageStyles.root}>
       <div ref={headerRef}>
-        <Header
-          title={headerTitle}
-          stateHeader={classHeader}
-          renderHeader={renderHeader}
-        />
+        <Header title={title} renderHeader={renderHeader} />
       </div>
       {renderBoards()}
       <div ref={funcbarRef}>

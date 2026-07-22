@@ -1,34 +1,19 @@
-import {
-  genUUID,
-  getState,
-  type ThunkModuleToFunc,
-  useThunk,
-} from "@chhsiao1981/use-thunk";
+import { useThunk } from "@chhsiao1981/use-thunk";
 import QueryString from "query-string";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useParams } from "react-router-dom";
 import useWindowSize from "../hooks/useWindowSize";
-import * as DoHeader from "../reducers/header";
-import * as DoSetIDEmailPage from "../reducers/setIDEmailPage";
+import * as DoSetIDEmailPage from "../thunks/setIDEmailPage";
 import Empty from "./Empty";
 import Header from "./Header";
 import pageStyles from "./Page.module.css";
 
-type TDoHeader = ThunkModuleToFunc<typeof DoHeader>;
-type TDoSetIDEmailPage = ThunkModuleToFunc<typeof DoSetIDEmailPage>;
-
-// biome-ignore lint/complexity/noBannedTypes: props
-type Props = {};
-
-export default (_props: Props) => {
-  const [classSetIDEmailPage, doSetIDEmailPage] = useThunk<
+export default () => {
+  const [setIDEmailPage, doSetIDEmailPage, setIDEmailPageID] = useThunk<
     DoSetIDEmailPage.State,
-    TDoSetIDEmailPage
+    typeof DoSetIDEmailPage
   >(DoSetIDEmailPage);
-  const [setIDEmailPageID, _setSetIDEmailPageID] = useState(genUUID);
-
-  const [classHeader, doHeader] = useThunk<DoHeader.State, TDoHeader>(DoHeader);
-  const [headerID, _setHeaderID] = useState(genUUID);
+  const { errmsg, isDone, data } = setIDEmailPage;
 
   //init
   const { userid: paramsUserID } = useParams();
@@ -38,17 +23,9 @@ export default (_props: Props) => {
   useEffect(() => {
     const { token: queryToken } = QueryString.parse(window.location.search);
     const token = (queryToken || "") as string;
-    doHeader.init(headerID);
 
     doSetIDEmailPage.init(setIDEmailPageID, userid, token);
   }, []);
-
-  //get data
-  const setIDEmailPage =
-    getState(classSetIDEmailPage) || DoSetIDEmailPage.defaultState;
-  const errmsg = setIDEmailPage.errmsg || "";
-  const isDone = setIDEmailPage.isDone;
-  const data = setIDEmailPage.data;
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: useEffect
   useEffect(() => {
@@ -86,7 +63,7 @@ export default (_props: Props) => {
   return (
     <div className={pageStyles.root} style={style}>
       <div className={"container"} style={style}>
-        <Header title="更改認證信箱" stateHeader={classHeader} />
+        <Header title="更改認證信箱" />
         <div className="row">
           <div className="col">{renderData()}</div>
           <div className="col">
