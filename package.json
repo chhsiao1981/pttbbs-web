@@ -61,7 +61,7 @@
     "query-string": "^9.5.0",
     "react": "^19.2.8",
     "react-bootstrap": "^2.10.10",
-    "react-dom": "^19.2.0",
+    "react-dom": "^19.2.8",
     "react-i18next": "^17.0.12",
     "react-router-dom": "^6.30.3",
     "react-use": "^17.6.0",
