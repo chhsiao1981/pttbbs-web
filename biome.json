@@ -9,7 +9,8 @@
       "*.config.ts",
       "vitest.*.ts",
       "tsconfig*.json",
-      "testing/*.mjs"
+      "testing/*.mjs",
+      "!src/assets"
     ]
   },
   "assist": {
